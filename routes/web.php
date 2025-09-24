@@ -3,75 +3,53 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-// ====================================
-// ROUTES PUBLIQUES
-// ====================================
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-// ====================================
-// ROUTES AUTHENTIFIÉES
-// ====================================
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard - Accessible à tous les utilisateurs connectés
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
-    // ====================================
-    // ROUTES CDC (Cahiers des Charges)
-    // ====================================
     Route::prefix('cdc')->name('cdc.')->group(function () {
 
-        // Voir la liste des CDC - Permission: cdc.view
         Route::get('/', function () {
             return view('cdc.index');
         })->name('index')->middleware('permission:cdc.view');
 
-        // Créer un nouveau CDC - Permission: cdc.create
         Route::get('/create', function () {
             return view('cdc.create');
         })->name('create')->middleware('permission:cdc.create');
 
-        // Sauvegarder un CDC - Permission: cdc.create
         Route::post('/', function () {
-            // Logique de sauvegarde
             return redirect()->route('cdc.index')->with('success', 'CDC créé avec succès');
         })->name('store')->middleware('permission:cdc.create');
 
-        // Voir un CDC spécifique - Permission: cdc.view
         Route::get('/{id}', function ($id) {
             return view('cdc.show', compact('id'));
         })->name('show')->middleware('permission:cdc.view');
 
-        // Éditer un CDC - Permission: cdc.edit
         Route::get('/{id}/edit', function ($id) {
             return view('cdc.edit', compact('id'));
         })->name('edit')->middleware('permission:cdc.edit');
 
-        // Mettre à jour un CDC - Permission: cdc.edit
         Route::put('/{id}', function ($id) {
-            // Logique de mise à jour
             return redirect()->route('cdc.show', $id)->with('success', 'CDC mis à jour');
         })->name('update')->middleware('permission:cdc.edit');
 
-        // Supprimer un CDC - Permission: cdc.delete
         Route::delete('/{id}', function ($id) {
-            // Logique de suppression
             return redirect()->route('cdc.index')->with('success', 'CDC supprimé');
         })->name('destroy')->middleware('permission:cdc.delete');
 
-        // Exporter un CDC en Word - Permission: cdc.export
         Route::get('/{id}/export', function ($id) {
-            // Logique d'export
             return response()->download('cdc.docx');
         })->name('export')->middleware('permission:cdc.export');
 
-        // Dupliquer un CDC - Permission: cdc.duplicate
         Route::post('/{id}/duplicate', function ($id) {
-            // Logique de duplication
             return redirect()->route('cdc.index')->with('success', 'CDC dupliqué');
         })->name('duplicate')->middleware('permission:cdc.duplicate');
     });
@@ -125,23 +103,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', function () {
             $stats = [
                 'total_users' => \App\Models\User::count(),
-                'total_cdc' => 0, // À implémenter quand vous aurez le modèle CDC
+                'total_cdc' => 0,
                 'total_forms' => 0,
                 'total_templates' => 0,
             ];
             return view('admin.dashboard', compact('stats'));
         })->name('dashboard');
 
-        // Gestion des utilisateurs
         Route::prefix('users')->name('users.')->group(function () {
 
-            // Liste des utilisateurs
             Route::get('/', function () {
                 $users = \App\Models\User::with('roles')->paginate(10);
                 return view('admin.users.index', compact('users'));
             })->name('index')->middleware('permission:user.view');
 
-            // Créer un utilisateur
             Route::get('/create', function () {
                 $roles = \Spatie\Permission\Models\Role::all();
                 return view('admin.users.create', compact('roles'));
@@ -169,7 +144,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->with('success', 'Utilisateur créé avec succès');
             })->name('store')->middleware('permission:user.create');
 
-            // Éditer un utilisateur
             Route::get('/{id}/edit', function ($id) {
                 $user = \App\Models\User::findOrFail($id);
                 $roles = \Spatie\Permission\Models\Role::all();
@@ -198,7 +172,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->with('success', 'Utilisateur mis à jour');
             })->name('update')->middleware('permission:user.edit');
 
-            // Supprimer un utilisateur
             Route::delete('/{id}', function ($id) {
                 if (auth()->id() == $id) {
                     return back()->with('error', 'Vous ne pouvez pas vous supprimer vous-même');
@@ -210,7 +183,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->with('success', 'Utilisateur supprimé');
             })->name('destroy')->middleware('permission:user.delete');
 
-            // Gérer les rôles d'un utilisateur
             Route::post('/{id}/roles', function ($id) {
                 $user = \App\Models\User::findOrFail($id);
                 $roles = request()->input('roles', []);
@@ -221,16 +193,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             })->name('roles.update')->middleware('permission:user.roles');
         });
 
-        // Gestion des rôles (Super Admin uniquement)
         Route::middleware(['role:super-admin'])->prefix('roles')->name('roles.')->group(function () {
 
-            // Liste des rôles
             Route::get('/', function () {
                 $roles = \Spatie\Permission\Models\Role::with('permissions')->get();
                 return view('admin.roles.index', compact('roles'));
             })->name('index');
 
-            // Créer un rôle
             Route::get('/create', function () {
                 $permissions = \Spatie\Permission\Models\Permission::all();
                 return view('admin.roles.create', compact('permissions'));
@@ -252,7 +221,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->with('success', 'Rôle créé avec succès');
             })->name('store');
 
-            // Éditer un rôle
             Route::get('/{id}/edit', function ($id) {
                 $role = \Spatie\Permission\Models\Role::findOrFail($id);
                 $permissions = \Spatie\Permission\Models\Permission::all();
@@ -274,7 +242,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     ->with('success', 'Rôle mis à jour');
             })->name('update');
 
-            // Supprimer un rôle
             Route::delete('/{id}', function ($id) {
                 $role = \Spatie\Permission\Models\Role::findOrFail($id);
 
@@ -289,7 +256,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             })->name('destroy');
         });
 
-        // Logs système (Super Admin uniquement)
         Route::middleware(['role:super-admin'])->group(function () {
             Route::get('/logs', function () {
                 return view('admin.logs');
