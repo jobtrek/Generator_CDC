@@ -27,3 +27,4 @@
         </div>
     </div>
 </x-app-layout>
+{{-- resources/views/admin/users/index.blade.php --}}
