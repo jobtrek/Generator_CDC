@@ -44,7 +44,6 @@
                             @enderror
                         </div>
 
-                        {{-- Email --}}
                         <div>
                             <label for="email" class="block text-sm font-medium text-gray-700">
                                 Adresse email
@@ -160,7 +159,6 @@
                             </dl>
                         </div>
 
-                        {{-- Boutons --}}
                         <div class="flex items-center justify-between border-t pt-6">
                             <div>
                                 @if(auth()->id() !== $user->id)
