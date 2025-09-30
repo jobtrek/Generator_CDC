@@ -15,12 +15,11 @@ class RolePermissionSeeder extends Seeder
 
 
         $cdcPermissions = [
-            'cdc.view',
-            'cdc.create',
-            'cdc.edit',
-            'cdc.delete',
-            'cdc.export',
-            'cdc.duplicate',
+            'cdcs.view',
+            'cdcs.edit',
+            'cdcs.delete',
+            'cdcs.export',
+            'cdcs.duplicate',
         ];
 
         $formPermissions = [
@@ -75,7 +74,7 @@ class RolePermissionSeeder extends Seeder
 
         $admin = Role::create(['name' => 'admin']);
         $admin->givePermissionTo([
-            'cdc.view', 'cdc.create', 'cdc.edit', 'cdc.delete', 'cdc.export', 'cdc.duplicate',
+            'cdcs.view', 'cdcs.create', 'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
             'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
             'template.view', 'template.create', 'template.edit', 'template.delete', 'template.import',
             'user.view', 'user.create', 'user.edit',
@@ -84,7 +83,7 @@ class RolePermissionSeeder extends Seeder
 
         $formateur = Role::create(['name' => 'formateur']);
         $formateur->givePermissionTo([
-            'cdc.view', 'cdc.create', 'cdc.edit', 'cdc.delete', 'cdc.export', 'cdc.duplicate',
+            'cdcs.view', 'cdcs.create', 'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
             'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
             'template.view', 'template.create', 'template.edit',
             'user.view',
@@ -93,7 +92,7 @@ class RolePermissionSeeder extends Seeder
 
         $user = Role::create(['name' => 'user']);
         $user->givePermissionTo([
-            'cdc.view', 'cdc.create', 'cdc.export',
+            'cdcs.view', 'cdcs.create', 'cdcs.export',
             'form.view',
             'template.view',
             'dashboard.view',
@@ -101,7 +100,7 @@ class RolePermissionSeeder extends Seeder
 
         $guest = Role::create(['name' => 'guest']);
         $guest->givePermissionTo([
-            'cdc.view',
+            'cdcs.view',
             'form.view',
             'template.view',
             'dashboard.view',
@@ -109,7 +108,7 @@ class RolePermissionSeeder extends Seeder
 
 
         $superAdminUser = User::firstOrCreate(
-            ['email' => 'superadmin@cdc.com'],
+            ['email' => 'superadmin@cdcs.com'],
             [
                 'name' => 'Super Admin',
                 'password' => bcrypt('password123'),
@@ -118,9 +117,8 @@ class RolePermissionSeeder extends Seeder
         );
         $superAdminUser->assignRole('super-admin');
 
-        // Admin
         $adminUser = User::firstOrCreate(
-            ['email' => 'admin@cdc.com'],
+            ['email' => 'admin@cdcs.com'],
             [
                 'name' => 'Admin User',
                 'password' => bcrypt('password123'),
@@ -130,7 +128,7 @@ class RolePermissionSeeder extends Seeder
         $adminUser->assignRole('admin');
 
         $formateurUser = User::firstOrCreate(
-            ['email' => 'formateur@cdc.com'],
+            ['email' => 'formateur@cdcs.com'],
             [
                 'name' => 'formateur User',
                 'password' => bcrypt('password123'),
@@ -140,7 +138,7 @@ class RolePermissionSeeder extends Seeder
         $formateurUser->assignRole('formateur');
 
         $normalUser = User::firstOrCreate(
-            ['email' => 'user@cdc.com'],
+            ['email' => 'user@cdcs.com'],
             [
                 'name' => 'Normal User',
                 'password' => bcrypt('password123'),
@@ -149,9 +147,8 @@ class RolePermissionSeeder extends Seeder
         );
         $normalUser->assignRole('user');
 
-        // Guest
         $guestUser = User::firstOrCreate(
-            ['email' => 'guest@cdc.com'],
+            ['email' => 'guest@cdcs.com'],
             [
                 'name' => 'Guest User',
                 'password' => bcrypt('password123'),
@@ -164,11 +161,11 @@ class RolePermissionSeeder extends Seeder
         $this->command->table(
             ['Email', 'Rôle', 'Mot de passe'],
             [
-                ['superadmin@cdc.com', 'Super Admin', 'password123'],
-                ['admin@cdc.com', 'Admin', 'password123'],
-                ['formateur@cdc.com', 'formateur', 'password123'],
-                ['user@cdc.com', 'User', 'password123'],
-                ['guest@cdc.com', 'Guest', 'password123'],
+                ['superadmin@cdcs.com', 'Super Admin', 'password123'],
+                ['admin@cdcs.com', 'Admin', 'password123'],
+                ['formateur@cdcs.com', 'formateur', 'password123'],
+                ['user@cdcs.com', 'User', 'password123'],
+                ['guest@cdcs.com', 'Guest', 'password123'],
             ]
         );
     }

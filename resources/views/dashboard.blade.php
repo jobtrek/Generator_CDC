@@ -61,7 +61,7 @@
                                 </svg>
                             </div>
                             <div class="ml-5">
-                                <p class="text-2xl font-semibold text-gray-900">0</p>
+                                <p class="text-2xl font-semibold text-gray-900">{{ Auth::user()->cdcs()->count() }}</p>
                                 <p class="text-sm text-gray-500">CDC générés</p>
                             </div>
                         </div>
@@ -90,12 +90,12 @@
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
                                     <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                                     </svg>
                                 </div>
                                 <div class="ml-5">
-                                    <p class="text-2xl font-semibold text-gray-900">0</p>
-                                    <p class="text-sm text-gray-500">Templates</p>
+                                    <p class="text-2xl font-semibold text-gray-900">{{ Auth::user()->forms()->count() }}</p>
+                                    <p class="text-sm text-gray-500">Mes modèles</p>
                                 </div>
                             </div>
                         </div>
@@ -124,19 +124,19 @@
                     </div>
                 </a>
 
-                <a href="{{ route('profile.edit') }}" class="group">
+                <a href="{{ route('cdcs.index') }}" class="group">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
                         <div class="p-6">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">
-                                        Mon Profil
+                                    <h4 class="text-lg font-semibold text-gray-900 group-hover:text-blue-600">
+                                        Mes CDC
                                     </h4>
                                     <p class="mt-1 text-sm text-gray-600">
-                                        Gérer mes informations
+                                        Cahiers des charges générés
                                     </p>
                                 </div>
-                                <svg class="h-6 w-6 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-6 w-6 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </div>
@@ -164,6 +164,26 @@
                             </div>
                         </div>
                     </a>
+                @else
+                    <a href="{{ route('profile.edit') }}" class="group">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">
+                                            Mon Profil
+                                        </h4>
+                                        <p class="mt-1 text-sm text-gray-600">
+                                            Gérer mes informations
+                                        </p>
+                                    </div>
+                                    <svg class="h-6 w-6 text-gray-400 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
                 @endif
             </div>
 
@@ -185,6 +205,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
                             </svg>
                             Voir mes formulaires
+                        </a>
+
+                        <a href="{{ route('cdcs.index') }}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Voir mes CDC
                         </a>
                     </div>
                 </div>
@@ -269,7 +297,7 @@
                                             'form' => 'bg-green-50 text-green-700 border-green-200',
                                             'user' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
                                             'admin' => 'bg-red-50 text-red-700 border-red-200',
-                                            'cdc' => 'bg-blue-50 text-blue-700 border-blue-200',
+                                            'cdcs' => 'bg-blue-50 text-blue-700 border-blue-200',
                                         ];
                                         $colorClass = $categoryColors[$category] ?? 'bg-gray-50 text-gray-700 border-gray-200';
                                     @endphp
