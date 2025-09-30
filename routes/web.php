@@ -1,13 +1,12 @@
 <?php
 
+use App\Http\Controllers\FormController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/', function () {
     return view('welcome');
 });
-
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -16,7 +15,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::prefix('cdc')->name('cdc.')->group(function () {
-
         Route::get('/', function () {
             return view('cdc.index');
         })->name('index')->middleware('permission:cdc.view');
@@ -54,73 +52,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
         })->name('duplicate')->middleware('permission:cdc.duplicate');
     });
 
-    Route::prefix('forms')->name('forms.')->middleware('permission:form.view')->group(function () {
-        Route::get('/', function () {
-            return view('forms.index');
-        })->name('index');
-
-        Route::get('/create', function () {
-            return view('forms.create');
-        })->name('create')->middleware('permission:form.create');
-
-        Route::post('/', function () {
-            return redirect()->route('forms.index')->with('success', 'Formulaire créé');
-        })->name('store')->middleware('permission:form.create');
-
-        Route::get('/{id}/edit', function ($id) {
-            return view('forms.edit', compact('id'));
-        })->name('edit')->middleware('permission:form.edit');
-
-        Route::delete('/{id}', function ($id) {
-            return redirect()->route('forms.index')->with('success', 'Formulaire supprimé');
-        })->name('destroy')->middleware('permission:form.delete');
-    });
-
-    Route::prefix('templates')->name('templates.')->middleware('permission:template.view')->group(function () {
-        Route::get('/', function () {
-            return view('templates.index');
-        })->name('index');
-
-        Route::get('/create', function () {
-            return view('templates.create');
-        })->name('create')->middleware('permission:template.create');
-
-        Route::get('/{id}/edit', function ($id) {
-            return view('templates.edit', compact('id'));
-        })->name('edit')->middleware('permission:template.edit');
-
-        Route::delete('/{id}', function ($id) {
-            return redirect()->route('templates.index')->with('success', 'Template supprimé');
-        })->name('destroy')->middleware('permission:template.delete');
-    });
+    Route::resource('forms', FormController::class);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::middleware(['role:admin,super-admin'])->prefix('admin')->name('admin.')->group(function () {
-
+    Route::middleware(['role:admin|super-admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', function () {
             $stats = [
                 'total_users' => \App\Models\User::count(),
                 'total_cdc' => 0,
-                'total_forms' => 0,
+                'total_forms' => \App\Models\Form::count(),
                 'total_templates' => 0,
             ];
             return view('admin.dashboard', compact('stats'));
         })->name('dashboard');
 
         Route::prefix('users')->name('users.')->group(function () {
-
             Route::get('/', function () {
                 $users = \App\Models\User::with('roles')->paginate(10);
                 return view('admin.users.index', compact('users'));
-            })->name('index')->middleware('permission:user.view');
+            })->name('index');
 
             Route::get('/create', function () {
                 $roles = \Spatie\Permission\Models\Role::all();
                 return view('admin.users.create', compact('roles'));
-            })->name('create')->middleware('permission:user.create');
+            })->name('create');
 
             Route::post('/', function () {
                 $validated = request()->validate([
@@ -142,13 +100,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 return redirect()->route('admin.users.index')
                     ->with('success', 'Utilisateur créé avec succès');
-            })->name('store')->middleware('permission:user.create');
+            })->name('store');
 
             Route::get('/{id}/edit', function ($id) {
                 $user = \App\Models\User::findOrFail($id);
                 $roles = \Spatie\Permission\Models\Role::all();
                 return view('admin.users.edit', compact('user', 'roles'));
-            })->name('edit')->middleware('permission:user.edit');
+            })->name('edit');
 
             Route::put('/{id}', function ($id) {
                 $user = \App\Models\User::findOrFail($id);
@@ -170,7 +128,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 return redirect()->route('admin.users.index')
                     ->with('success', 'Utilisateur mis à jour');
-            })->name('update')->middleware('permission:user.edit');
+            })->name('update');
 
             Route::delete('/{id}', function ($id) {
                 if (auth()->id() == $id) {
@@ -181,7 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 return redirect()->route('admin.users.index')
                     ->with('success', 'Utilisateur supprimé');
-            })->name('destroy')->middleware('permission:user.delete');
+            })->name('destroy');
 
             Route::post('/{id}/roles', function ($id) {
                 $user = \App\Models\User::findOrFail($id);
@@ -190,80 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
                 return redirect()->route('admin.users.index')
                     ->with('success', 'Rôles mis à jour avec succès');
-            })->name('roles.update')->middleware('permission:user.roles');
-        });
-
-        Route::middleware(['role:super-admin'])->prefix('roles')->name('roles.')->group(function () {
-
-            Route::get('/', function () {
-                $roles = \Spatie\Permission\Models\Role::with('permissions')->get();
-                return view('admin.roles.index', compact('roles'));
-            })->name('index');
-
-            Route::get('/create', function () {
-                $permissions = \Spatie\Permission\Models\Permission::all();
-                return view('admin.roles.create', compact('permissions'));
-            })->name('create');
-
-            Route::post('/', function () {
-                $validated = request()->validate([
-                    'name' => 'required|string|unique:roles',
-                    'permissions' => 'array'
-                ]);
-
-                $role = \Spatie\Permission\Models\Role::create(['name' => $validated['name']]);
-
-                if (!empty($validated['permissions'])) {
-                    $role->givePermissionTo($validated['permissions']);
-                }
-
-                return redirect()->route('admin.roles.index')
-                    ->with('success', 'Rôle créé avec succès');
-            })->name('store');
-
-            Route::get('/{id}/edit', function ($id) {
-                $role = \Spatie\Permission\Models\Role::findOrFail($id);
-                $permissions = \Spatie\Permission\Models\Permission::all();
-                return view('admin.roles.edit', compact('role', 'permissions'));
-            })->name('edit');
-
-            Route::put('/{id}', function ($id) {
-                $role = \Spatie\Permission\Models\Role::findOrFail($id);
-
-                $validated = request()->validate([
-                    'name' => 'required|string|unique:roles,name,' . $id,
-                    'permissions' => 'array'
-                ]);
-
-                $role->update(['name' => $validated['name']]);
-                $role->syncPermissions($validated['permissions'] ?? []);
-
-                return redirect()->route('admin.roles.index')
-                    ->with('success', 'Rôle mis à jour');
-            })->name('update');
-
-            Route::delete('/{id}', function ($id) {
-                $role = \Spatie\Permission\Models\Role::findOrFail($id);
-
-                if (in_array($role->name, ['super-admin', 'admin', 'user'])) {
-                    return back()->with('error', 'Ce rôle système ne peut pas être supprimé');
-                }
-
-                $role->delete();
-
-                return redirect()->route('admin.roles.index')
-                    ->with('success', 'Rôle supprimé');
-            })->name('destroy');
-        });
-
-        Route::middleware(['role:super-admin'])->group(function () {
-            Route::get('/logs', function () {
-                return view('admin.logs');
-            })->name('logs')->middleware('permission:logs.view');
-
-            Route::get('/settings', function () {
-                return view('admin.settings');
-            })->name('settings')->middleware('permission:settings.view');
+            })->name('roles.update');
         });
     });
 });
