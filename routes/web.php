@@ -54,24 +54,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('forms', FormController::class);
 
-    Route::prefix('templates')->name('templates.')->group(function () {
-        Route::get('/', function () {
-            return view('templates.index');
-        })->name('index');
-
-        Route::get('/create', function () {
-            return view('templates.create');
-        })->name('create');
-
-        Route::get('/{id}/edit', function ($id) {
-            return view('templates.edit', compact('id'));
-        })->name('edit');
-
-        Route::delete('/{id}', function ($id) {
-            return redirect()->route('templates.index')->with('success', 'Template supprimé');
-        })->name('destroy');
-    });
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
