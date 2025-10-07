@@ -20,7 +20,7 @@
                     </x-nav-link>
 
                     <x-nav-link :href="route('cdcs.index')" :active="request()->routeIs('cdcs.*')">
-                        {{ __('Mes chaiers de charges') }}
+                        {{ __('Mes cahiers de charges') }}
                     </x-nav-link>
 
                     @role('admin|super-admin')

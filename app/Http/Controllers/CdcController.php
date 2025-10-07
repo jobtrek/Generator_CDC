@@ -79,4 +79,42 @@ class CdcController extends Controller
         return redirect()->route('cdcs.index')
             ->with('success', 'CDC supprimé avec succès !');
     }
+
+    public function edit(Cdc $cdc)
+    {
+        if ($cdc->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $cdc->load(['form.fields.fieldType']);
+
+        return view('cdcs.edit', compact('cdc'));
+    }
+
+    public function update(Request $request, Cdc $cdc)
+    {
+        if ($cdc->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $data = [];
+        foreach ($cdc->form->fields as $field) {
+            $fieldKey = 'field_' . $field->id;
+            if ($request->has($fieldKey)) {
+                $data[$field->name] = $request->input($fieldKey);
+            }
+        }
+
+        $cdc->update([
+            'title' => $validated['title'],
+            'data' => $data,
+        ]);
+
+        return redirect()->route('cdcs.show', $cdc)
+            ->with('success', 'CDC mis à jour avec succès !');
+    }
 }

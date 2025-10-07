@@ -23,7 +23,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/cdcs/{cdc}/download', [CdcController::class, 'download'])->name('cdcs.download');
     Route::delete('/cdcs/{cdc}', [CdcController::class, 'destroy'])->name('cdcs.destroy');
 
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

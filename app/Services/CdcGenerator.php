@@ -1,5 +1,4 @@
 <?php
-// app/Services/CdcGenerator.php
 
 namespace App\Services;
 
@@ -24,7 +23,6 @@ class CdcGenerator
     {
         $this->section = $this->phpWord->addSection($this->getSectionStyle());
 
-        // Construire le document avec VOS méthodes Laravel
         $this->addHeader($cdc);
         $this->addInformations($cdc);
         $this->addFields($cdc);
@@ -90,7 +88,6 @@ class CdcGenerator
 
     private function addField(string $label, $value, bool $required): void
     {
-        // Votre méthode personnalisée
         $labelText = $label . ($required ? ' *' : '');
 
         $this->section->addText(
@@ -140,7 +137,7 @@ class CdcGenerator
             'borderSize' => 6,
             'borderColor' => 'CCCCCC',
             'cellMargin' => 80,
-            'width' => 100 * 50, // 100% width
+            'width' => 100 * 50,
             'unit' => 'pct'
         ];
     }
