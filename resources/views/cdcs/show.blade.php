@@ -23,7 +23,6 @@
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex items-center justify-between">
                     <span>{{ session('success') }}</span>

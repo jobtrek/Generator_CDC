@@ -6,15 +6,37 @@ use App\Models\FieldType;
 use App\Models\Form;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class FormController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $forms = Form::with('user', 'fields')
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->paginate(10);
+        $query = Form::with(['user', 'fields'])
+            ->where('user_id', Auth::id());
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $isActive = $request->status === 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $forms = $query->latest()->paginate(10)->withQueryString();
 
         return view('forms.index', compact('forms'));
     }
@@ -22,7 +44,6 @@ class FormController extends Controller
     public function create()
     {
         $fieldTypes = FieldType::all();
-
         $sessionFields = session('form_fields', []);
 
         return view('forms.create', compact('fieldTypes', 'sessionFields'));
@@ -32,12 +53,12 @@ class FormController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'fields' => 'required|array|min:1',
             'fields.*.name' => 'required|string|max:255',
             'fields.*.label' => 'required|string|max:255',
-            'fields.*.placeholder' => 'nullable|string',
+            'fields.*.placeholder' => 'nullable|string|max:255',
             'fields.*.is_required' => 'boolean',
             'fields.*.field_type_id' => 'required|exists:field_types,id',
         ]);
@@ -50,15 +71,6 @@ class FormController extends Controller
         ]);
 
         foreach ($validated['fields'] as $index => $fieldData) {
-            $options = null;
-            if (isset($fieldData['options'])) {
-                if (is_string($fieldData['options'])) {
-                    $options = json_decode($fieldData['options'], true);
-                } else if (is_array($fieldData['options'])) {
-                    $options = $fieldData['options'];
-                }
-            }
-
             $form->fields()->create([
                 'name' => $fieldData['name'],
                 'label' => $fieldData['label'],
@@ -66,7 +78,7 @@ class FormController extends Controller
                 'is_required' => $fieldData['is_required'] ?? false,
                 'order_index' => $index,
                 'field_type_id' => $fieldData['field_type_id'],
-                'options' => $options,
+                'options' => $this->parseOptions($fieldData['options'] ?? null),
             ]);
         }
 
@@ -107,13 +119,13 @@ class FormController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'fields' => 'required|array|min:1',
             'fields.*.id' => 'nullable|exists:fields,id',
             'fields.*.name' => 'required|string|max:255',
             'fields.*.label' => 'required|string|max:255',
-            'fields.*.placeholder' => 'nullable|string',
+            'fields.*.placeholder' => 'nullable|string|max:255',
             'fields.*.is_required' => 'boolean',
             'fields.*.field_type_id' => 'required|exists:field_types,id',
         ]);
@@ -129,20 +141,9 @@ class FormController extends Controller
             ->filter()
             ->toArray();
 
-        $form->fields()
-            ->whereNotIn('id', $existingFieldIds)
-            ->delete();
+        $form->fields()->whereNotIn('id', $existingFieldIds)->delete();
 
         foreach ($validated['fields'] as $index => $fieldData) {
-            $options = null;
-            if (isset($fieldData['options'])) {
-                if (is_string($fieldData['options'])) {
-                    $options = json_decode($fieldData['options'], true);
-                } else if (is_array($fieldData['options'])) {
-                    $options = $fieldData['options'];
-                }
-            }
-
             $form->fields()->updateOrCreate(
                 ['id' => $fieldData['id'] ?? null],
                 [
@@ -152,7 +153,7 @@ class FormController extends Controller
                     'is_required' => $fieldData['is_required'] ?? false,
                     'order_index' => $index,
                     'field_type_id' => $fieldData['field_type_id'],
-                    'options' => $options,
+                    'options' => $this->parseOptions($fieldData['options'] ?? null),
                 ]
             );
         }
@@ -167,9 +168,23 @@ class FormController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
+        $formName = $form->name;
         $form->delete();
 
         return redirect()->route('forms.index')
-            ->with('success', 'Formulaire supprimé avec succès !');
+            ->with('success', "Le formulaire \"{$formName}\" a été supprimé avec succès !");
+    }
+
+    private function parseOptions($options)
+    {
+        if (is_null($options)) {
+            return null;
+        }
+
+        if (is_string($options)) {
+            return json_decode($options, true);
+        }
+
+        return $options;
     }
 }
