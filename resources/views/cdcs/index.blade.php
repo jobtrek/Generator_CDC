@@ -1,17 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Mes formulaires
-            </h2>
-            <a href="{{ route('forms.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Nouveau formulaire
-            </a>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Mes cahiers des charges
+        </h2>
     </x-slot>
 
     <div class="py-12">
@@ -20,13 +11,8 @@
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition
                      class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex items-center justify-between">
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-green-700 hover:text-green-900">
+                    <span>{{ session('success') }}</span>
+                    <button @click="show = false">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                         </svg>
@@ -38,7 +24,7 @@
                 <div x-data="{ show: true }" x-show="show" x-transition
                      class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded flex items-center justify-between">
                     <span>{{ session('error') }}</span>
-                    <button @click="show = false" class="text-red-700 hover:text-red-900">
+                    <button @click="show = false">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                         </svg>
@@ -48,7 +34,7 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6" x-data="{ showFilters: false }">
                 <div class="p-6">
-                    <form method="GET" action="{{ route('forms.index') }}">
+                    <form method="GET" action="{{ route('cdcs.index') }}">
                         <div class="flex flex-col md:flex-row gap-4 mb-4">
                             <div class="flex-1">
                                 <div class="relative">
@@ -60,7 +46,7 @@
                                     <input type="text"
                                            name="search"
                                            value="{{ request('search') }}"
-                                           placeholder="Rechercher par nom ou description..."
+                                           placeholder="Rechercher par titre ou formulaire..."
                                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
@@ -73,9 +59,9 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                                     </svg>
                                     Filtres
-                                    @if(request()->hasAny(['status', 'date_from', 'date_to']))
+                                    @if(request()->hasAny(['form_id', 'date_from', 'date_to']))
                                         <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                            {{ collect(['status', 'date_from', 'date_to'])->filter(fn($key) => request()->filled($key))->count() }}
+                                            {{ collect(['form_id', 'date_from', 'date_to'])->filter(fn($key) => request()->filled($key))->count() }}
                                         </span>
                                     @endif
                                 </button>
@@ -85,8 +71,8 @@
                                     Rechercher
                                 </button>
 
-                                @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                                    <a href="{{ route('forms.index') }}"
+                                @if(request()->hasAny(['search', 'form_id', 'date_from', 'date_to']))
+                                    <a href="{{ route('cdcs.index') }}"
                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                         Réinitialiser
                                     </a>
@@ -97,17 +83,20 @@
                         <div x-show="showFilters" x-transition
                              class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                                <select name="status"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Formulaire</label>
+                                <select name="form_id"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Tous</option>
-                                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
-                                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
+                                    <option value="">Tous les formulaires</option>
+                                    @foreach($forms as $form)
+                                        <option value="{{ $form->id }}" {{ request('form_id') == $form->id ? 'selected' : '' }}>
+                                            {{ $form->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Créé après le</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
                                 <input type="date"
                                        name="date_from"
                                        value="{{ request('date_from') }}"
@@ -115,7 +104,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Créé avant le</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin</label>
                                 <input type="date"
                                        name="date_to"
                                        value="{{ request('date_to') }}"
@@ -128,58 +117,36 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    @if($forms->count() > 0)
-                        <div class="mb-4 flex justify-between items-center">
-                            <div class="text-sm text-gray-600">
-                                {{ $forms->total() }} formulaire{{ $forms->total() > 1 ? 's' : '' }}
-                            </div>
+                    @if($cdcs->count() > 0)
+                        <div class="mb-4 text-sm text-gray-600">
+                            {{ $cdcs->total() }} CDC trouvé{{ $cdcs->total() > 1 ? 's' : '' }}
                         </div>
 
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Champs</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Titre</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Formulaire</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé le</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($forms as $form)
+                                @foreach($cdcs as $cdc)
                                     <tr class="hover:bg-gray-50 transition">
                                         <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $form->name }}</div>
-                                            @if($form->description)
-                                                <div class="text-sm text-gray-500">{{ Str::limit($form->description, 50) }}</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                {{ $form->fields->count() }} champ{{ $form->fields->count() > 1 ? 's' : '' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            @if($form->is_active)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    Actif
-                                                </span>
-                                            @else
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                    Inactif
-                                                </span>
-                                            @endif
+                                            <div class="text-sm font-medium text-gray-900">{{ $cdc->title }}</div>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500">
-                                            {{ $form->created_at->format('d/m/Y') }}
+                                            {{ $cdc->form->name }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500">
+                                            {{ $cdc->created_at->format('d/m/Y à H:i') }}
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="flex justify-end gap-2">
-                                                <a href="{{ route('forms.show', $form) }}"
+                                                <a href="{{ route('cdcs.show', $cdc) }}"
                                                    class="inline-flex items-center p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded transition"
                                                    title="Voir">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,28 +155,16 @@
                                                     </svg>
                                                 </a>
 
-                                                <a href="{{ route('forms.edit', $form) }}"
-                                                   class="inline-flex items-center p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition"
-                                                   title="Modifier">
+                                                <a href="{{ route('cdcs.download', $cdc) }}"
+                                                   class="inline-flex items-center p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition"
+                                                   title="Télécharger">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                     </svg>
                                                 </a>
 
-                                                <form method="POST" action="{{ route('cdcs.generate', $form) }}" class="inline">
-                                                    @csrf
-                                                    <button type="submit"
-                                                            class="inline-flex items-center p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition"
-                                                            title="Générer un CDC">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-
-                                                <form method="POST"
-                                                      action="{{ route('forms.destroy', $form) }}"
-                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce formulaire ?');"
+                                                <form method="POST" action="{{ route('cdcs.destroy', $cdc) }}"
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce CDC ?');"
                                                       class="inline">
                                                     @csrf
                                                     @method('DELETE')
@@ -230,32 +185,29 @@
                         </div>
 
                         <div class="mt-4">
-                            {{ $forms->links() }}
+                            {{ $cdcs->links() }}
                         </div>
                     @else
                         <div class="text-center py-12">
-                            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun résultat trouvé</h3>
-                                <p class="mt-2 text-sm text-gray-500">Essayez de modifier vos critères de recherche.</p>
+                            @if(request()->hasAny(['search', 'form_id', 'date_from', 'date_to']))
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun résultat trouvé</h3>
+                                <p class="mt-1 text-sm text-gray-500">Essayez de modifier vos critères de recherche.</p>
                                 <div class="mt-6">
-                                    <a href="{{ route('forms.index') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                                    <a href="{{ route('cdcs.index') }}"
+                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                                         Réinitialiser les filtres
                                     </a>
                                 </div>
                             @else
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun formulaire</h3>
-                                <p class="mt-2 text-sm text-gray-500">Commencez par créer votre premier formulaire.</p>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun CDC généré</h3>
+                                <p class="mt-1 text-sm text-gray-500">Commencez par générer un CDC depuis vos formulaires.</p>
                                 <div class="mt-6">
-                                    <a href="{{ route('forms.create') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </svg>
-                                        Créer mon premier formulaire
+                                    <a href="{{ route('forms.index') }}"
+                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                                        Voir mes formulaires
                                     </a>
                                 </div>
                             @endif

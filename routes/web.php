@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CdcController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -14,45 +15,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    Route::prefix('cdc')->name('cdc.')->group(function () {
-        Route::get('/', function () {
-            return view('cdc.index');
-        })->name('index')->middleware('permission:cdc.view');
-
-        Route::get('/create', function () {
-            return view('cdc.create');
-        })->name('create')->middleware('permission:cdc.create');
-
-        Route::post('/', function () {
-            return redirect()->route('cdc.index')->with('success', 'CDC créé avec succès');
-        })->name('store')->middleware('permission:cdc.create');
-
-        Route::get('/{id}', function ($id) {
-            return view('cdc.show', compact('id'));
-        })->name('show')->middleware('permission:cdc.view');
-
-        Route::get('/{id}/edit', function ($id) {
-            return view('cdc.edit', compact('id'));
-        })->name('edit')->middleware('permission:cdc.edit');
-
-        Route::put('/{id}', function ($id) {
-            return redirect()->route('cdc.show', $id)->with('success', 'CDC mis à jour');
-        })->name('update')->middleware('permission:cdc.edit');
-
-        Route::delete('/{id}', function ($id) {
-            return redirect()->route('cdc.index')->with('success', 'CDC supprimé');
-        })->name('destroy')->middleware('permission:cdc.delete');
-
-        Route::get('/{id}/export', function ($id) {
-            return response()->download('cdc.docx');
-        })->name('export')->middleware('permission:cdc.export');
-
-        Route::post('/{id}/duplicate', function ($id) {
-            return redirect()->route('cdc.index')->with('success', 'CDC dupliqué');
-        })->name('duplicate')->middleware('permission:cdc.duplicate');
-    });
-
     Route::resource('forms', FormController::class);
+
+    Route::get('/cdcs', [CdcController::class, 'index'])->name('cdcs.index');
+    Route::post('/cdcs/generate/{form}', [CdcController::class, 'generate'])->name('cdcs.generate');
+    Route::get('/cdcs/{cdc}', [CdcController::class, 'show'])->name('cdcs.show');
+    Route::get('/cdcs/{cdc}/download', [CdcController::class, 'download'])->name('cdcs.download');
+    Route::delete('/cdcs/{cdc}', [CdcController::class, 'destroy'])->name('cdcs.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -62,7 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', function () {
             $stats = [
                 'total_users' => \App\Models\User::count(),
-                'total_cdc' => 0,
+                'total_cdc' => \App\Models\Cdc::count(), // Corrigé aussi
                 'total_forms' => \App\Models\Form::count(),
                 'total_templates' => 0,
             ];

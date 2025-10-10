@@ -56,4 +56,9 @@ class User extends Authenticatable
         return $this->hasMany(Form::class);
     }
 
+    public function cdcs(): HasMany
+    {
+        return $this->hasMany(Cdc::class);
+    }
+
 }

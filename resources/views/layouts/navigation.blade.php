@@ -4,7 +4,9 @@
             <div class="flex">
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <img src="{{ asset('img.png') }}"
+                             alt="Mon Logo"
+                             class="block h-9 w-auto" />
                     </a>
                 </div>
 
@@ -15,6 +17,10 @@
 
                     <x-nav-link :href="route('forms.index')" :active="request()->routeIs('forms.*')">
                         {{ __('Formulaires') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('cdcs.index')" :active="request()->routeIs('cdcs.*')">
+                        {{ __('Mes cahiers de charges') }}
                     </x-nav-link>
 
                     @role('admin|super-admin')
@@ -44,7 +50,6 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
-                        <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
@@ -77,6 +82,9 @@
 
             <x-responsive-nav-link :href="route('forms.index')" :active="request()->routeIs('forms.*')">
                 {{ __('Formulaires') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('cdcs.index')" :active="request()->routeIs('cdcs.*')">
+                {{ __('Mes CDC') }}
             </x-responsive-nav-link>
 
             @role('admin|super-admin')
