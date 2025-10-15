@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use App\Models\Cdc;
-use App\Models\Form;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\SimpleType\Jc;
+use PhpOffice\PhpWord\Shared\Converter;
 
 class CdcGenerator
 {
@@ -17,134 +18,386 @@ class CdcGenerator
         $this->phpWord = new PhpWord();
         $this->phpWord->setDefaultFontName('Arial');
         $this->phpWord->setDefaultFontSize(11);
+        $this->defineStyles();
     }
 
     public function generate(Cdc $cdc): string
     {
-        $this->section = $this->phpWord->addSection($this->getSectionStyle());
+        $this->section = $this->phpWord->addSection([
+            'marginTop' => 1440,
+            'marginBottom' => 1440,
+            'marginLeft' => 1440,
+            'marginRight' => 1440,
+        ]);
 
-        $this->addHeader($cdc);
-        $this->addInformations($cdc);
-        $this->addFields($cdc);
-        $this->addFooter();
+        $this->addOfficialHeader();
+        $this->addOfficialFooter();
+
+        $this->addSection1InformationsGenerales($cdc);
+        $this->addSection2Procedure();
+        $this->addSection3Titre($cdc);
+        $this->addSection4MaterielLogiciel($cdc);
+        $this->addSection5Prerequis($cdc);
+        $this->addSection6DescriptifProjet($cdc);
+        $this->addSection7Livrables($cdc);
+        $this->addSection8PointsTechniques($cdc);
+        $this->addSection9Validation($cdc);
 
         return $this->save($cdc);
     }
 
-    private function getSectionStyle(): array
+    private function defineStyles(): void
     {
-        return [
-            'marginTop' => 1440,
-            'marginBottom' => 1440,
-            'marginLeft' => 1800,
-            'marginRight' => 1800,
-        ];
+        $this->phpWord->addTitleStyle(1, [
+            'name' => 'Arial',
+            'size' => 14,
+            'bold' => true,
+        ], [
+            'spaceBefore' => 240,
+            'spaceAfter' => 120,
+        ]);
     }
 
-    private function addHeader(Cdc $cdc): void
+    private function addOfficialHeader(): void
     {
-        $this->section->addText(
-            'CAHIER DES CHARGES',
-            ['bold' => true, 'size' => 18, 'color' => '2E74B5'],
-            ['alignment' => 'center', 'spaceAfter' => 240]
+        $header = $this->section->addHeader();
+        $header->addText(
+            'Procédure de qualification : 88600/1/2/3 - 88614 Informaticien/ne CFC (Ordo 2014/21)',
+            ['size' => 9]
         );
-
-        $this->section->addText(
-            strtoupper($cdc->title),
-            ['bold' => true, 'size' => 14],
-            ['alignment' => 'center', 'spaceAfter' => 480]
-        );
-    }
-
-    private function addInformations(Cdc $cdc): void
-    {
-        $this->addSectionTitle('1. INFORMATIONS GÉNÉRALES');
-
-        $table = $this->section->addTable($this->getTableStyle());
-
-        $infoRows = [
-            ['Candidat', $cdc->user->name],
-            ['Lieu de travail', config('app.name')],
-            ['Période de réalisation', now()->format('d/m/Y')],
-        ];
-
-        foreach ($infoRows as $row) {
-            $table->addRow();
-            $table->addCell(4000)->addText($row[0], ['bold' => true]);
-            $table->addCell(6000)->addText($row[1]);
-        }
-    }
-
-    private function addFields(Cdc $cdc): void
-    {
-        $this->addSectionTitle('2. DESCRIPTIF DU PROJET');
-
-        foreach ($cdc->form->fields()->orderBy('order_index')->get() as $field) {
-            $value = $cdc->data[$field->name] ?? 'Non renseigné';
-
-            $this->addField($field->label, $value, $field->is_required);
-        }
-    }
-
-    private function addField(string $label, $value, bool $required): void
-    {
-        $labelText = $label . ($required ? ' *' : '');
-
-        $this->section->addText(
-            $labelText,
-            ['bold' => true, 'size' => 11, 'color' => '333333']
-        );
-
-        if (is_array($value)) {
-            foreach ($value as $item) {
-                $this->section->addText(
-                    '• ' . $item,
-                    ['size' => 10],
-                    ['indentation' => ['left' => 360]]
-                );
-            }
-        } else {
-            $this->section->addText(
-                $value,
-                ['size' => 10],
-                ['indentation' => ['left' => 360], 'spaceAfter' => 200]
-            );
-        }
-    }
-
-    private function addSectionTitle(string $title): void
-    {
-        $this->section->addText(
-            $title,
-            ['bold' => true, 'size' => 12, 'color' => '2E74B5'],
-            ['spaceAfter' => 240, 'spaceBefore' => 360]
+        $header->addText(
+            'Cahier des charges',
+            ['size' => 9, 'bold' => true]
         );
     }
 
-    private function addFooter(): void
+    private function addOfficialFooter(): void
     {
         $footer = $this->section->addFooter();
-        $footer->addText(
-            'Généré automatiquement le ' . now()->format('d/m/Y à H:i'),
-            ['size' => 8, 'italic' => true, 'color' => '666666'],
-            ['alignment' => 'center']
+
+        $table = $footer->addTable([
+            'borderSize' => 0,
+            'width' => 100 * 50,
+            'unit' => 'pct'
+        ]);
+
+        $table->addRow();
+        $cell1 = $table->addCell(3000);
+        $cell1->addPreserveText('Page {PAGE} sur {NUMPAGES}', ['size' => 8]);
+
+        $cell2 = $table->addCell(6500);
+        $cell2->addText(
+            'Version 1.1-ordo2k104-21 (' . now()->format('d.m.Y') . ')',
+            ['size' => 8],
+            ['alignment' => Jc::END]
+        );
+
+        $table->addRow();
+        $table->addCell(9500)->addText(
+            '© I-CQ VD 2017/' . now()->format('y'),
+            ['size' => 8],
+            ['alignment' => Jc::END]
         );
     }
 
-    private function getTableStyle(): array
+    private function addSection1InformationsGenerales(Cdc $cdc): void
     {
-        return [
+        $this->section->addTitle('1 INFORMATIONS GENERALES', 1);
+
+        $tableStyle = [
             'borderSize' => 6,
-            'borderColor' => 'CCCCCC',
+            'borderColor' => '000000',
             'cellMargin' => 80,
             'width' => 100 * 50,
             'unit' => 'pct'
         ];
+
+        $table = $this->section->addTable($tableStyle);
+
+        $table->addRow();
+        $table->addCell(2500)->addText('Candidat:', ['bold' => true]);
+        $table->addCell(3500)->addText('Nom:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'candidat_nom'));
+        $table->addCell(1500)->addText('Prénom:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'candidat_prenom'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('');
+        $table->addCell(3500)->addText('');
+        $table->addCell(3000)->addText('');
+        $table->addCell(1500)->addText('');
+        $table->addCell(2000)->addText('');
+
+        $table->addRow();
+        $table->addCell(12500, ['gridSpan' => 5])->addText('Lieu de travail:', ['bold' => true]);
+
+        $table->addRow();
+        $table->addCell(12500, ['gridSpan' => 5])->addText($this->getValue($cdc, 'lieu_travail'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('Chef de projet:', ['bold' => true]);
+        $table->addCell(3500)->addText('Nom:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'chef_projet_nom'));
+        $table->addCell(1500)->addText('Prénom:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'chef_projet_prenom'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('');
+        $table->addCell(3500)->addText('📧:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'chef_projet_email'));
+        $table->addCell(1500)->addText('☎:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'chef_projet_telephone'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('Expert 1:', ['bold' => true]);
+        $table->addCell(3500)->addText('Nom:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'expert1_nom'));
+        $table->addCell(1500)->addText('Prénom:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'expert1_prenom'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('');
+        $table->addCell(3500)->addText('📧:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'expert1_email'));
+        $table->addCell(1500)->addText('☎:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'expert1_telephone'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('Expert 2:', ['bold' => true]);
+        $table->addCell(3500)->addText('Nom:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'expert2_nom'));
+        $table->addCell(1500)->addText('Prénom:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'expert2_prenom'));
+
+        $table->addRow();
+        $table->addCell(2500)->addText('');
+        $table->addCell(3500)->addText('📧:');
+        $table->addCell(3000)->addText($this->getValue($cdc, 'expert2_email'));
+        $table->addCell(1500)->addText('☎:');
+        $table->addCell(2000)->addText($this->getValue($cdc, 'expert2_telephone'));
+
+        $table->addRow();
+        $table->addCell(4000)->addText('Période de réalisation :', ['bold' => true]);
+        $table->addCell(8500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'periode_realisation'));
+
+        $table->addRow();
+        $table->addCell(4000)->addText('Horaire de travail :', ['bold' => true]);
+        $table->addCell(8500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'horaire_travail'));
+
+        $table->addRow();
+        $table->addCell(4000)->addText('Nombre d\'heures :', ['bold' => true]);
+        $table->addCell(8500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'nombre_heures'));
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection2Procedure(): void
+    {
+        $this->section->addTitle('2 PROCÉDURE', 1);
+
+        $points = [
+            'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.',
+            'Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.',
+            'Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.',
+            'Le candidat est entièrement responsable de la sécurité de ses données.',
+            'En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.',
+            'Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.',
+            'A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires. Cette dernière doit être en tout point identique à la version électronique.'
+        ];
+
+        foreach ($points as $point) {
+            $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
+        }
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection3Titre(Cdc $cdc): void
+    {
+        $this->section->addTitle('3 TITRE', 1);
+        $this->section->addText($this->getValue($cdc, 'titre_projet', $cdc->title));
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection4MaterielLogiciel(Cdc $cdc): void
+    {
+        $this->section->addTitle('4 MATÉRIEL ET LOGICIEL À DISPOSITION', 1);
+
+        $materiel = $this->getValue($cdc, 'materiel_logiciel', '');
+
+        if (!empty($materiel)) {
+            $items = explode("\n", $materiel);
+            foreach ($items as $item) {
+                $item = trim($item);
+                if (!empty($item)) {
+                    $this->section->addListItem($item, 0, ['size' => 11]);
+                }
+            }
+        } else {
+            $this->section->addText('À définir');
+        }
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection5Prerequis(Cdc $cdc): void
+    {
+        $this->section->addTitle('5 PRÉREQUIS', 1);
+
+        $prerequis = $this->getValue($cdc, 'prerequis', '');
+
+        if (!empty($prerequis)) {
+            $items = explode("\n", $prerequis);
+            foreach ($items as $item) {
+                $item = trim($item);
+                if (!empty($item)) {
+                    $this->section->addListItem($item, 0, ['size' => 11]);
+                }
+            }
+        } else {
+            $this->section->addText('Aucun prérequis spécifique');
+        }
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection6DescriptifProjet(Cdc $cdc): void
+    {
+        $this->section->addTitle('6 DESCRIPTIF DU PROJET', 1);
+
+        $descriptif = $this->getValue($cdc, 'descriptif_projet', '');
+
+        if (!empty($descriptif)) {
+            $paragraphs = explode("\n\n", $descriptif);
+
+            foreach ($paragraphs as $paragraph) {
+                $paragraph = trim($paragraph);
+
+                if (empty($paragraph)) continue;
+
+                if (preg_match('/^[\-\*]\s/', $paragraph)) {
+                    $lines = explode("\n", $paragraph);
+                    foreach ($lines as $line) {
+                        $line = trim($line);
+                        if (preg_match('/^[\-\*]\s(.+)$/', $line, $matches)) {
+                            $this->section->addListItem(trim($matches[1]), 0, ['size' => 11]);
+                        }
+                    }
+                } else {
+                    $this->section->addText($paragraph, ['size' => 11], ['spaceAfter' => 120]);
+                }
+            }
+        } else {
+            $this->section->addText('Description du projet à définir.');
+        }
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection7Livrables(Cdc $cdc): void
+    {
+        $this->section->addTitle('7 LIVRABLES', 1);
+
+        $this->section->addText('Le candidat est responsable de livrer à son chef de projet et aux deux experts :');
+        $this->section->addTextBreak();
+
+        $livrables = $this->getValue($cdc, 'livrables', '');
+
+        if (!empty($livrables)) {
+            $items = explode("\n", $livrables);
+            foreach ($items as $item) {
+                $item = trim($item);
+                if (!empty($item)) {
+                    $this->section->addListItem($item, 0, ['size' => 11]);
+                }
+            }
+        } else {
+            $defaultLivrables = [
+                'Une planification initiale',
+                'Un rapport de projet',
+                'Un journal de travail'
+            ];
+
+            foreach ($defaultLivrables as $livrable) {
+                $this->section->addListItem($livrable, 0, ['size' => 11]);
+            }
+        }
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection8PointsTechniques(Cdc $cdc): void
+    {
+        $this->section->addTitle('8 POINTS TECHNIQUES ÉVALUÉS SPÉCIFIQUES AU PROJET', 1);
+
+        $this->section->addText(
+            'La grille d\'évaluation définit les critères généraux selon lesquels le travail du candidat sera évalué (documentation, journal de travail, respect des normes, qualité, ...).'
+        );
+
+        $this->section->addTextBreak();
+
+        $this->section->addText(
+            'En plus de cela, le travail sera évalué sur les 7 points spécifiques suivants (Point A14 à A20) :'
+        );
+
+        $this->section->addTextBreak();
+
+        for ($i = 1; $i <= 7; $i++) {
+            $point = $this->getValue($cdc, 'point_technique_' . $i, '(à compléter par le chef de projet)');
+            $this->section->addText("$i. $point", ['size' => 11]);
+        }
+
+        $this->section->addTextBreak(1);
+    }
+
+    private function addSection9Validation(Cdc $cdc): void
+    {
+        $this->section->addTitle('9 VALIDATION', 1);
+
+        $tableStyle = [
+            'borderSize' => 6,
+            'borderColor' => '000000',
+            'cellMargin' => 80,
+            'width' => 100 * 50,
+            'unit' => 'pct'
+        ];
+
+        $table = $this->section->addTable($tableStyle);
+
+        $table->addRow(400);
+        $table->addCell(3000)->addText('');
+        $table->addCell(4500)->addText('Lu et approuvé le :', ['bold' => true]);
+        $table->addCell(4500)->addText('Signature :', ['bold' => true]);
+
+        $table->addRow(800);
+        $table->addCell(3000)->addText('Candidat :');
+        $table->addCell(4500)->addText('');
+        $table->addCell(4500)->addText('');
+
+        $table->addRow(800);
+        $table->addCell(3000)->addText('Expert n°1 :');
+        $table->addCell(4500)->addText('');
+        $table->addCell(4500)->addText('');
+
+        $table->addRow(800);
+        $table->addCell(3000)->addText('Expert n° 2 :');
+        $table->addCell(4500)->addText('');
+        $table->addCell(4500)->addText('');
+
+        $table->addRow(800);
+        $table->addCell(3000)->addText('Chef de projet :');
+        $table->addCell(4500)->addText('');
+        $table->addCell(4500)->addText('');
+    }
+
+    private function getValue(Cdc $cdc, string $key, string $default = ''): string
+    {
+        return $cdc->data[$key] ?? $default;
     }
 
     private function save(Cdc $cdc): string
     {
-        $filename = 'cdcs-' . $cdc->id . '-' . time() . '.docx';
+        $filename = 'cdc-' . $cdc->id . '-' . time() . '.docx';
         $path = storage_path('app/public/cdcs/');
 
         if (!is_dir($path)) {

@@ -21,8 +21,9 @@
                                     $roleConfig = [
                                         'super-admin' => ['bg' => 'bg-red-100', 'text' => 'text-red-800', 'label' => 'Super Admin'],
                                         'admin' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-800', 'label' => 'Admin'],
-                                        'manager' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'Manager'],
+                                        'formateur' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'Formateur'],
                                         'user' => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'Utilisateur'],
+                                        'guest' => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'Invité'],
                                     ];
                                     $config = $roleConfig[$role] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => ucfirst($role)];
                                 @endphp
@@ -94,8 +95,8 @@
                                     </svg>
                                 </div>
                                 <div class="ml-5">
-                                    <p class="text-2xl font-semibold text-gray-900">{{ Auth::user()->forms()->count() }}</p>
-                                    <p class="text-sm text-gray-500">Mes modèles</p>
+                                    <p class="text-2xl font-semibold text-gray-900">{{ Auth::user()->forms()->where('is_active', true)->count() }}</p>
+                                    <p class="text-sm text-gray-500">Modèles actifs</p>
                                 </div>
                             </div>
                         </div>
@@ -145,25 +146,6 @@
                 </a>
 
                 @if(Auth::user()->hasAnyRole(['admin', 'super-admin']))
-                    <a href="{{ route('admin.users.index') }}" class="group">
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
-                            <div class="p-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h4 class="text-lg font-semibold text-gray-900 group-hover:text-red-600">
-                                            Administration
-                                        </h4>
-                                        <p class="mt-1 text-sm text-gray-600">
-                                            Gérer les utilisateurs
-                                        </p>
-                                    </div>
-                                    <svg class="h-6 w-6 text-gray-400 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
                 @else
                     <a href="{{ route('profile.edit') }}" class="group">
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
@@ -214,6 +196,8 @@
                             </svg>
                             Voir mes CDC
                         </a>
+                        @if(Auth::user()->hasAnyRole(['admin', 'super-admin']))
+                        @endif
                     </div>
                 </div>
             </div>
@@ -248,12 +232,8 @@
                                     </div>
                                     <div class="flex gap-2">
                                         <a href="{{ route('forms.show', $form) }}"
-                                           class="text-indigo-600 hover:text-indigo-900 text-sm">
+                                           class="text-indigo-600 hover:text-indigo-900 text-sm px-3 py-1 bg-indigo-50 rounded hover:bg-indigo-100 transition">
                                             Voir
-                                        </a>
-                                        <a href="{{ route('forms.edit', $form) }}"
-                                           class="text-blue-600 hover:text-blue-900 text-sm">
-                                            Modifier
                                         </a>
                                     </div>
                                 </div>
@@ -272,7 +252,7 @@
                         <div class="mt-6">
                             <a href="{{ route('forms.create') }}"
                                class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
                                 Créer mon premier formulaire

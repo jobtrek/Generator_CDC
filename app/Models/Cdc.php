@@ -31,4 +31,9 @@ class Cdc extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function isManual(): bool
+    {
+        return is_null($this->form_id);
+    }
 }

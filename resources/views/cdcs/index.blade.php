@@ -1,13 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Mes cahiers des charges
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Mes cahiers des charges
+            </h2>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
             @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition
                      class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex items-center justify-between">
@@ -46,7 +47,7 @@
                                     <input type="text"
                                            name="search"
                                            value="{{ request('search') }}"
-                                           placeholder="Rechercher par titre ou formulaire..."
+                                           placeholder="Rechercher par titre..."
                                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
                             </div>
@@ -59,11 +60,6 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                                     </svg>
                                     Filtres
-                                    @if(request()->hasAny(['form_id', 'date_from', 'date_to']))
-                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                            {{ collect(['form_id', 'date_from', 'date_to'])->filter(fn($key) => request()->filled($key))->count() }}
-                                        </span>
-                                    @endif
                                 </button>
 
                                 <button type="submit"
@@ -71,7 +67,7 @@
                                     Rechercher
                                 </button>
 
-                                @if(request()->hasAny(['search', 'form_id', 'date_from', 'date_to']))
+                                @if(request()->hasAny(['search', 'date_from', 'date_to']))
                                     <a href="{{ route('cdcs.index') }}"
                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                         Réinitialiser
@@ -79,22 +75,8 @@
                                 @endif
                             </div>
                         </div>
-
                         <div x-show="showFilters" x-transition
-                             class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Formulaire</label>
-                                <select name="form_id"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Tous les formulaires</option>
-                                    @foreach($forms as $form)
-                                        <option value="{{ $form->id }}" {{ request('form_id') == $form->id ? 'selected' : '' }}>
-                                            {{ $form->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
+                             class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
                                 <input type="date"
@@ -127,7 +109,6 @@
                                 <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Titre</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Formulaire</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Créé le</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
@@ -137,9 +118,11 @@
                                     <tr class="hover:bg-gray-50 transition">
                                         <td class="px-6 py-4">
                                             <div class="text-sm font-medium text-gray-900">{{ $cdc->title }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500">
-                                            {{ $cdc->form->name }}
+                                            @if(isset($cdc->data['candidat_nom']))
+                                                <div class="text-sm text-gray-500">
+                                                    Candidat: {{ $cdc->data['candidat_nom'] }} {{ $cdc->data['candidat_prenom'] ?? '' }}
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500">
                                             {{ $cdc->created_at->format('d/m/Y à H:i') }}
@@ -192,29 +175,13 @@
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            @if(request()->hasAny(['search', 'form_id', 'date_from', 'date_to']))
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun résultat trouvé</h3>
-                                <p class="mt-1 text-sm text-gray-500">Essayez de modifier vos critères de recherche.</p>
-                                <div class="mt-6">
-                                    <a href="{{ route('cdcs.index') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                                        Réinitialiser les filtres
-                                    </a>
-                                </div>
-                            @else
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun CDC généré</h3>
-                                <p class="mt-1 text-sm text-gray-500">Commencez par générer un CDC depuis vos formulaires.</p>
-                                <div class="mt-6">
-                                    <a href="{{ route('forms.index') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                                        Voir mes formulaires
-                                    </a>
-                                </div>
-                            @endif
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Aucun CDC généré</h3>
+                            <p class="mt-1 text-sm text-gray-500">Commencez par créer votre premier CDC.</p>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </x-app-layout>
