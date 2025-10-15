@@ -7,9 +7,16 @@ use App\Models\Form;
 use App\Services\CdcGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CdcController extends Controller
 {
+    use AuthorizesRequests;
+
+    /**
+     * Affiche la liste des CDC de l'utilisateur
+     */
     public function index(Request $request)
     {
         $query = Cdc::with(['form', 'user'])
@@ -24,11 +31,6 @@ class CdcController extends Controller
                     });
             });
         }
-
-        if ($request->filled('form_id')) {
-            $query->where('form_id', $request->form_id);
-        }
-
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
@@ -39,123 +41,170 @@ class CdcController extends Controller
 
         $cdcs = $query->latest()->paginate(10)->withQueryString();
 
-        $forms = Auth::user()->forms()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('cdcs.index', compact('cdcs', 'forms'));
+        return view('cdcs.index', compact('cdcs'));
     }
 
-    public function generate(Form $form)
+    /**
+     * ✅ Prépare la duplication d'un formulaire pour générer un nouveau CDC
+     * Redirige vers forms.create avec les données en session
+     */
+    public function create(Request $request)
     {
-        if ($form->user_id !== Auth::id()) {
-            abort(403);
+        $formId = $request->query('form_id');
+
+        if (!$formId) {
+            return redirect()->route('forms.create')
+                ->with('info', 'Créez un nouveau formulaire pour générer un CDC.');
         }
 
-        $cdc = Cdc::create([
-            'title' => $this->generateTitle($form),
-            'data' => $this->getDefaultData($form),
-            'form_id' => $form->id,
-            'user_id' => Auth::id(),
+        $form = Form::with('fields.fieldType')->findOrFail($formId);
+        $this->authorize('view', $form);
+
+        session()->put('duplicate_form', [
+            'source_form_id' => $form->id,
+            'name' => $form->name . ' (Copie)',
+            'description' => $form->description,
+            'fields' => $form->fields->sortBy('order_index')->map(function($field) {
+                return [
+                    'name' => $field->name,
+                    'label' => $field->label,
+                    'field_type_id' => $field->field_type_id,
+                    'placeholder' => $field->placeholder,
+                    'is_required' => $field->is_required ?? false,
+                    'options' => $field->options,
+                    'order_index' => $field->order_index,
+                    'value' => ''
+                ];
+            })->values()->toArray()
         ]);
 
-        return redirect()->route('cdcs.show', $cdc)
-            ->with('success', 'Vous pouvez maintenant le télécharger.');
+        return redirect()->route('forms.create')
+            ->with('info', 'Remplissez les données pour générer un nouveau CDC basé sur "' . $form->name . '"');
     }
 
+    /**
+     * ✅ Store n'est plus utilisé directement
+     * La création du CDC se fait via FormController::store()
+     */
+    public function store(Request $request)
+    {
+        return redirect()->route('forms.create')
+            ->with('error', 'Veuillez utiliser le formulaire de création pour générer un CDC.');
+    }
+
+    /**
+     * Affiche un CDC spécifique
+     */
     public function show(Cdc $cdc)
     {
-        if ($cdc->user_id !== Auth::id()) {
-            abort(403);
-        }
-
+        $this->authorize('view', $cdc);
         $cdc->load(['form.fields.fieldType', 'user']);
 
         return view('cdcs.show', compact('cdc'));
     }
 
+    /**
+     * Met à jour un CDC existant
+     */
     public function update(Request $request, Cdc $cdc)
     {
-        if ($cdc->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('update', $cdc);
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'data' => 'required|array',
         ]);
 
-        $data = [];
-        foreach ($cdc->form->fields as $field) {
-            $fieldKey = 'field_' . $field->id;
-            if ($request->has($fieldKey)) {
-                $value = $request->input($fieldKey);
-                $data[$field->name] = is_array($value) ? $value : trim($value);
-            }
+        try {
+            $cdc->update([
+                'title' => $validated['title'],
+                'data' => $validated['data'],
+            ]);
+
+            return redirect()->route('cdcs.show', $cdc)
+                ->with('success', 'CDC mis à jour avec succès !');
+
+        } catch (\Exception $e) {
+            Log::error('Erreur mise à jour CDC', [
+                'cdc_id' => $cdc->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la mise à jour : ' . $e->getMessage());
         }
-
-        $cdc->update([
-            'title' => $validated['title'],
-            'data' => $data,
-        ]);
-
-        return redirect()->route('cdcs.show', $cdc)
-            ->with('success', 'CDC mis à jour avec succès !');
     }
 
+    /**
+     * ✅ Télécharge le CDC au format Word (.docx)
+     */
     public function download(Cdc $cdc, CdcGenerator $generator)
     {
-        if ($cdc->user_id !== Auth::id()) {
-            abort(403);
-        }
+        $this->authorize('view', $cdc);
 
         try {
             $path = $generator->generate($cdc);
 
+            $fullPath = storage_path('app/public/' . $path);
+
+            if (!file_exists($fullPath)) {
+                throw new \Exception('Le fichier généré est introuvable.');
+            }
+
             return response()->download(
-                storage_path('app/public/' . $path),
+                $fullPath,
                 $this->generateFileName($cdc)
-            );
+            )->deleteFileAfterSend(true);
+
         } catch (\Exception $e) {
+            Log::error('Erreur génération CDC', [
+                'cdc_id' => $cdc->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return redirect()->back()
-                ->with('error', 'Erreur lors de la génération du document : ' . $e->getMessage());
+                ->with('error', 'Une erreur est survenue lors de la génération du document. Veuillez réessayer.');
         }
     }
 
+    /**
+     * Supprime un CDC
+     */
     public function destroy(Cdc $cdc)
     {
-        if ($cdc->user_id !== Auth::id()) {
-            abort(403);
+        $this->authorize('delete', $cdc);
+
+        try {
+            $cdcTitle = $cdc->title;
+            $cdc->delete();
+
+            return redirect()->route('cdcs.index')
+                ->with('success', "Le CDC \"{$cdcTitle}\" a été supprimé avec succès !");
+
+        } catch (\Exception $e) {
+            Log::error('Erreur suppression CDC', [
+                'cdc_id' => $cdc->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
         }
-
-        $cdcTitle = $cdc->title;
-        $cdc->delete();
-
-        return redirect()->route('cdcs.index')
-            ->with('success', "Le CDC \"{$cdcTitle}\" a été supprimé avec succès !");
     }
 
-    private function generateTitle(Form $form): string
-    {
-        return sprintf(
-            'CDC - %s - %s',
-            $form->name,
-            now()->format('d/m/Y')
-        );
-    }
-
+    /**
+     * ✅ Génère un nom de fichier sécurisé pour le téléchargement
+     */
     private function generateFileName(Cdc $cdc): string
     {
         $slug = \Illuminate\Support\Str::slug($cdc->title);
-        return "{$slug}.docx";
-    }
+        $timestamp = now()->format('Y-m-d');
 
-    private function getDefaultData(Form $form): array
-    {
-        $data = [];
-        foreach ($form->fields as $field) {
-            $data[$field->name] = 'À compléter';
-        }
-        return $data;
+        return "{$slug}_{$timestamp}.docx";
     }
 }
