@@ -122,17 +122,17 @@ class CdcGenerator
         $table->addCell(2000)->addText($this->getValue($cdc, 'candidat_prenom'));
 
         $table->addRow();
-        $table->addCell(2500)->addText('');
-        $table->addCell(3500)->addText('');
-        $table->addCell(3000)->addText('');
-        $table->addCell(1500)->addText('');
-        $table->addCell(2000)->addText('');
+        $table->addCell(12500, ['gridSpan' => 5])->addText('');
 
         $table->addRow();
-        $table->addCell(12500, ['gridSpan' => 5])->addText('Lieu de travail:', ['bold' => true]);
+        $table->addCell(3000)->addText('Lieu de travail:', ['bold' => true]);
+        $table->addCell(9500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'lieu_travail'));
 
-        $table->addRow();
-        $table->addCell(12500, ['gridSpan' => 5])->addText($this->getValue($cdc, 'lieu_travail'));
+        if ($orientation = $this->getValue($cdc, 'orientation')) {
+            $table->addRow();
+            $table->addCell(3000)->addText('Orientation:', ['bold' => true]);
+            $table->addCell(9500, ['gridSpan' => 4])->addText($orientation);
+        }
 
         $table->addRow();
         $table->addCell(2500)->addText('Chef de projet:', ['bold' => true]);
@@ -188,6 +188,28 @@ class CdcGenerator
         $table->addCell(4000)->addText('Nombre d\'heures :', ['bold' => true]);
         $table->addCell(8500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'nombre_heures'));
 
+        if ($this->getValue($cdc, 'planning_analyse') || $this->getValue($cdc, 'planning_implementation')) {
+            $table->addRow();
+            $table->addCell(4000, ['gridSpan' => 1, 'vMerge' => 'restart'])->addText('Planning (en H ou %):', ['bold' => true]);
+            $table->addCell(4000)->addText('Analyse:');
+            $table->addCell(4500, ['gridSpan' => 3])->addText($this->getValue($cdc, 'planning_analyse'));
+
+            $table->addRow();
+            $table->addCell(4000, ['vMerge' => 'continue']);
+            $table->addCell(4000)->addText('Implémentation:');
+            $table->addCell(4500, ['gridSpan' => 3])->addText($this->getValue($cdc, 'planning_implementation'));
+
+            $table->addRow();
+            $table->addCell(4000, ['vMerge' => 'continue']);
+            $table->addCell(4000)->addText('Tests:');
+            $table->addCell(4500, ['gridSpan' => 3])->addText($this->getValue($cdc, 'planning_tests'));
+
+            $table->addRow();
+            $table->addCell(4000, ['vMerge' => 'continue']);
+            $table->addCell(4000)->addText('Documentations:');
+            $table->addCell(4500, ['gridSpan' => 3])->addText($this->getValue($cdc, 'planning_documentation'));
+        }
+
         $this->section->addTextBreak(1);
     }
 
@@ -202,7 +224,7 @@ class CdcGenerator
             'Le candidat est entièrement responsable de la sécurité de ses données.',
             'En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.',
             'Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.',
-            'A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires. Cette dernière doit être en tout point identique à la version électronique.'
+            'A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.'
         ];
 
         foreach ($points as $point) {
@@ -268,30 +290,114 @@ class CdcGenerator
         $descriptif = $this->getValue($cdc, 'descriptif_projet', '');
 
         if (!empty($descriptif)) {
-            $paragraphs = explode("\n\n", $descriptif);
-
-            foreach ($paragraphs as $paragraph) {
-                $paragraph = trim($paragraph);
-
-                if (empty($paragraph)) continue;
-
-                if (preg_match('/^[\-\*]\s/', $paragraph)) {
-                    $lines = explode("\n", $paragraph);
-                    foreach ($lines as $line) {
-                        $line = trim($line);
-                        if (preg_match('/^[\-\*]\s(.+)$/', $line, $matches)) {
-                            $this->section->addListItem(trim($matches[1]), 0, ['size' => 11]);
-                        }
-                    }
-                } else {
-                    $this->section->addText($paragraph, ['size' => 11], ['spaceAfter' => 120]);
-                }
-            }
+            $this->parseMarkdown($descriptif);
         } else {
             $this->section->addText('Description du projet à définir.');
         }
 
         $this->section->addTextBreak(1);
+    }
+
+    /**
+     * Parse simple Markdown et ajoute au document Word
+     */
+    private function parseMarkdown(string $text): void
+    {
+        $lines = explode("\n", $text);
+        $inList = false;
+        $listLevel = 0;
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if (empty($line)) {
+                if ($inList) {
+                    $inList = false;
+                    $listLevel = 0;
+                }
+                $this->section->addTextBreak();
+                continue;
+            }
+
+            if (preg_match('/^(#{1,3})\s+(.+)$/', $line, $matches)) {
+                if ($inList) {
+                    $inList = false;
+                    $listLevel = 0;
+                }
+                $level = strlen($matches[1]);
+                $text = $matches[2];
+                $this->section->addText($text, ['bold' => true, 'size' => 13 - $level]);
+                continue;
+            }
+
+            if (preg_match('/^(\s*)([-*])\s+(.+)$/', $line, $matches)) {
+                $indent = strlen($matches[1]);
+                $text = $matches[3];
+                $level = intdiv($indent, 2);
+
+                $text = $this->removeInlineMarkdown($text);
+
+                $this->section->addListItem(
+                    $text,
+                    $level,
+                    ['size' => 11],
+                    ['indentation' => ['left' => 360 + ($level * 360)]]
+                );
+                $inList = true;
+                $listLevel = $level;
+                continue;
+            }
+
+            if (preg_match('/^(\s*)(\d+)\.\s+(.+)$/', $line, $matches)) {
+                $indent = strlen($matches[1]);
+                $text = $matches[3];
+                $level = intdiv($indent, 2);
+
+                $text = $this->removeInlineMarkdown($text);
+
+                $this->section->addListItem(
+                    $text,
+                    $level,
+                    ['size' => 11],
+                    [
+                        'indentation' => ['left' => 360 + ($level * 360)],
+                        'numStyle' => 'decimal'
+                    ]
+                );
+                $inList = true;
+                continue;
+            }
+
+            if ($inList) {
+                $inList = false;
+                $listLevel = 0;
+            }
+
+            $this->addTextWithInlineFormatting($line);
+        }
+    }
+
+    /**
+     * Ajoute du texte avec formatage inline (**gras**, *italique*)
+     */
+    private function addTextWithInlineFormatting(string $text): void
+    {
+        $text = $this->removeInlineMarkdown($text);
+        $this->section->addText($text, ['size' => 11], ['spaceAfter' => 120]);
+    }
+
+    /**
+     * Retire le markdown inline pour le texte simple
+     */
+    private function removeInlineMarkdown(string $text): string
+    {
+        // **gras** → gras
+        $text = preg_replace('/\*\*(.+?)\*\*/', '$1', $text);
+        // *italique* → italique
+        $text = preg_replace('/\*(.+?)\*/', '$1', $text);
+        // `code` → code
+        $text = preg_replace('/`(.+?)`/', '$1', $text);
+        return $text;
     }
 
     private function addSection7Livrables(Cdc $cdc): void

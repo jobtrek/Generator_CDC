@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Form;
-use App\Models\FormField;
+use App\Models\Field;
 use App\Models\FieldType;
 use App\Models\Cdc;
 use Illuminate\Http\Request;
@@ -45,13 +45,9 @@ class FormController extends Controller
         return view('forms.index', compact('forms'));
     }
 
-    /**
-     * ✅ Affiche le formulaire de création avec support de duplication
-     */
     public function create()
     {
         $fieldTypes = FieldType::all();
-
         $duplicateData = session('duplicate_form', []);
         $prefilledFields = $duplicateData['fields'] ?? [];
 
@@ -65,21 +61,57 @@ class FormController extends Controller
             'description' => 'nullable|string',
             'is_active' => 'boolean',
 
-            'title' => 'required|string|max:255',
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
             'lieu_travail' => 'required|string|max:255',
+            'orientation' => 'nullable|string',
+
+            'chef_projet_nom' => 'required|string|max:255',
+            'chef_projet_prenom' => 'required|string|max:255',
+            'chef_projet_email' => 'required|email',
+            'chef_projet_telephone' => 'required|string',
+
+            'expert1_nom' => 'required|string|max:255',
+            'expert1_prenom' => 'required|string|max:255',
+            'expert1_email' => 'required|email',
+            'expert1_telephone' => 'required|string',
+
+            'expert2_nom' => 'required|string|max:255',
+            'expert2_prenom' => 'required|string|max:255',
+            'expert2_email' => 'required|email',
+            'expert2_telephone' => 'required|string',
+
             'periode_realisation' => 'required|string|max:255',
             'horaire_travail' => 'required|string|max:255',
             'nombre_heures' => 'required|string|max:255',
 
-            'fields' => 'required|array|min:1',
-            'fields.*.name' => 'required|string|max:255',
-            'fields.*.label' => 'required|string|max:255',
-            'fields.*.field_type_id' => 'required|exists:field_types,id',
-            'fields.*.placeholder' => 'nullable|string',
-            'fields.*.is_required' => 'boolean',
-            'fields.*.options' => 'nullable|array',
+            'planning_analyse' => 'nullable|string',
+            'planning_implementation' => 'nullable|string',
+            'planning_tests' => 'nullable|string',
+            'planning_documentation' => 'nullable|string',
+
+            'titre_projet' => 'required|string',
+
+            'materiel_logiciel' => 'nullable|string',
+
+            'prerequis' => 'nullable|string',
+
+            'descriptif_projet' => 'required|string',
+
+            'livrables' => 'nullable|string',
+
+            'point_technique_1' => 'nullable|string',
+            'point_technique_2' => 'nullable|string',
+            'point_technique_3' => 'nullable|string',
+            'point_technique_4' => 'nullable|string',
+            'point_technique_5' => 'nullable|string',
+            'point_technique_6' => 'nullable|string',
+            'point_technique_7' => 'nullable|string',
+
+            'fields' => 'nullable|array',
+            'fields.*.name' => 'required_with:fields|string|max:255',
+            'fields.*.label' => 'required_with:fields|string|max:255',
+            'fields.*.field_type_id' => 'required_with:fields|exists:field_types,id',
             'fields.*.value' => 'nullable|string',
         ]);
 
@@ -97,29 +129,72 @@ class FormController extends Controller
                 'candidat_nom' => $validated['candidat_nom'],
                 'candidat_prenom' => $validated['candidat_prenom'],
                 'lieu_travail' => $validated['lieu_travail'],
+                'orientation' => $validated['orientation'] ?? null,
+
+                'chef_projet_nom' => $validated['chef_projet_nom'],
+                'chef_projet_prenom' => $validated['chef_projet_prenom'],
+                'chef_projet_email' => $validated['chef_projet_email'],
+                'chef_projet_telephone' => $validated['chef_projet_telephone'],
+
+                'expert1_nom' => $validated['expert1_nom'],
+                'expert1_prenom' => $validated['expert1_prenom'],
+                'expert1_email' => $validated['expert1_email'],
+                'expert1_telephone' => $validated['expert1_telephone'],
+
+                'expert2_nom' => $validated['expert2_nom'],
+                'expert2_prenom' => $validated['expert2_prenom'],
+                'expert2_email' => $validated['expert2_email'],
+                'expert2_telephone' => $validated['expert2_telephone'],
+
                 'periode_realisation' => $validated['periode_realisation'],
                 'horaire_travail' => $validated['horaire_travail'],
                 'nombre_heures' => $validated['nombre_heures'],
+
+                'planning_analyse' => $validated['planning_analyse'] ?? '',
+                'planning_implementation' => $validated['planning_implementation'] ?? '',
+                'planning_tests' => $validated['planning_tests'] ?? '',
+                'planning_documentation' => $validated['planning_documentation'] ?? '',
+
+                'titre_projet' => $validated['titre_projet'],
+
+                'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',
+
+                'prerequis' => $validated['prerequis'] ?? '',
+
+                'descriptif_projet' => $validated['descriptif_projet'],
+
+                'livrables' => $validated['livrables'] ?? '',
+
+                'point_technique_1' => $validated['point_technique_1'] ?? '',
+                'point_technique_2' => $validated['point_technique_2'] ?? '',
+                'point_technique_3' => $validated['point_technique_3'] ?? '',
+                'point_technique_4' => $validated['point_technique_4'] ?? '',
+                'point_technique_5' => $validated['point_technique_5'] ?? '',
+                'point_technique_6' => $validated['point_technique_6'] ?? '',
+                'point_technique_7' => $validated['point_technique_7'] ?? '',
+
             ];
 
-            foreach ($validated['fields'] as $index => $fieldData) {
-                $field = $form->fields()->create([
-                    'name' => $fieldData['name'],
-                    'label' => $fieldData['label'],
-                    'field_type_id' => $fieldData['field_type_id'],
-                    'placeholder' => $fieldData['placeholder'] ?? null,
-                    'is_required' => $fieldData['is_required'] ?? false,
-                    'options' => $fieldData['options'] ?? null,
-                    'order_index' => $index,
-                ]);
+            if (isset($validated['fields'])) {
+                foreach ($validated['fields'] as $index => $fieldData) {
+                    $field = $form->fields()->create([
+                        'name' => $fieldData['name'],
+                        'label' => $fieldData['label'],
+                        'field_type_id' => $fieldData['field_type_id'],
+                        'placeholder' => null,
+                        'is_required' => false,
+                        'options' => null,
+                        'order_index' => $index,
+                    ]);
 
-                if (isset($fieldData['value']) && !empty($fieldData['value'])) {
-                    $cdcData[$fieldData['name']] = $fieldData['value'];
+                    if (isset($fieldData['value']) && !empty($fieldData['value'])) {
+                        $cdcData[$fieldData['name']] = $fieldData['value'];
+                    }
                 }
             }
 
             $cdc = Cdc::create([
-                'title' => $validated['title'],
+                'title' => $validated['titre_projet'],
                 'data' => $cdcData,
                 'form_id' => $form->id,
                 'user_id' => Auth::id(),
@@ -170,11 +245,11 @@ class FormController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
-            'fields' => 'required|array|min:1',
-            'fields.*.id' => 'nullable|exists:form_fields,id',
-            'fields.*.name' => 'required|string|max:255',
-            'fields.*.label' => 'required|string|max:255',
-            'fields.*.field_type_id' => 'required|exists:field_types,id',
+            'fields' => 'nullable|array',
+            'fields.*.id' => 'nullable|exists:fields,id',
+            'fields.*.name' => 'required_with:fields|string|max:255',
+            'fields.*.label' => 'required_with:fields|string|max:255',
+            'fields.*.field_type_id' => 'required_with:fields|exists:field_types,id',
             'fields.*.placeholder' => 'nullable|string',
             'fields.*.is_required' => 'boolean',
             'fields.*.options' => 'nullable|array',
@@ -189,13 +264,26 @@ class FormController extends Controller
                 'is_active' => $request->has('is_active'),
             ]);
 
-            $existingFieldIds = [];
+            if (isset($validated['fields'])) {
+                $existingFieldIds = [];
 
-            foreach ($validated['fields'] as $index => $fieldData) {
-                if (isset($fieldData['id']) && $fieldData['id']) {
-                    $field = FormField::find($fieldData['id']);
-                    if ($field && $field->form_id === $form->id) {
-                        $field->update([
+                foreach ($validated['fields'] as $index => $fieldData) {
+                    if (isset($fieldData['id']) && $fieldData['id']) {
+                        $field = Field::find($fieldData['id']);
+                        if ($field && $field->form_id === $form->id) {
+                            $field->update([
+                                'name' => $fieldData['name'],
+                                'label' => $fieldData['label'],
+                                'field_type_id' => $fieldData['field_type_id'],
+                                'placeholder' => $fieldData['placeholder'] ?? null,
+                                'is_required' => $fieldData['is_required'] ?? false,
+                                'options' => $fieldData['options'] ?? null,
+                                'order_index' => $index,
+                            ]);
+                            $existingFieldIds[] = $field->id;
+                        }
+                    } else {
+                        $field = $form->fields()->create([
                             'name' => $fieldData['name'],
                             'label' => $fieldData['label'],
                             'field_type_id' => $fieldData['field_type_id'],
@@ -206,21 +294,10 @@ class FormController extends Controller
                         ]);
                         $existingFieldIds[] = $field->id;
                     }
-                } else {
-                    $field = $form->fields()->create([
-                        'name' => $fieldData['name'],
-                        'label' => $fieldData['label'],
-                        'field_type_id' => $fieldData['field_type_id'],
-                        'placeholder' => $fieldData['placeholder'] ?? null,
-                        'is_required' => $fieldData['is_required'] ?? false,
-                        'options' => $fieldData['options'] ?? null,
-                        'order_index' => $index,
-                    ]);
-                    $existingFieldIds[] = $field->id;
                 }
-            }
 
-            $form->fields()->whereNotIn('id', $existingFieldIds)->delete();
+                $form->fields()->whereNotIn('id', $existingFieldIds)->delete();
+            }
 
             DB::commit();
 
