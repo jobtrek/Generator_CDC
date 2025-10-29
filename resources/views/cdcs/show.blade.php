@@ -226,20 +226,6 @@
                     </div>
                 </div>
             @endif
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4 text-indigo-700 border-b pb-2">
-                        8. POINTS TECHNIQUES ÉVALUÉS
-                    </h3>
-                    <ol class="list-decimal list-inside space-y-2 text-gray-700">
-                        @for($i = 1; $i <= 7; $i++)
-                            <li>{{ $cdc->data['point_technique_' . $i] ?? '(à compléter par le chef de projet)' }}</li>
-                        @endfor
-                    </ol>
-                </div>
-            </div>
-
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold mb-4 text-indigo-700 border-b pb-2">

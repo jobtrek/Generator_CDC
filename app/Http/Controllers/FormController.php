@@ -91,22 +91,10 @@ class FormController extends Controller
             'planning_documentation' => 'nullable|string',
 
             'titre_projet' => 'required|string',
-
             'materiel_logiciel' => 'nullable|string',
-
             'prerequis' => 'nullable|string',
-
             'descriptif_projet' => 'required|string',
-
             'livrables' => 'nullable|string',
-
-            'point_technique_1' => 'nullable|string',
-            'point_technique_2' => 'nullable|string',
-            'point_technique_3' => 'nullable|string',
-            'point_technique_4' => 'nullable|string',
-            'point_technique_5' => 'nullable|string',
-            'point_technique_6' => 'nullable|string',
-            'point_technique_7' => 'nullable|string',
 
             'fields' => 'nullable|array',
             'fields.*.name' => 'required_with:fields|string|max:255',
@@ -124,6 +112,61 @@ class FormController extends Controller
                 'is_active' => $request->has('is_active'),
                 'user_id' => Auth::id(),
             ]);
+
+            $fixedFieldsStructure = [
+                ['name' => 'candidat_nom', 'label' => 'Nom du candidat', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'candidat_prenom', 'label' => 'Prénom du candidat', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'lieu_travail', 'label' => 'Lieu de travail', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'orientation', 'label' => 'Orientation', 'section' => 'section_1', 'field_type_id' => 1],
+
+                ['name' => 'chef_projet_nom', 'label' => 'Chef de projet - Nom', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'chef_projet_prenom', 'label' => 'Chef de projet - Prénom', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'chef_projet_email', 'label' => 'Chef de projet - Email', 'section' => 'section_1', 'field_type_id' => 3],
+                ['name' => 'chef_projet_telephone', 'label' => 'Chef de projet - Téléphone', 'section' => 'section_1', 'field_type_id' => 6],
+
+                ['name' => 'expert1_nom', 'label' => 'Expert 1 - Nom', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'expert1_prenom', 'label' => 'Expert 1 - Prénom', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'expert1_email', 'label' => 'Expert 1 - Email', 'section' => 'section_1', 'field_type_id' => 3],
+                ['name' => 'expert1_telephone', 'label' => 'Expert 1 - Téléphone', 'section' => 'section_1', 'field_type_id' => 6],
+
+                ['name' => 'expert2_nom', 'label' => 'Expert 2 - Nom', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'expert2_prenom', 'label' => 'Expert 2 - Prénom', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'expert2_email', 'label' => 'Expert 2 - Email', 'section' => 'section_1', 'field_type_id' => 3],
+                ['name' => 'expert2_telephone', 'label' => 'Expert 2 - Téléphone', 'section' => 'section_1', 'field_type_id' => 6],
+
+                ['name' => 'periode_realisation', 'label' => 'Période de réalisation', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'horaire_travail', 'label' => 'Horaire de travail', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'nombre_heures', 'label' => 'Nombre d\'heures', 'section' => 'section_1', 'field_type_id' => 1],
+
+                ['name' => 'planning_analyse', 'label' => 'Planning - Analyse', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'planning_implementation', 'label' => 'Planning - Implémentation', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'planning_tests', 'label' => 'Planning - Tests', 'section' => 'section_1', 'field_type_id' => 1],
+                ['name' => 'planning_documentation', 'label' => 'Planning - Documentation', 'section' => 'section_1', 'field_type_id' => 1],
+
+                ['name' => 'titre_projet', 'label' => 'Titre du projet', 'section' => 'section_3', 'field_type_id' => 1],
+
+                ['name' => 'materiel_logiciel', 'label' => 'Matériel et logiciel', 'section' => 'section_4', 'field_type_id' => 2],
+
+                ['name' => 'prerequis', 'label' => 'Prérequis', 'section' => 'section_5', 'field_type_id' => 2],
+
+                ['name' => 'descriptif_projet', 'label' => 'Descriptif du projet', 'section' => 'section_6', 'field_type_id' => 2],
+
+                ['name' => 'livrables', 'label' => 'Livrables', 'section' => 'section_7', 'field_type_id' => 2],
+            ];
+
+            $orderIndex = 0;
+            foreach ($fixedFieldsStructure as $fieldStructure) {
+                $form->fields()->create([
+                    'name' => $fieldStructure['name'],
+                    'label' => $fieldStructure['label'],
+                    'field_type_id' => $fieldStructure['field_type_id'],
+                    'section' => $fieldStructure['section'],
+                    'placeholder' => null,
+                    'is_required' => true,
+                    'options' => null,
+                    'order_index' => $orderIndex++,
+                ]);
+            }
 
             $cdcData = [
                 'candidat_nom' => $validated['candidat_nom'],
@@ -156,27 +199,14 @@ class FormController extends Controller
                 'planning_documentation' => $validated['planning_documentation'] ?? '',
 
                 'titre_projet' => $validated['titre_projet'],
-
                 'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',
-
                 'prerequis' => $validated['prerequis'] ?? '',
-
                 'descriptif_projet' => $validated['descriptif_projet'],
-
                 'livrables' => $validated['livrables'] ?? '',
-
-                'point_technique_1' => $validated['point_technique_1'] ?? '',
-                'point_technique_2' => $validated['point_technique_2'] ?? '',
-                'point_technique_3' => $validated['point_technique_3'] ?? '',
-                'point_technique_4' => $validated['point_technique_4'] ?? '',
-                'point_technique_5' => $validated['point_technique_5'] ?? '',
-                'point_technique_6' => $validated['point_technique_6'] ?? '',
-                'point_technique_7' => $validated['point_technique_7'] ?? '',
-
             ];
 
-            if (isset($validated['fields'])) {
-                foreach ($validated['fields'] as $index => $fieldData) {
+            if (isset($validated['fields']) && count($validated['fields']) > 0) {
+                foreach ($validated['fields'] as $fieldData) {
                     $field = $form->fields()->create([
                         'name' => $fieldData['name'],
                         'label' => $fieldData['label'],
@@ -184,7 +214,8 @@ class FormController extends Controller
                         'placeholder' => null,
                         'is_required' => false,
                         'options' => null,
-                        'order_index' => $index,
+                        'section' => 'custom',
+                        'order_index' => $orderIndex++,
                     ]);
 
                     if (isset($fieldData['value']) && !empty($fieldData['value'])) {

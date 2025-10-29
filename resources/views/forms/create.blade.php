@@ -362,28 +362,6 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('livrables') }}</textarea>
                     </div>
                 </div>
-
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">8. POINTS TECHNIQUES ÉVALUÉS</h3>
-                    </div>
-                    <div class="p-6 space-y-3">
-                        <p class="text-sm text-gray-600 mb-4">
-                            Définissez les 7 points techniques spécifiques qui seront évalués (Points A14 à A20)
-                        </p>
-                        @for($i = 1; $i <= 7; $i++)
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Point technique {{ $i }}
-                                </label>
-                                <input type="text" name="point_technique_{{ $i }}"
-                                       placeholder="Ex: Communication avec le lecteur code-barres"
-                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-                        @endfor
-                    </div>
-                </div>
-
                 <div class="bg-white shadow-sm rounded-lg" x-show="fields.length > 0">
                     <div class="p-6 border-b border-gray-200 bg-gray-50">
                         <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
