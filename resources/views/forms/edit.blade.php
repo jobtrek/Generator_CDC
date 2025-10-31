@@ -49,6 +49,7 @@
                 @csrf
                 @method('PUT')
 
+                <!-- Informations du formulaire -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
@@ -87,6 +88,7 @@
                     </div>
                 </div>
 
+                <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">
@@ -101,6 +103,7 @@
                                 </label>
                                 <input type="text" name="candidat_nom" required
                                        value="{{ $getValue('candidat_nom') }}"
+                                       placeholder="Dupont"
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
@@ -109,6 +112,7 @@
                                 </label>
                                 <input type="text" name="candidat_prenom" required
                                        value="{{ $getValue('candidat_prenom') }}"
+                                       placeholder="Jean"
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
@@ -132,32 +136,33 @@
                                     $currentOrientation = $getValue('orientation');
                                 @endphp
                                 <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88601"
-                                           {{ $currentOrientation == '88601' ? 'checked' : '' }}
+                                    <input type="radio" name="orientation" value="88601 Développement d'applications"
+                                           {{ $currentOrientation == '88601 Développement d\'applications' ? 'checked' : '' }}
                                            class="text-indigo-600">
                                     <span class="ml-2 text-sm">88601 Développement d'applications</span>
                                 </label>
                                 <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88602"
-                                           {{ $currentOrientation == '88602' ? 'checked' : '' }}
+                                    <input type="radio" name="orientation" value="88602 Informatique d'entreprise"
+                                           {{ $currentOrientation == '88602 Informatique d\'entreprise' ? 'checked' : '' }}
                                            class="text-indigo-600">
                                     <span class="ml-2 text-sm">88602 Informatique d'entreprise</span>
                                 </label>
                                 <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88603"
-                                           {{ $currentOrientation == '88603' ? 'checked' : '' }}
+                                    <input type="radio" name="orientation" value="88603 Technique des systèmes"
+                                           {{ $currentOrientation == '88603 Technique des systèmes' ? 'checked' : '' }}
                                            class="text-indigo-600">
                                     <span class="ml-2 text-sm">88603 Technique des systèmes</span>
                                 </label>
                                 <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88614"
-                                           {{ $currentOrientation == '88614' ? 'checked' : '' }}
+                                    <input type="radio" name="orientation" value="88614 Informaticienne d'entreprise CFC"
+                                           {{ $currentOrientation == '88614 Informaticienne d\'entreprise CFC' ? 'checked' : '' }}
                                            class="text-indigo-600">
                                     <span class="ml-2 text-sm">88614 Informaticienne d'entreprise CFC</span>
                                 </label>
                             </div>
                         </div>
 
+                        <!-- Chef de projet -->
                         <div class="border-t pt-4 mt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,29 +170,36 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
                                     <input type="text" name="chef_projet_nom" required
                                            value="{{ $getValue('chef_projet_nom') }}"
+                                           placeholder="Martin"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
                                     <input type="text" name="chef_projet_prenom" required
                                            value="{{ $getValue('chef_projet_prenom') }}"
+                                           placeholder="Sophie"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                     <input type="email" name="chef_projet_email" required
                                            value="{{ $getValue('chef_projet_email') }}"
+                                           placeholder="sophie.martin@example.com"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="chef_projet_telephone" required
-                                           value="{{ $getValue('chef_projet_telephone') }}"
+                                           value="{{ old('chef_projet_telephone', $getValue('chef_projet_telephone', '+41 ')) }}"
+                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           placeholder="+41 21 123 45 67"
+                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Expert 1 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 1</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,29 +207,36 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
                                     <input type="text" name="expert1_nom" required
                                            value="{{ $getValue('expert1_nom') }}"
+                                           placeholder="Durand"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
                                     <input type="text" name="expert1_prenom" required
                                            value="{{ $getValue('expert1_prenom') }}"
+                                           placeholder="Pierre"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                     <input type="email" name="expert1_email" required
                                            value="{{ $getValue('expert1_email') }}"
+                                           placeholder="pierre.durand@example.com"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert1_telephone" required
-                                           value="{{ $getValue('expert1_telephone') }}"
+                                           value="{{ old('expert1_telephone', $getValue('expert1_telephone', '+41 ')) }}"
+                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           placeholder="+41 21 123 45 67"
+                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Expert 2 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -225,29 +244,36 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
                                     <input type="text" name="expert2_nom" required
                                            value="{{ $getValue('expert2_nom') }}"
+                                           placeholder="Blanc"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
                                     <input type="text" name="expert2_prenom" required
                                            value="{{ $getValue('expert2_prenom') }}"
+                                           placeholder="Marie"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                     <input type="email" name="expert2_email" required
                                            value="{{ $getValue('expert2_email') }}"
+                                           placeholder="marie.blanc@example.com"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert2_telephone" required
-                                           value="{{ $getValue('expert2_telephone') }}"
+                                           value="{{ old('expert2_telephone', $getValue('expert2_telephone', '+41 ')) }}"
+                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           placeholder="+41 21 123 45 67"
+                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
                         </div>
 
+                        <!-- Période, horaire, heures -->
                         <div class="border-t pt-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -280,6 +306,7 @@
                             </div>
                         </div>
 
+                        <!-- Planning -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Planning (en H ou %)</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -316,6 +343,7 @@
                     </div>
                 </div>
 
+                <!-- Section 3: TITRE -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
@@ -331,6 +359,7 @@
                     </div>
                 </div>
 
+                <!-- Section 4: MATÉRIEL ET LOGICIEL -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
@@ -346,6 +375,7 @@
                     </div>
                 </div>
 
+                <!-- Section 5: PRÉREQUIS -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
@@ -360,6 +390,7 @@
                     </div>
                 </div>
 
+                <!-- Section 6: DESCRIPTIF DU PROJET -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
@@ -379,6 +410,7 @@
                             </ul>
                         </div>
                         <textarea name="descriptif_projet" rows="12" required
+                                  placeholder="Le projet consiste à réaliser une application clé en main..."
                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ $getValue('descriptif_projet') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Utilisez le formatage Markdown pour structurer votre texte</p>
                     </div>
@@ -399,6 +431,7 @@
                     </div>
                 </div>
 
+                <!-- Champs personnalisés existants -->
                 @php
                     $customFields = $form->fields->where('section', 'custom');
                 @endphp
@@ -410,7 +443,7 @@
                         </div>
                         <div class="p-6 space-y-4">
                             @foreach($customFields as $index => $field)
-                                <div class="border rounded-lg p-4 bg-gray-50 relative">
+                                <div class="border rounded-lg p-4 bg-gray-50 relative" id="field-{{ $field->id }}">
                                     <button type="button" @click="removeCustomField({{ $field->id }})"
                                             class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,19 +453,23 @@
 
                                     <div class="grid grid-cols-2 gap-4 pr-12">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
                                             <input type="text" name="fields[{{ $index }}][name]" value="{{ $field->name }}" required
+                                                   placeholder="nom_du_champ"
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                             <input type="hidden" name="fields[{{ $index }}][id]" value="{{ $field->id }}">
+                                            <input type="hidden" name="fields[{{ $index }}][field_type_id]" value="{{ $field->field_type_id }}">
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
                                             <input type="text" name="fields[{{ $index }}][label]" value="{{ $field->label }}" required
+                                                   placeholder="Libellé du champ"
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
                                             <textarea name="fields[{{ $index }}][value]" rows="3"
+                                                      placeholder="Contenu du champ personnalisé"
                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ $getValue($field->name) }}</textarea>
                                         </div>
                                     </div>
@@ -442,6 +479,7 @@
                     </div>
                 @endif
 
+                <!-- Nouveaux champs personnalisés -->
                 <div class="bg-white shadow-sm rounded-lg" x-data="{ newFields: [] }">
                     <div class="p-6">
                         <button type="button" @click="newFields.push({ tempId: Date.now(), name: '', label: '', value: '' })"
@@ -460,18 +498,21 @@
                                     </button>
                                     <div class="grid grid-cols-2 gap-4 pr-12">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
                                             <input type="text" :name="'new_fields[' + index + '][name]'" x-model="field.name" required
+                                                   placeholder="nom_du_champ"
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
                                             <input type="text" :name="'new_fields[' + index + '][label]'" x-model="field.label" required
+                                                   placeholder="Libellé du champ"
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                         <div class="col-span-2">
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
                                             <textarea :name="'new_fields[' + index + '][value]'" x-model="field.value" rows="3"
+                                                      placeholder="Contenu du champ personnalisé"
                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
                                         </div>
                                         <input type="hidden" :name="'new_fields[' + index + '][field_type_id]'" value="1">
@@ -482,6 +523,7 @@
                     </div>
                 </div>
 
+                <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.show', $form) }}"
                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
@@ -501,13 +543,18 @@
             return {
                 removeCustomField(fieldId) {
                     if (confirm('Êtes-vous sûr de vouloir supprimer ce champ ?')) {
+                        // Créer un input hidden pour marquer le champ comme supprimé
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = 'deleted_fields[]';
                         input.value = fieldId;
                         document.querySelector('form').appendChild(input);
 
-                        event.target.closest('.border').style.display = 'none';
+                        // Cacher visuellement le champ
+                        const fieldElement = document.getElementById('field-' + fieldId);
+                        if (fieldElement) {
+                            fieldElement.style.display = 'none';
+                        }
                     }
                 }
             };
