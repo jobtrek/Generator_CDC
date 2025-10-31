@@ -113,7 +113,6 @@ class CdcGenerator
 
         $table = $this->section->addTable($tableStyle);
 
-        // Candidat
         $table->addRow();
         $table->addCell(2500)->addText('Candidat:', ['bold' => true]);
         $table->addCell(3500)->addText('Nom:');
@@ -124,19 +123,16 @@ class CdcGenerator
         $table->addRow();
         $table->addCell(12500, ['gridSpan' => 5])->addText('');
 
-        // Lieu de travail
         $table->addRow();
         $table->addCell(3000)->addText('Lieu de travail:', ['bold' => true]);
         $table->addCell(9500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'lieu_travail'));
 
-        // Orientation
         if ($orientation = $this->getValue($cdc, 'orientation')) {
             $table->addRow();
             $table->addCell(3000)->addText('Orientation:', ['bold' => true]);
             $table->addCell(9500, ['gridSpan' => 4])->addText($orientation);
         }
 
-        // Chef de projet
         $table->addRow();
         $table->addCell(2500)->addText('Chef de projet:', ['bold' => true]);
         $table->addCell(3500)->addText('Nom:');
@@ -151,7 +147,6 @@ class CdcGenerator
         $table->addCell(1500)->addText('☎:');
         $table->addCell(2000)->addText($this->getValue($cdc, 'chef_projet_telephone'));
 
-        // Expert 1
         $table->addRow();
         $table->addCell(2500)->addText('Expert 1:', ['bold' => true]);
         $table->addCell(3500)->addText('Nom:');
@@ -166,7 +161,6 @@ class CdcGenerator
         $table->addCell(1500)->addText('☎:');
         $table->addCell(2000)->addText($this->getValue($cdc, 'expert1_telephone'));
 
-        // Expert 2
         $table->addRow();
         $table->addCell(2500)->addText('Expert 2:', ['bold' => true]);
         $table->addCell(3500)->addText('Nom:');
@@ -181,7 +175,6 @@ class CdcGenerator
         $table->addCell(1500)->addText('☎:');
         $table->addCell(2000)->addText($this->getValue($cdc, 'expert2_telephone'));
 
-        // Période, horaire, heures
         $table->addRow();
         $table->addCell(4000)->addText('Période de réalisation :', ['bold' => true]);
         $table->addCell(8500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'periode_realisation'));
@@ -194,7 +187,6 @@ class CdcGenerator
         $table->addCell(4000)->addText('Nombre d\'heures :', ['bold' => true]);
         $table->addCell(8500, ['gridSpan' => 4])->addText($this->getValue($cdc, 'nombre_heures'));
 
-        // Planning (optionnel)
         if ($this->getValue($cdc, 'planning_analyse') || $this->getValue($cdc, 'planning_implementation')) {
             $table->addRow();
             $table->addCell(4000, ['gridSpan' => 1, 'vMerge' => 'restart'])->addText('Planning (en H ou %):', ['bold' => true]);
@@ -224,7 +216,6 @@ class CdcGenerator
     {
         $this->section->addTitle('2 PROCÉDURE', 1);
 
-        // Texte automatique fixe
         $points = [
             'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.',
             'Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.',
@@ -324,7 +315,6 @@ class CdcGenerator
                 continue;
             }
 
-            // Titres (## Titre)
             if (preg_match('/^(#{1,3})\s+(.+)$/', $line, $matches)) {
                 if ($inList) {
                     $inList = false;
@@ -336,7 +326,6 @@ class CdcGenerator
                 continue;
             }
 
-            // Listes à puces (- item ou * item)
             if (preg_match('/^(\s*)([-*])\s+(.+)$/', $line, $matches)) {
                 $indent = strlen($matches[1]);
                 $text = $matches[3];
@@ -355,7 +344,6 @@ class CdcGenerator
                 continue;
             }
 
-            // Listes numérotées (1. item)
             if (preg_match('/^(\s*)(\d+)\.\s+(.+)$/', $line, $matches)) {
                 $indent = strlen($matches[1]);
                 $text = $matches[3];
@@ -376,7 +364,6 @@ class CdcGenerator
                 continue;
             }
 
-            // Texte normal
             if ($inList) {
                 $inList = false;
                 $listLevel = 0;
@@ -432,9 +419,6 @@ class CdcGenerator
         $this->section->addTextBreak(1);
     }
 
-    // ❌ SUPPRIMÉ: addSection8PointsTechniques()
-
-    // ✅ RENOMMÉ: Section 9 → Section 8 (VALIDATION)
     private function addSection8Validation(Cdc $cdc): void
     {
         $this->section->addTitle('8 VALIDATION', 1);

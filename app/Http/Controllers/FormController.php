@@ -276,14 +276,56 @@ class FormController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+
+            'candidat_nom' => 'required|string|max:255',
+            'candidat_prenom' => 'required|string|max:255',
+            'lieu_travail' => 'required|string|max:255',
+            'orientation' => 'nullable|string',
+
+            'chef_projet_nom' => 'required|string|max:255',
+            'chef_projet_prenom' => 'required|string|max:255',
+            'chef_projet_email' => 'required|email',
+            'chef_projet_telephone' => 'required|string',
+
+            'expert1_nom' => 'required|string|max:255',
+            'expert1_prenom' => 'required|string|max:255',
+            'expert1_email' => 'required|email',
+            'expert1_telephone' => 'required|string',
+
+            'expert2_nom' => 'required|string|max:255',
+            'expert2_prenom' => 'required|string|max:255',
+            'expert2_email' => 'required|email',
+            'expert2_telephone' => 'required|string',
+
+            'periode_realisation' => 'required|string|max:255',
+            'horaire_travail' => 'required|string|max:255',
+            'nombre_heures' => 'required|string|max:255',
+
+            'planning_analyse' => 'nullable|string',
+            'planning_implementation' => 'nullable|string',
+            'planning_tests' => 'nullable|string',
+            'planning_documentation' => 'nullable|string',
+
+            'titre_projet' => 'required|string',
+            'materiel_logiciel' => 'nullable|string',
+            'prerequis' => 'nullable|string',
+            'descriptif_projet' => 'required|string',
+            'livrables' => 'nullable|string',
+
             'fields' => 'nullable|array',
             'fields.*.id' => 'nullable|exists:fields,id',
             'fields.*.name' => 'required_with:fields|string|max:255',
             'fields.*.label' => 'required_with:fields|string|max:255',
-            'fields.*.field_type_id' => 'required_with:fields|exists:field_types,id',
-            'fields.*.placeholder' => 'nullable|string',
-            'fields.*.is_required' => 'boolean',
-            'fields.*.options' => 'nullable|array',
+            'fields.*.value' => 'nullable|string',
+
+            'new_fields' => 'nullable|array',
+            'new_fields.*.name' => 'required_with:new_fields|string|max:255',
+            'new_fields.*.label' => 'required_with:new_fields|string|max:255',
+            'new_fields.*.value' => 'nullable|string',
+            'new_fields.*.field_type_id' => 'required_with:new_fields|exists:field_types,id',
+
+            'deleted_fields' => 'nullable|array',
+            'deleted_fields.*' => 'exists:fields,id',
         ]);
 
         DB::beginTransaction();
@@ -295,45 +337,107 @@ class FormController extends Controller
                 'is_active' => $request->has('is_active'),
             ]);
 
-            if (isset($validated['fields'])) {
-                $existingFieldIds = [];
+            $cdcData = [
+                'candidat_nom' => $validated['candidat_nom'],
+                'candidat_prenom' => $validated['candidat_prenom'],
+                'lieu_travail' => $validated['lieu_travail'],
+                'orientation' => $validated['orientation'] ?? null,
 
-                foreach ($validated['fields'] as $index => $fieldData) {
-                    if (isset($fieldData['id']) && $fieldData['id']) {
+                'chef_projet_nom' => $validated['chef_projet_nom'],
+                'chef_projet_prenom' => $validated['chef_projet_prenom'],
+                'chef_projet_email' => $validated['chef_projet_email'],
+                'chef_projet_telephone' => $validated['chef_projet_telephone'],
+
+                'expert1_nom' => $validated['expert1_nom'],
+                'expert1_prenom' => $validated['expert1_prenom'],
+                'expert1_email' => $validated['expert1_email'],
+                'expert1_telephone' => $validated['expert1_telephone'],
+
+                'expert2_nom' => $validated['expert2_nom'],
+                'expert2_prenom' => $validated['expert2_prenom'],
+                'expert2_email' => $validated['expert2_email'],
+                'expert2_telephone' => $validated['expert2_telephone'],
+
+                'periode_realisation' => $validated['periode_realisation'],
+                'horaire_travail' => $validated['horaire_travail'],
+                'nombre_heures' => $validated['nombre_heures'],
+
+                'planning_analyse' => $validated['planning_analyse'] ?? '',
+                'planning_implementation' => $validated['planning_implementation'] ?? '',
+                'planning_tests' => $validated['planning_tests'] ?? '',
+                'planning_documentation' => $validated['planning_documentation'] ?? '',
+
+                'titre_projet' => $validated['titre_projet'],
+                'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',
+                'prerequis' => $validated['prerequis'] ?? '',
+                'descriptif_projet' => $validated['descriptif_projet'],
+                'livrables' => $validated['livrables'] ?? '',
+            ];
+
+            if (isset($validated['fields'])) {
+                foreach ($validated['fields'] as $fieldData) {
+                    if (isset($fieldData['id'])) {
                         $field = Field::find($fieldData['id']);
                         if ($field && $field->form_id === $form->id) {
                             $field->update([
                                 'name' => $fieldData['name'],
                                 'label' => $fieldData['label'],
-                                'field_type_id' => $fieldData['field_type_id'],
-                                'placeholder' => $fieldData['placeholder'] ?? null,
-                                'is_required' => $fieldData['is_required'] ?? false,
-                                'options' => $fieldData['options'] ?? null,
-                                'order_index' => $index,
                             ]);
-                            $existingFieldIds[] = $field->id;
+
+                            if (isset($fieldData['value']) && !empty($fieldData['value'])) {
+                                $cdcData[$fieldData['name']] = $fieldData['value'];
+                            }
                         }
-                    } else {
-                        $field = $form->fields()->create([
-                            'name' => $fieldData['name'],
-                            'label' => $fieldData['label'],
-                            'field_type_id' => $fieldData['field_type_id'],
-                            'placeholder' => $fieldData['placeholder'] ?? null,
-                            'is_required' => $fieldData['is_required'] ?? false,
-                            'options' => $fieldData['options'] ?? null,
-                            'order_index' => $index,
-                        ]);
-                        $existingFieldIds[] = $field->id;
                     }
                 }
+            }
 
-                $form->fields()->whereNotIn('id', $existingFieldIds)->delete();
+            if (isset($validated['new_fields']) && count($validated['new_fields']) > 0) {
+                $maxOrderIndex = $form->fields()->max('order_index') ?? 0;
+
+                foreach ($validated['new_fields'] as $newFieldData) {
+                    $field = $form->fields()->create([
+                        'name' => $newFieldData['name'],
+                        'label' => $newFieldData['label'],
+                        'field_type_id' => $newFieldData['field_type_id'],
+                        'section' => 'custom',
+                        'placeholder' => null,
+                        'is_required' => false,
+                        'options' => null,
+                        'order_index' => ++$maxOrderIndex,
+                    ]);
+
+                    if (isset($newFieldData['value']) && !empty($newFieldData['value'])) {
+                        $cdcData[$newFieldData['name']] = $newFieldData['value'];
+                    }
+                }
+            }
+
+            if (isset($validated['deleted_fields']) && count($validated['deleted_fields']) > 0) {
+                Field::whereIn('id', $validated['deleted_fields'])
+                    ->where('form_id', $form->id)
+                    ->delete();
+            }
+
+            $cdc = $form->cdcs()->first();
+            if ($cdc) {
+                $cdc->update([
+                    'title' => $validated['titre_projet'],
+                    'data' => $cdcData,
+                ]);
+            } else {
+                Cdc::create([
+                    'title' => $validated['titre_projet'],
+                    'data' => $cdcData,
+                    'form_id' => $form->id,
+                    'user_id' => Auth::id(),
+                ]);
             }
 
             DB::commit();
 
             return redirect()->route('forms.show', $form)
-                ->with('success', 'Formulaire mis à jour avec succès !');
+                ->with('success', 'Formulaire et CDC mis à jour avec succès !');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -341,7 +445,8 @@ class FormController extends Controller
             \Log::error('Erreur mise à jour formulaire', [
                 'form_id' => $form->id,
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->back()

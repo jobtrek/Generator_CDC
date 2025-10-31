@@ -7,403 +7,508 @@
                 </svg>
             </a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Modifier le formulaire
+                Modifier le cahier des charges
             </h2>
         </div>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
-                    @php
-                        $fieldsData = $form->fields->map(function($field) {
-                            return [
-                                'id' => $field->id,
-                                'tempId' => $field->id,
-                                'name' => $field->name,
-                                'label' => $field->label,
-                                'placeholder' => $field->placeholder,
-                                'is_required' => $field->is_required,
-                                'field_type_id' => $field->field_type_id,
-                                'input_type' => $field->fieldType->input_type,
-                                'options' => $field->options ?? [],
-                                'optionsText' => $field->options ? implode("\n", $field->options) : ''
-                            ];
-                        })->values();
-                    @endphp
-
-                    <form method="POST" action="{{ route('forms.update', $form) }}"
-                          x-data="formBuilder(@js($fieldsData))"
-                          @submit.prevent="validateAndSubmit">
-                        @csrf
-                        @method('PUT')
-
-                        <div x-show="showNotification"
-                             x-transition
-                             class="mb-4 p-4 rounded-lg flex items-center"
-                             :class="notificationType === 'error' ? 'bg-red-100 border-l-4 border-red-500 text-red-700' : 'bg-green-100 border-l-4 border-green-500 text-green-700'">
-                            <svg x-show="notificationType === 'error'" class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                            </svg>
-                            <span x-text="notificationMessage"></span>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="text-lg font-medium mb-4 flex items-center">
-                                <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                Informations du formulaire
-                            </h3>
-
-                            <div class="mb-4">
-                                <label for="name" class="block text-sm font-medium text-gray-700">
-                                    Nom du formulaire *
-                                </label>
-                                <input type="text"
-                                       name="name"
-                                       id="name"
-                                       required
-                                       value="{{ old('name', $form->name) }}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('name')
-                                <p class="mt-1 text-sm text-red-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                    </svg>
-                                    {{ $message }}
-                                </p>
-                                @enderror
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="description" class="block text-sm font-medium text-gray-700">
-                                    Description
-                                </label>
-                                <textarea name="description"
-                                          id="description"
-                                          rows="3"
-                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $form->description) }}</textarea>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="flex items-center">
-                                    <input type="checkbox"
-                                           name="is_active"
-                                           value="1"
-                                           {{ old('is_active', $form->is_active) ? 'checked' : '' }}
-                                           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <span class="ml-2 text-sm text-gray-600">Formulaire actif</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <hr class="my-6">
-
-                        <div class="mb-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-medium flex items-center">
-                                    <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                    </svg>
-                                    Champs du formulaire
-                                </h3>
-                            </div>
-
-                            <div class="space-y-4 mb-4">
-                                <template x-for="(field, index) in fields" :key="field.tempId">
-                                    <div class="border rounded-lg p-4 bg-gray-50 relative hover:shadow-md transition">
-                                        <div class="absolute top-2 right-2 flex gap-2">
-                                            <button type="button"
-                                                    @click="moveFieldUp(index)"
-                                                    x-show="index > 0"
-                                                    class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition"
-                                                    title="Déplacer vers le haut">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                                                </svg>
-                                            </button>
-                                            <button type="button"
-                                                    @click="moveFieldDown(index)"
-                                                    x-show="index < fields.length - 1"
-                                                    class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition"
-                                                    title="Déplacer vers le bas">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                                                </svg>
-                                            </button>
-                                            <button type="button"
-                                                    @click="removeField(index)"
-                                                    class="p-2 text-red-600 hover:text-red-900 hover:bg-red-100 rounded transition"
-                                                    title="Supprimer">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-
-                                        <input type="hidden" :name="'fields[' + index + '][id]'" x-model="field.id">
-
-                                        <div class="grid grid-cols-2 gap-4 pr-24">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    Nom du champ *
-                                                </label>
-                                                <input type="text"
-                                                       :name="'fields[' + index + '][name]'"
-                                                       x-model="field.name"
-                                                       required
-                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    Label *
-                                                </label>
-                                                <input type="text"
-                                                       :name="'fields[' + index + '][label]'"
-                                                       x-model="field.label"
-                                                       required
-                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    Type de champ *
-                                                </label>
-                                                <select :name="'fields[' + index + '][field_type_id]'"
-                                                        x-model="field.field_type_id"
-                                                        @change="updateFieldType(index)"
-                                                        required
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                    <option value="">Sélectionner un type</option>
-                                                    @foreach($fieldTypes as $type)
-                                                        <option value="{{ $type->id }}" data-input-type="{{ $type->input_type }}">
-                                                            {{ $type->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-700">
-                                                    Placeholder
-                                                </label>
-                                                <input type="text"
-                                                       :name="'fields[' + index + '][placeholder]'"
-                                                       x-model="field.placeholder"
-                                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-
-                                            <div class="col-span-2">
-                                                <label class="flex items-center">
-                                                    <input type="checkbox"
-                                                           :name="'fields[' + index + '][is_required]'"
-                                                           x-model="field.is_required"
-                                                           value="1"
-                                                           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                                    <span class="ml-2 text-sm text-gray-600">Champ requis</span>
-                                                </label>
-                                            </div>
-
-                                            <div class="col-span-2" x-show="field.input_type === 'select' || field.input_type === 'checkbox'">
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    Options (une par ligne)
-                                                </label>
-                                                <textarea :name="'fields[' + index + '][options_text]'"
-                                                          x-model="field.optionsText"
-                                                          @input="updateOptions(index)"
-                                                          rows="3"
-                                                          placeholder="Option 1&#10;Option 2&#10;Option 3"
-                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
-                                                <input type="hidden"
-                                                       :name="'fields[' + index + '][options]'"
-                                                       :value="JSON.stringify(field.options)">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <div x-show="fields.length === 0" class="text-center py-12 bg-gray-100 rounded-lg">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    <p class="mt-4 text-gray-500">Aucun champ ajouté.</p>
-                                </div>
-                            </div>
-
-                            <button type="button"
-                                    @click="addField"
-                                    class="w-full inline-flex items-center justify-center px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                Ajouter un champ
-                            </button>
-                        </div>
-
-                        <div x-show="showPreview"
-                             x-transition
-                             class="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                            <h3 class="text-lg font-medium mb-4 flex items-center">
-                                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                Prévisualisation
-                            </h3>
-                            <div class="space-y-4 bg-white p-6 rounded-lg shadow">
-                                <template x-for="(field, index) in fields" :key="field.tempId">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                                            <span x-text="field.label"></span>
-                                            <span x-show="field.is_required" class="text-red-500">*</span>
-                                        </label>
-
-                                        <input x-show="field.input_type === 'text' || field.input_type === 'email' || field.input_type === 'number'"
-                                               :type="field.input_type"
-                                               :placeholder="field.placeholder"
-                                               disabled
-                                               class="block w-full rounded-md border-gray-300 shadow-sm text-sm bg-gray-50">
-
-                                        <textarea x-show="field.input_type === 'textarea'"
-                                                  :placeholder="field.placeholder"
-                                                  disabled
-                                                  rows="3"
-                                                  class="block w-full rounded-md border-gray-300 shadow-sm text-sm bg-gray-50"></textarea>
-
-                                        <input x-show="field.input_type === 'date'"
-                                               type="date"
-                                               disabled
-                                               class="block w-full rounded-md border-gray-300 shadow-sm text-sm bg-gray-50">
-
-                                        <select x-show="field.input_type === 'select'"
-                                                disabled
-                                                class="block w-full rounded-md border-gray-300 shadow-sm text-sm bg-gray-50">
-                                            <option>Sélectionner...</option>
-                                            <template x-for="option in field.options">
-                                                <option x-text="option"></option>
-                                            </template>
-                                        </select>
-
-                                        <div x-show="field.input_type === 'checkbox'" class="space-y-2">
-                                            <template x-for="option in field.options">
-                                                <label class="flex items-center">
-                                                    <input type="checkbox" disabled class="rounded border-gray-300 bg-gray-50">
-                                                    <span class="ml-2 text-sm" x-text="option"></span>
-                                                </label>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <div x-show="fields.length === 0" class="text-center text-gray-500 py-8">
-                                    Aucun champ à prévisualiser
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end gap-4 pt-6 border-t">
-                            <a href="{{ route('forms.show', $form) }}"
-                               class="inline-flex items-center px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                                Annuler
-                            </a>
-                            <button type="submit"
-                                    class="inline-flex items-center px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Mettre à jour
-                            </button>
-                        </div>
-                    </form>
-
+            @if(session('success'))
+                <div x-data="{ show: true }" x-show="show" x-transition
+                     class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded">
+                    <div class="flex items-center justify-between">
+                        <span>{{ session('success') }}</span>
+                        <button @click="show = false">✕</button>
+                    </div>
                 </div>
-            </div>
+            @endif
+
+            @if($errors->any())
+                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+                    <p class="font-bold">Erreurs de validation :</p>
+                    <ul class="list-disc list-inside mt-2">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @php
+                $cdc = $form->cdcs()->first();
+                $cdcData = $cdc ? $cdc->data : [];
+
+                $getValue = function($key, $default = '') use ($cdcData) {
+                    return old($key, $cdcData[$key] ?? $default);
+                };
+            @endphp
+
+            <form method="POST" action="{{ route('forms.update', $form) }}" x-data="cdcFormBuilder()" class="space-y-6">
+                @csrf
+                @method('PUT')
+
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Informations du formulaire
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                                Nom du formulaire *
+                            </label>
+                            <input type="text" name="name" id="name" required
+                                   value="{{ old('name', $form->name) }}"
+                                   placeholder="Ex: Cahier des charges TPI 2025"
+                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                                Description
+                            </label>
+                            <textarea name="description" id="description" rows="2"
+                                      placeholder="Description du formulaire..."
+                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $form->description) }}</textarea>
+                        </div>
+
+                        <label class="flex items-center">
+                            <input type="checkbox" name="is_active" value="1"
+                                   {{ old('is_active', $form->is_active) ? 'checked' : '' }}
+                                   class="rounded border-gray-300 text-indigo-600 shadow-sm">
+                            <span class="ml-2 text-sm text-gray-600">Formulaire actif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">
+                            1. INFORMATIONS GÉNÉRALES
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Nom du candidat *
+                                </label>
+                                <input type="text" name="candidat_nom" required
+                                       value="{{ $getValue('candidat_nom') }}"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Prénom du candidat *
+                                </label>
+                                <input type="text" name="candidat_prenom" required
+                                       value="{{ $getValue('candidat_prenom') }}"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Lieu de travail *
+                            </label>
+                            <input type="text" name="lieu_travail" required
+                                   value="{{ $getValue('lieu_travail') }}"
+                                   placeholder="Ex: ETML, Lausanne"
+                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Orientation *
+                            </label>
+                            <div class="space-y-2">
+                                @php
+                                    $currentOrientation = $getValue('orientation');
+                                @endphp
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88601"
+                                           {{ $currentOrientation == '88601' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88601 Développement d'applications</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88602"
+                                           {{ $currentOrientation == '88602' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88602 Informatique d'entreprise</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88603"
+                                           {{ $currentOrientation == '88603' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88603 Technique des systèmes</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88614"
+                                           {{ $currentOrientation == '88614' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88614 Informaticienne d'entreprise CFC</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4 mt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="chef_projet_nom" required
+                                           value="{{ $getValue('chef_projet_nom') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                    <input type="text" name="chef_projet_prenom" required
+                                           value="{{ $getValue('chef_projet_prenom') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="chef_projet_email" required
+                                           value="{{ $getValue('chef_projet_email') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                                    <input type="tel" name="chef_projet_telephone" required
+                                           value="{{ $getValue('chef_projet_telephone') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Expert 1</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="expert1_nom" required
+                                           value="{{ $getValue('expert1_nom') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                    <input type="text" name="expert1_prenom" required
+                                           value="{{ $getValue('expert1_prenom') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="expert1_email" required
+                                           value="{{ $getValue('expert1_email') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                                    <input type="tel" name="expert1_telephone" required
+                                           value="{{ $getValue('expert1_telephone') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="expert2_nom" required
+                                           value="{{ $getValue('expert2_nom') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                    <input type="text" name="expert2_prenom" required
+                                           value="{{ $getValue('expert2_prenom') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="expert2_email" required
+                                           value="{{ $getValue('expert2_email') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                                    <input type="tel" name="expert2_telephone" required
+                                           value="{{ $getValue('expert2_telephone') }}"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Période de réalisation *
+                                    </label>
+                                    <input type="text" name="periode_realisation" required
+                                           value="{{ $getValue('periode_realisation') }}"
+                                           placeholder="Ex: Du 3 au 26 mars 2025"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Horaire de travail *
+                                    </label>
+                                    <input type="text" name="horaire_travail" required
+                                           value="{{ $getValue('horaire_travail') }}"
+                                           placeholder="Ex: 8h-12h, 13h-17h"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Nombre d'heures *
+                                    </label>
+                                    <input type="text" name="nombre_heures" required
+                                           value="{{ $getValue('nombre_heures') }}"
+                                           placeholder="Ex: 120 heures"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Planning (en H ou %)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Analyse</label>
+                                    <input type="text" name="planning_analyse"
+                                           value="{{ $getValue('planning_analyse') }}"
+                                           placeholder="Ex: 20H ou 15%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Implémentation</label>
+                                    <input type="text" name="planning_implementation"
+                                           value="{{ $getValue('planning_implementation') }}"
+                                           placeholder="Ex: 60H ou 50%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tests</label>
+                                    <input type="text" name="planning_tests"
+                                           value="{{ $getValue('planning_tests') }}"
+                                           placeholder="Ex: 20H ou 15%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Documentations</label>
+                                    <input type="text" name="planning_documentation"
+                                           value="{{ $getValue('planning_documentation') }}"
+                                           placeholder="Ex: 20H ou 20%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Titre du projet *
+                        </label>
+                        <input type="text" name="titre_projet" required
+                               value="{{ $getValue('titre_projet') }}"
+                               placeholder="Ex: Skoob - Logiciel pour l'exploitation des librairies"
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Matériel et logiciels (un par ligne)
+                        </label>
+                        <textarea name="materiel_logiciel" rows="6"
+                                  placeholder="1 PC en configuration standard&#10;Environnement de développement Visual Studio&#10;1 lecteur code-barres USB"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $getValue('materiel_logiciel') }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Séparez chaque élément par une nouvelle ligne</p>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Prérequis (un par ligne)
+                        </label>
+                        <textarea name="prerequis" rows="4"
+                                  placeholder="Connaissances du développement orienté objet&#10;Connaissance de C# et du framework .NET"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $getValue('prerequis') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Description complète du projet *
+                        </label>
+                        <div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
+                            <p class="text-sm text-blue-800 font-medium mb-2">💡 Aide au formatage Markdown :</p>
+                            <ul class="text-xs text-blue-700 space-y-1">
+                                <li>• <code class="bg-blue-100 px-1 rounded">**texte**</code> pour <strong>gras</strong></li>
+                                <li>• <code class="bg-blue-100 px-1 rounded">*texte*</code> pour <em>italique</em></li>
+                                <li>• <code class="bg-blue-100 px-1 rounded">- item</code> pour liste à puces</li>
+                                <li>• <code class="bg-blue-100 px-1 rounded">1. item</code> pour liste numérotée</li>
+                                <li>• Laisser une ligne vide pour nouveau paragraphe</li>
+                            </ul>
+                        </div>
+                        <textarea name="descriptif_projet" rows="12" required
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ $getValue('descriptif_projet') }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Utilisez le formatage Markdown pour structurer votre texte</p>
+                    </div>
+                </div>
+
+                <!-- Section 7: LIVRABLES -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Livrables attendus (un par ligne)
+                        </label>
+                        <textarea name="livrables" rows="6"
+                                  placeholder="Rapport de projet&#10;Journal de travail&#10;Planification initiale&#10;Code source complet&#10;Manuel utilisateur"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $getValue('livrables') }}</textarea>
+                    </div>
+                </div>
+
+                @php
+                    $customFields = $form->fields->where('section', 'custom');
+                @endphp
+
+                @if($customFields->count() > 0)
+                    <div class="bg-white shadow-sm rounded-lg">
+                        <div class="p-6 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            @foreach($customFields as $index => $field)
+                                <div class="border rounded-lg p-4 bg-gray-50 relative">
+                                    <button type="button" @click="removeCustomField({{ $field->id }})"
+                                            class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+
+                                    <div class="grid grid-cols-2 gap-4 pr-12">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ</label>
+                                            <input type="text" name="fields[{{ $index }}][name]" value="{{ $field->name }}" required
+                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            <input type="hidden" name="fields[{{ $index }}][id]" value="{{ $field->id }}">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+                                            <input type="text" name="fields[{{ $index }}][label]" value="{{ $field->label }}" required
+                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
+                                            <textarea name="fields[{{ $index }}][value]" rows="3"
+                                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ $getValue($field->name) }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                <div class="bg-white shadow-sm rounded-lg" x-data="{ newFields: [] }">
+                    <div class="p-6">
+                        <button type="button" @click="newFields.push({ tempId: Date.now(), name: '', label: '', value: '' })"
+                                class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition">
+                            + Ajouter un champ personnalisé
+                        </button>
+
+                        <div class="mt-4 space-y-4" x-show="newFields.length > 0">
+                            <template x-for="(field, index) in newFields" :key="field.tempId">
+                                <div class="border rounded-lg p-4 bg-gray-50 relative">
+                                    <button type="button" @click="newFields.splice(index, 1)"
+                                            class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                    <div class="grid grid-cols-2 gap-4 pr-12">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ</label>
+                                            <input type="text" :name="'new_fields[' + index + '][name]'" x-model="field.name" required
+                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label</label>
+                                            <input type="text" :name="'new_fields[' + index + '][label]'" x-model="field.label" required
+                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        </div>
+                                        <div class="col-span-2">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
+                                            <textarea :name="'new_fields[' + index + '][value]'" x-model="field.value" rows="3"
+                                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
+                                        </div>
+                                        <input type="hidden" :name="'new_fields[' + index + '][field_type_id]'" value="1">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-4">
+                    <a href="{{ route('forms.show', $form) }}"
+                       class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                        Annuler
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg">
+                        Mettre à jour le formulaire
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        function formBuilder(initialFields = []) {
+        function cdcFormBuilder() {
             return {
-                fields: initialFields,
-                showPreview: false,
-                tempIdCounter: Date.now(),
-                showNotification: false,
-                notificationType: '',
-                notificationMessage: '',
-
-                showNotif(type, message) {
-                    this.notificationType = type;
-                    this.notificationMessage = message;
-                    this.showNotification = true;
-                    setTimeout(() => {
-                        this.showNotification = false;
-                    }, 5000);
-                },
-
-                validateAndSubmit(event) {
-                    if (this.fields.length === 0) {
-                        this.showNotif('error', 'Veuillez ajouter au moins un champ au formulaire.');
-                        return false;
-                    }
-                    event.target.submit();
-                },
-
-                addField() {
-                    this.fields.push({
-                        id: null,
-                        tempId: this.tempIdCounter++,
-                        name: '',
-                        label: '',
-                        placeholder: '',
-                        is_required: false,
-                        field_type_id: '',
-                        input_type: '',
-                        options: [],
-                        optionsText: ''
-                    });
-                },
-
-                removeField(index) {
+                removeCustomField(fieldId) {
                     if (confirm('Êtes-vous sûr de vouloir supprimer ce champ ?')) {
-                        this.fields.splice(index, 1);
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'deleted_fields[]';
+                        input.value = fieldId;
+                        document.querySelector('form').appendChild(input);
+
+                        event.target.closest('.border').style.display = 'none';
                     }
-                },
-
-                moveFieldUp(index) {
-                    if (index > 0) {
-                        const temp = this.fields[index];
-                        this.fields[index] = this.fields[index - 1];
-                        this.fields[index - 1] = temp;
-                    }
-                },
-
-                moveFieldDown(index) {
-                    if (index < this.fields.length - 1) {
-                        const temp = this.fields[index];
-                        this.fields[index] = this.fields[index + 1];
-                        this.fields[index + 1] = temp;
-                    }
-                },
-
-                updateFieldType(index) {
-                    const select = event.target;
-                    const selectedOption = select.options[select.selectedIndex];
-                    this.fields[index].input_type = selectedOption.dataset.inputType || '';
-                },
-
-                updateOptions(index) {
-                    const text = this.fields[index].optionsText;
-                    this.fields[index].options = text
-                        .split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line.length > 0);
                 }
             };
         }
