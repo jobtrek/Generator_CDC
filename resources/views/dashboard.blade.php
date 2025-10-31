@@ -261,35 +261,6 @@
                     </div>
                 </div>
             @endif
-
-            @if(Auth::user()->getAllPermissions()->count() > 0)
-                <div class="mt-6">
-                    <details class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <summary class="p-6 cursor-pointer hover:bg-gray-50">
-                            <span class="text-sm font-medium text-gray-700">Voir mes permissions détaillées</span>
-                        </summary>
-                        <div class="px-6 pb-6">
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                @foreach(Auth::user()->getAllPermissions()->sortBy('name') as $permission)
-                                    @php
-                                        $category = explode('.', $permission->name)[0] ?? 'other';
-                                        $categoryColors = [
-                                            'form' => 'bg-green-50 text-green-700 border-green-200',
-                                            'user' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                                            'admin' => 'bg-red-50 text-red-700 border-red-200',
-                                            'cdcs' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                        ];
-                                        $colorClass = $categoryColors[$category] ?? 'bg-gray-50 text-gray-700 border-gray-200';
-                                    @endphp
-                                    <span class="text-xs px-2 py-1 rounded border {{ $colorClass }}">
-                                        {{ $permission->name }}
-                                    </span>
-                                @endforeach
-                            </div>
-                        </div>
-                    </details>
-                </div>
-            @endif
         </div>
     </div>
 </x-app-layout>

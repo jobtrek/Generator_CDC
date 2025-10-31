@@ -13,375 +13,478 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
             @if(session('info'))
                 <div x-data="{ show: true }" x-show="show" x-transition
-                     class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded flex items-center justify-between">
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                        </svg>
+                     class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded">
+                    <div class="flex items-center justify-between">
                         <span>{{ session('info') }}</span>
+                        <button @click="show = false">✕</button>
                     </div>
-                    <button @click="show = false" class="text-blue-700 hover:text-blue-900">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
                 </div>
             @endif
 
-            @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition
-                     class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex items-center justify-between">
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-green-700 hover:text-green-900">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
+            @if($errors->any())
+                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+                    <p class="font-bold">Erreurs de validation :</p>
+                    <ul class="list-disc list-inside mt-2">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
             <form method="POST" action="{{ route('forms.store') }}" x-data="cdcFormBuilder()" class="space-y-6">
                 @csrf
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 text-indigo-700 border-b pb-2">
+                <!-- Informations du formulaire -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
                             Informations du formulaire
                         </h3>
-
-                        <div class="mb-4">
-                            <label for="name" class="block text-sm font-medium text-gray-700">
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
                                 Nom du formulaire *
                             </label>
-                            <input type="text"
-                                   name="name"
-                                   id="name"
-                                   required
+                            <input type="text" name="name" id="name" required
                                    value="{{ old('name', $duplicateData['name'] ?? '') }}"
                                    placeholder="Ex: Cahier des charges TPI 2025"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('name')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
 
-                        <div class="mb-4">
-                            <label for="description" class="block text-sm font-medium text-gray-700">
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
                                 Description
                             </label>
-                            <textarea name="description"
-                                      id="description"
-                                      rows="3"
+                            <textarea name="description" id="description" rows="2"
                                       placeholder="Description du formulaire..."
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $duplicateData['description'] ?? '') }}</textarea>
+                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $duplicateData['description'] ?? '') }}</textarea>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="flex items-center">
-                                <input type="checkbox"
-                                       name="is_active"
-                                       value="1"
-                                       {{ old('is_active', true) ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-indigo-600 shadow-sm">
-                                <span class="ml-2 text-sm text-gray-600">Formulaire actif</span>
-                            </label>
-                        </div>
+                        <label class="flex items-center">
+                            <input type="checkbox" name="is_active" value="1" checked
+                                   class="rounded border-gray-300 text-indigo-600 shadow-sm">
+                            <span class="ml-2 text-sm text-gray-600">Formulaire actif</span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 text-indigo-700 border-b-2 border-indigo-200 pb-2">
+                <!-- Section 1: INFORMATIONS GÉNÉRALES -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">
                             1. INFORMATIONS GÉNÉRALES
                         </h3>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label for="candidat_nom" class="block text-sm font-medium text-gray-700">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Nom du candidat *
                                 </label>
-                                <input type="text"
-                                       name="candidat_nom"
-                                       id="candidat_nom"
-                                       required
+                                <input type="text" name="candidat_nom" required
                                        value="{{ old('candidat_nom') }}"
-                                       placeholder="Nom de famille"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('candidat_nom')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                       placeholder="Dupont"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
-
                             <div>
-                                <label for="candidat_prenom" class="block text-sm font-medium text-gray-700">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
                                     Prénom du candidat *
                                 </label>
-                                <input type="text"
-                                       name="candidat_prenom"
-                                       id="candidat_prenom"
-                                       required
+                                <input type="text" name="candidat_prenom" required
                                        value="{{ old('candidat_prenom') }}"
-                                       placeholder="Prénom"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('candidat_prenom')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                       placeholder="Jean"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="title" class="block text-sm font-medium text-gray-700">
-                                Titre du CDC *
-                            </label>
-                            <input type="text"
-                                   name="title"
-                                   id="title"
-                                   required
-                                   value="{{ old('title') }}"
-                                   placeholder="Ex: Cahier des charges TPI 2025 - Application web"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('title')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="lieu_travail" class="block text-sm font-medium text-gray-700">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Lieu de travail *
                             </label>
-                            <input type="text"
-                                   name="lieu_travail"
-                                   id="lieu_travail"
-                                   required
+                            <input type="text" name="lieu_travail" required
                                    value="{{ old('lieu_travail') }}"
                                    placeholder="Ex: ETML, Lausanne"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            @error('lieu_travail')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="periode_realisation" class="block text-sm font-medium text-gray-700">
-                                    Période de réalisation *
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Orientation *
+                            </label>
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88601 Développement d'applications"
+                                           {{ old('orientation') == '88601 Développement d\'applications' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88601 Développement d'applications</span>
                                 </label>
-                                <input type="text"
-                                       name="periode_realisation"
-                                       id="periode_realisation"
-                                       required
-                                       value="{{ old('periode_realisation') }}"
-                                       placeholder="Ex: Mai 2025"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('periode_realisation')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88602 Informatique d'entreprise"
+                                           {{ old('orientation') == '88602 Informatique d\'entreprise' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88602 Informatique d'entreprise</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88603 Technique des systèmes"
+                                           {{ old('orientation') == '88603 Technique des systèmes' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88603 Technique des systèmes</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="orientation" value="88614 Informaticienne d'entreprise CFC"
+                                           {{ old('orientation') == '88614 Informaticienne d\'entreprise CFC' ? 'checked' : '' }}
+                                           class="text-indigo-600">
+                                    <span class="ml-2 text-sm">88614 Informaticienne d'entreprise CFC</span>
+                                </label>
                             </div>
+                        </div>
 
-                            <div>
-                                <label for="horaire_travail" class="block text-sm font-medium text-gray-700">
-                                    Horaire de travail *
-                                </label>
-                                <input type="text"
-                                       name="horaire_travail"
-                                       id="horaire_travail"
-                                       required
-                                       value="{{ old('horaire_travail') }}"
-                                       placeholder="Ex: 8h-17h"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('horaire_travail')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                        <!-- Chef de projet -->
+                        <div class="border-t pt-4 mt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="chef_projet_nom" required
+                                           value="{{ old('chef_projet_nom') }}"
+                                           placeholder="Martin"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                    <input type="text" name="chef_projet_prenom" required
+                                           value="{{ old('chef_projet_prenom') }}"
+                                           placeholder="Sophie"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="chef_projet_email" required
+                                           value="{{ old('chef_projet_email') }}"
+                                           placeholder="sophie.martin@example.com"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                                    <input type="tel" name="chef_projet_telephone" required
+                                           value="{{ old('chef_projet_telephone', '+41 ') }}"
+                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           placeholder="+41 21 123 45 67"
+                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
                             </div>
+                        </div>
 
-                            <div>
-                                <label for="nombre_heures" class="block text-sm font-medium text-gray-700">
-                                    Nombre d'heures *
-                                </label>
-                                <input type="text"
-                                       name="nombre_heures"
-                                       id="nombre_heures"
-                                       required
-                                       value="{{ old('nombre_heures') }}"
-                                       placeholder="Ex: 80 heures"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                @error('nombre_heures')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                        <!-- Expert 1 -->
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Expert 1</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="expert1_nom" required
+                                           value="{{ old('expert1_nom') }}"
+                                           placeholder="Durand"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                    <input type="text" name="expert1_prenom" required
+                                           value="{{ old('expert1_prenom') }}"
+                                           placeholder="Pierre"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="expert1_email" required
+                                           value="{{ old('expert1_email') }}"
+                                           placeholder="pierre.durand@example.com"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                                    <input type="tel" name="expert1_telephone" required
+                                           value="{{ old('expert1_telephone', '+41 ') }}"
+                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           placeholder="+41 21 123 45 67"
+                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expert 2 -->
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                    <input type="text" name="expert2_nom" required
+                                           value="{{ old('expert2_nom') }}"
+                                           placeholder="Blanc"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                    <input type="text" name="expert2_prenom" required
+                                           value="{{ old('expert2_prenom') }}"
+                                           placeholder="Marie"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                                    <input type="email" name="expert2_email" required
+                                           value="{{ old('expert2_email') }}"
+                                           placeholder="marie.blanc@example.com"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                                    <input type="tel" name="expert2_telephone" required
+                                           value="{{ old('expert2_telephone', '+41 ') }}"
+                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           placeholder="+41 21 123 45 67"
+                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Période, horaire, heures -->
+                        <div class="border-t pt-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Période de réalisation *
+                                    </label>
+                                    <input type="text" name="periode_realisation" required
+                                           value="{{ old('periode_realisation') }}"
+                                           placeholder="Ex: Du 3 au 26 mars 2025"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Horaire de travail *
+                                    </label>
+                                    <input type="text" name="horaire_travail" required
+                                           value="{{ old('horaire_travail') }}"
+                                           placeholder="Ex: 8h-12h, 13h-17h"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Nombre d'heures *
+                                    </label>
+                                    <input type="text" name="nombre_heures" required
+                                           value="{{ old('nombre_heures') }}"
+                                           placeholder="Ex: 120 heures"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Planning -->
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Planning (en H ou %)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Analyse</label>
+                                    <input type="text" name="planning_analyse"
+                                           value="{{ old('planning_analyse') }}"
+                                           placeholder="Ex: 20H ou 15%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Implémentation</label>
+                                    <input type="text" name="planning_implementation"
+                                           value="{{ old('planning_implementation') }}"
+                                           placeholder="Ex: 60H ou 50%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tests</label>
+                                    <input type="text" name="planning_tests"
+                                           value="{{ old('planning_tests') }}"
+                                           placeholder="Ex: 20H ou 15%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Documentations</label>
+                                    <input type="text" name="planning_documentation"
+                                           value="{{ old('planning_documentation') }}"
+                                           placeholder="Ex: 20H ou 20%"
+                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <!-- Section 3: TITRE -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
+                    </div>
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4 text-indigo-700 border-b pb-2">
-                            2. CONTENU DU CAHIER DES CHARGES
-                        </h3>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Titre du projet *
+                        </label>
+                        <input type="text" name="titre_projet" required
+                               value="{{ old('titre_projet') }}"
+                               placeholder="Ex: Skoob - Logiciel pour l'exploitation des librairies"
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
 
-                        <div class="space-y-4 mb-4">
-                            <template x-for="(field, index) in fields" :key="field.tempId">
-                                <div class="border rounded-lg p-4 bg-gray-50 relative">
-                                    <div class="absolute top-2 right-2 flex gap-2">
-                                        <button type="button"
-                                                @click="removeField(index)"
-                                                class="p-2 text-red-600 hover:text-red-900 hover:bg-red-100 rounded transition"
-                                                title="Supprimer">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                <!-- Section 4: MATÉRIEL ET LOGICIEL -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Matériel et logiciels (un par ligne)
+                        </label>
+                        <textarea name="materiel_logiciel" rows="6"
+                                  placeholder="1 PC en configuration standard&#10;Environnement de développement Visual Studio&#10;1 lecteur code-barres USB"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('materiel_logiciel') }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Séparez chaque élément par une nouvelle ligne</p>
+                    </div>
+                </div>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pr-16">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                Nom du champ *
-                                            </label>
-                                            <input type="text"
-                                                   :name="'fields[' + index + '][name]'"
-                                                   x-model="field.name"
-                                                   required
-                                                   placeholder="Ex: titre_projet"
-                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        </div>
+                <!-- Section 5: PRÉREQUIS -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Prérequis (un par ligne)
+                        </label>
+                        <textarea name="prerequis" rows="4"
+                                  placeholder="Connaissances du développement orienté objet&#10;Connaissance de C# et du framework .NET"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('prerequis') }}</textarea>
+                    </div>
+                </div>
 
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                Label *
-                                            </label>
-                                            <input type="text"
-                                                   :name="'fields[' + index + '][label]'"
-                                                   x-model="field.label"
-                                                   required
-                                                   placeholder="Ex: Titre du projet"
-                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                Type de champ *
-                                            </label>
-                                            <select :name="'fields[' + index + '][field_type_id]'"
-                                                    x-model="field.field_type_id"
-                                                    required
-                                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <option value="">Sélectionner un type</option>
-                                                @foreach($fieldTypes as $type)
-                                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700">
-                                                Placeholder
-                                            </label>
-                                            <input type="text"
-                                                   :name="'fields[' + index + '][placeholder]'"
-                                                   x-model="field.placeholder"
-                                                   placeholder="Texte d'aide"
-                                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        </div>
-
-                                        <div class="col-span-2">
-                                            <label class="flex items-center">
-                                                <input type="checkbox"
-                                                       :name="'fields[' + index + '][is_required]'"
-                                                       x-model="field.is_required"
-                                                       value="1"
-                                                       class="rounded border-gray-300 text-indigo-600 shadow-sm">
-                                                <span class="ml-2 text-sm text-gray-600">Champ requis</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="col-span-2">
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                <span class="flex items-center">
-                                                    <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                    </svg>
-                                                    Contenu / Valeur
-                                                </span>
-                                            </label>
-                                            <textarea :name="'fields[' + index + '][value]'"
-                                                      x-model="field.value"
-                                                      rows="4"
-                                                      :placeholder="'Saisissez le contenu pour : ' + (field.label || 'ce champ')"
-                                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
-                                            <p class="mt-1 text-xs text-gray-500">Ce contenu sera inclus dans le CDC généré</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <div x-show="fields.length === 0" class="text-center py-12 bg-gray-100 rounded-lg">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <p class="mt-4 text-gray-500">Aucun champ ajouté.</p>
-                                <p class="mt-2 text-sm text-gray-400">Cliquez sur "Ajouter un champ" pour commencer.</p>
-                            </div>
+                <!-- Section 6: DESCRIPTIF DU PROJET -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Description complète du projet *
+                        </label>
+                        <div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
+                            <p class="text-sm text-blue-800 font-medium mb-2">💡 Aide au formatage Markdown :</p>
+                            <ul class="text-xs text-blue-700 space-y-1">
+                                <li>• <code class="bg-blue-100 px-1 rounded">**texte**</code> pour <strong>gras</strong></li>
+                                <li>• <code class="bg-blue-100 px-1 rounded">*texte*</code> pour <em>italique</em></li>
+                                <li>• <code class="bg-blue-100 px-1 rounded">- item</code> pour liste à puces</li>
+                                <li>• <code class="bg-blue-100 px-1 rounded">1. item</code> pour liste numérotée</li>
+                                <li>• Laisser une ligne vide pour nouveau paragraphe</li>
+                            </ul>
                         </div>
+                        <textarea name="descriptif_projet" rows="12" required
+                                  placeholder="Le projet consiste à réaliser une application clé en main pour la gestion du stock d'une petite librairie.
 
-                        <button type="button"
-                                @click="addField"
-                                class="w-full inline-flex items-center justify-center px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Ajouter un champ
+L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en informatique.
+
+**Cas d'utilisation:**
+- Entrée en stock
+  - Scénario 1: saisie du code ISBN
+  - Scénario 2: saisie d'un nouvel ouvrage
+- Sortie de stock
+- Inventaire"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ old('descriptif_projet') }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Utilisez le formatage Markdown pour structurer votre texte</p>
+                    </div>
+                </div>
+
+                <!-- Section 7: LIVRABLES -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Livrables attendus (un par ligne)
+                        </label>
+                        <textarea name="livrables" rows="6"
+                                  placeholder="Rapport de projet&#10;Journal de travail&#10;Planification initiale&#10;Code source complet&#10;Manuel utilisateur"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('livrables') }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Champs personnalisés existants -->
+                <div class="bg-white shadow-sm rounded-lg" x-show="fields.length > 0">
+                    <div class="p-6 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <template x-for="(field, index) in fields" :key="field.tempId">
+                            <div class="border rounded-lg p-4 bg-gray-50 relative">
+                                <button type="button" @click="removeField(index)"
+                                        class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+
+                                <div class="grid grid-cols-2 gap-4 pr-12">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
+                                        <input type="text" :name="'fields[' + index + '][name]'" x-model="field.name" required
+                                               placeholder="nom_du_champ"
+                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
+                                        <input type="text" :name="'fields[' + index + '][label]'" x-model="field.label" required
+                                               placeholder="Libellé du champ"
+                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                    <div class="col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
+                                        <textarea :name="'fields[' + index + '][value]'" x-model="field.value" rows="3"
+                                                  placeholder="Contenu du champ personnalisé"
+                                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
+                                    </div>
+                                    <input type="hidden" :name="'fields[' + index + '][field_type_id]'" value="1">
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Bouton ajouter champ -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6">
+                        <button type="button" @click="addField"
+                                class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition">
+                            + Ajouter un champ personnalisé
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-r from-green-50 to-emerald-50 overflow-hidden shadow-sm sm:rounded-lg border-2 border-green-200">
-                    <div class="p-6">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <h3 class="text-sm font-medium text-green-800">
-                                    📋 Prêt à générer votre CDC
-                                </h3>
-                                <div class="mt-2 text-sm text-green-700">
-                                    <p class="mb-2">En cliquant sur "Créer et générer le CDC", vous allez :</p>
-                                    <ul class="list-disc list-inside space-y-1">
-                                        <li>Créer un nouveau formulaire avec la structure définie</li>
-                                        <li>Générer automatiquement un CDC Word basé sur vos données</li>
-                                        <li>Pouvoir télécharger immédiatement le document</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.index') }}"
-                       class="inline-flex items-center px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
+                       class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
                         Annuler
                     </a>
                     <button type="submit"
-                            class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow-lg">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
+                            class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow-lg">
                         Créer et générer le CDC
                     </button>
                 </div>
@@ -398,9 +501,7 @@
                     ? prefilledFields.map((field, index) => ({
                         ...field,
                         tempId: Date.now() + index,
-                        value: field.value || '',
-                        is_required: field.is_required || false,
-                        placeholder: field.placeholder || ''
+                        value: field.value || ''
                     }))
                     : [],
 
@@ -411,18 +512,14 @@
                         tempId: this.tempIdCounter++,
                         name: '',
                         label: '',
-                        placeholder: '',
-                        is_required: false,
-                        field_type_id: '',
+                        field_type_id: '1',
                         value: ''
                     });
-                    console.log('✅ Champ ajouté, total:', this.fields.length);
                 },
 
                 removeField(index) {
                     if (confirm('Êtes-vous sûr de vouloir supprimer ce champ ?')) {
                         this.fields.splice(index, 1);
-                        console.log('🗑️ Champ supprimé, reste:', this.fields.length);
                     }
                 }
             };

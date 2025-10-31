@@ -31,4 +31,9 @@ class Form extends Model
     {
         return $this->hasMany(Field::class)->orderBy('order_index');
     }
+
+    public function cdcs(): HasMany
+    {
+        return $this->hasMany(Cdc::class);
+    }
 }
