@@ -329,6 +329,28 @@
                     </div>
                 </div>
 
+                <!-- Section 2: PROCÉDURE -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
+                    </div>
+                    <div class="p-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Description de la procédure
+                        </label>
+                        <textarea name="procedure" rows="15"
+                                  placeholder="Points de la procédure (un par ligne)"
+                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ old('procedure', 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.
+Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.
+Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.
+Le candidat est entièrement responsable de la sécurité de ses données.
+En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.
+Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.
+A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.') }}</textarea>
+                        <p class="mt-1 text-sm text-gray-500">Séparez chaque point par une nouvelle ligne</p>
+                    </div>
+                </div>
+
                 <!-- Section 3: TITRE -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
