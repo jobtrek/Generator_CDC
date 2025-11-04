@@ -90,6 +90,8 @@ class FormController extends Controller
             'planning_tests' => 'nullable|string',
             'planning_documentation' => 'nullable|string',
 
+            'procedure' => ['nullable', 'string', 'max:5000'],
+
             'titre_projet' => 'required|string',
             'materiel_logiciel' => 'nullable|string',
             'prerequis' => 'nullable|string',
@@ -297,6 +299,8 @@ class FormController extends Controller
             'expert2_email' => 'required|email',
             'expert2_telephone' => 'required|string',
 
+            'procedure' => ['nullable', 'string', 'max:5000'],
+
             'periode_realisation' => 'required|string|max:255',
             'horaire_travail' => 'required|string|max:255',
             'nombre_heures' => 'required|string|max:255',
@@ -366,6 +370,8 @@ class FormController extends Controller
                 'planning_implementation' => $validated['planning_implementation'] ?? '',
                 'planning_tests' => $validated['planning_tests'] ?? '',
                 'planning_documentation' => $validated['planning_documentation'] ?? '',
+
+                'procedure' => $request->procedure ?? '',
 
                 'titre_projet' => $validated['titre_projet'],
                 'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',

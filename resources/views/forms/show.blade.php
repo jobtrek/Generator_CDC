@@ -340,6 +340,31 @@
                 </div>
             </div>
 
+
+                <!-- Section 2: PROCÉDURE -->
+                <div class="bg-white shadow-sm rounded-lg mb-6">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
+                    </div>
+                    <div class="p-6">
+                        @php
+                            $procedure = $getValue('procedure', '');
+                            $procedureItems = $procedure ? explode("\n", $procedure) : [];
+                        @endphp
+                        @if(count($procedureItems) > 0)
+                            <ul class="list-disc list-inside space-y-2 text-gray-900">
+                                @foreach($procedureItems as $item)
+                                    @if(trim($item))
+                                        <li>{{ trim($item) }}</li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        @else
+                            <p class="text-gray-500 italic">Non renseigné</p>
+                        @endif
+                    </div>
+                </div>
+
             <!-- Section 3: TITRE -->
             <div class="bg-white shadow-sm rounded-lg mb-6">
                 <div class="p-6 border-b border-gray-200 bg-indigo-50">

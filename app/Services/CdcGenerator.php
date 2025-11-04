@@ -212,27 +212,39 @@ class CdcGenerator
         $this->section->addTextBreak(1);
     }
 
-    private function addSection2Procedure(): void
+    private function addSection2Procedure(Cdc $cdc): void
     {
         $this->section->addTitle('2 PROCÉDURE', 1);
 
-        $points = [
-            'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.',
-            'Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.',
-            'Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.',
-            'Le candidat est entièrement responsable de la sécurité de ses données.',
-            'En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.',
-            'Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.',
-            'A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.'
-        ];
+        $procedure = $this->getValue($cdc, 'procedure', '');
 
-        foreach ($points as $point) {
-            $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
+        if (!empty($procedure)) {
+            $points = explode("\n", $procedure);
+            foreach ($points as $point) {
+                $point = trim($point);
+                if (!empty($point)) {
+                    $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
+                }
+            }
+        } else {
+            // Texte par défaut si rien n'est saisi
+            $points = [
+                'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.',
+                'Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.',
+                'Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.',
+                'Le candidat est entièrement responsable de la sécurité de ses données.',
+                'En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.',
+                'Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.',
+                'A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.'
+            ];
+
+            foreach ($points as $point) {
+                $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
+            }
         }
 
         $this->section->addTextBreak(1);
     }
-
     private function addSection3Titre(Cdc $cdc): void
     {
         $this->section->addTitle('3 TITRE', 1);
