@@ -60,26 +60,33 @@ class CdcController extends Controller
         $form = Form::with('fields.fieldType')->findOrFail($formId);
         $this->authorize('view', $form);
 
-        session()->put('duplicate_form', [
-            'source_form_id' => $form->id,
-            'name' => $form->name . ' (Copie)',
-            'description' => $form->description,
-            'fields' => $form->fields->sortBy('order_index')->map(function($field) {
-                return [
-                    'name' => $field->name,
-                    'label' => $field->label,
-                    'field_type_id' => $field->field_type_id,
-                    'placeholder' => $field->placeholder,
-                    'is_required' => $field->is_required ?? false,
-                    'options' => $field->options,
-                    'order_index' => $field->order_index,
-                    'value' => ''
-                ];
-            })->values()->toArray()
-        ]);
+        $cdc = $form->cdcs()->first();
 
-        return redirect()->route('forms.create')
-            ->with('info', 'Remplissez les données pour générer un nouveau CDC basé sur "' . $form->name . '"');
+        if ($cdc) {
+            return redirect()->route('forms.edit', $form)
+                ->with('info', 'Modifiez le cahier des charges existant.');
+        } else {
+            session()->put('duplicate_form', [
+                'source_form_id' => $form->id,
+                'name' => $form->name . ' (Copie)',
+                'description' => $form->description,
+                'fields' => $form->fields->where('section', 'custom')->sortBy('order_index')->map(function($field) {
+                    return [
+                        'name' => $field->name,
+                        'label' => $field->label,
+                        'field_type_id' => $field->field_type_id,
+                        'placeholder' => $field->placeholder,
+                        'is_required' => $field->is_required ?? false,
+                        'options' => $field->options,
+                        'order_index' => $field->order_index,
+                        'value' => ''
+                    ];
+                })->values()->toArray()
+            ]);
+
+            return redirect()->route('forms.create')
+                ->with('info', 'Remplissez les données pour générer un nouveau CDC basé sur "' . $form->name . '"');
+        }
     }
 
     /**

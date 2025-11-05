@@ -519,13 +519,20 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
             const prefilledFields = @json($prefilledFields ?? []);
 
             return {
-                fields: prefilledFields.length > 0
-                    ? prefilledFields.map((field, index) => ({
-                        ...field,
-                        tempId: Date.now() + index,
-                        value: field.value || ''
-                    }))
-                    : [],
+                fields: prefilledFields.filter(field =>
+                    !['candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
+                        'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
+                        'expert1_nom', 'expert1_prenom', 'expert1_email', 'expert1_telephone',
+                        'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',
+                        'periode_realisation', 'horaire_travail', 'nombre_heures',
+                        'planning_analyse', 'planning_implementation', 'planning_tests', 'planning_documentation',
+                        'titre_projet', 'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables'
+                    ].includes(field.name)
+                ).map((field, index) => ({
+                    ...field,
+                    tempId: Date.now() + index,
+                    value: field.value || ''
+                })),
 
                 tempIdCounter: Date.now() + (prefilledFields.length || 0),
 

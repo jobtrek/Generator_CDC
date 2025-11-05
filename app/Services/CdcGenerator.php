@@ -32,10 +32,8 @@ class CdcGenerator
 
         $this->addOfficialHeader();
         $this->addOfficialFooter();
-
         $this->addSection1InformationsGenerales($cdc);
-        $this->addSection2Procedure();
-        $this->addSection3Titre($cdc);
+        $this->addSection2Procedure($cdc);
         $this->addSection4MaterielLogiciel($cdc);
         $this->addSection5Prerequis($cdc);
         $this->addSection6DescriptifProjet($cdc);
@@ -101,7 +99,7 @@ class CdcGenerator
 
     private function addSection1InformationsGenerales(Cdc $cdc): void
     {
-        $this->section->addTitle('1 INFORMATIONS GENERALES', 1);
+        $this->section->addTitle('1 INFORMATIONS GÉNÉRALES', 1);
 
         $tableStyle = [
             'borderSize' => 6,
@@ -219,16 +217,12 @@ class CdcGenerator
         $procedure = $this->getValue($cdc, 'procedure', '');
 
         if (!empty($procedure)) {
-            $points = explode("\n", $procedure);
+            $points = array_filter(array_map('trim', explode("\n", $procedure)));
             foreach ($points as $point) {
-                $point = trim($point);
-                if (!empty($point)) {
-                    $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
-                }
+                $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
             }
         } else {
-            // Texte par défaut si rien n'est saisi
-            $points = [
+            $defaultPoints = [
                 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.',
                 'Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.',
                 'Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.',
@@ -238,13 +232,14 @@ class CdcGenerator
                 'A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.'
             ];
 
-            foreach ($points as $point) {
+            foreach ($defaultPoints as $point) {
                 $this->section->addListItem($point, 0, ['size' => 11], ['indentation' => ['left' => 360]]);
             }
         }
 
         $this->section->addTextBreak(1);
     }
+
     private function addSection3Titre(Cdc $cdc): void
     {
         $this->section->addTitle('3 TITRE', 1);

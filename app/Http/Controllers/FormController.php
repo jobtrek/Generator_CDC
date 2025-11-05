@@ -195,6 +195,7 @@ class FormController extends Controller
                 'horaire_travail' => $validated['horaire_travail'],
                 'nombre_heures' => $validated['nombre_heures'],
 
+                'procedure' => $validated['procedure'] ?? '',
                 'planning_analyse' => $validated['planning_analyse'] ?? '',
                 'planning_implementation' => $validated['planning_implementation'] ?? '',
                 'planning_tests' => $validated['planning_tests'] ?? '',
