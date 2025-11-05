@@ -34,6 +34,7 @@ class CdcGenerator
         $this->addOfficialFooter();
         $this->addSection1InformationsGenerales($cdc);
         $this->addSection2Procedure($cdc);
+        $this->addSection3Titre($cdc);
         $this->addSection4MaterielLogiciel($cdc);
         $this->addSection5Prerequis($cdc);
         $this->addSection6DescriptifProjet($cdc);
@@ -243,10 +244,17 @@ class CdcGenerator
     private function addSection3Titre(Cdc $cdc): void
     {
         $this->section->addTitle('3 TITRE', 1);
-        $this->section->addText($this->getValue($cdc, 'titre_projet', $cdc->title));
+
+        $titre = $this->getValue($cdc, 'titre_projet', $cdc->title);
+
+        if (!empty($titre)) {
+            $this->section->addText($titre, ['size' => 11, 'bold' => true]);
+        } else {
+            $this->section->addText('Titre du projet à définir');
+        }
+
         $this->section->addTextBreak(1);
     }
-
     private function addSection4MaterielLogiciel(Cdc $cdc): void
     {
         $this->section->addTitle('4 MATÉRIEL ET LOGICIEL À DISPOSITION', 1);
