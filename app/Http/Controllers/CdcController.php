@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cdc;
 use App\Models\Form;
-use App\Services\CdcGenerator;
+use App\Services\CdcPandocGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -147,7 +147,7 @@ class CdcController extends Controller
     /**
      * ✅ Télécharge le CDC au format Word (.docx)
      */
-    public function download(Cdc $cdc, CdcGenerator $generator)
+    public function download(Cdc $cdc, CdcPandocGenerator $generator)
     {
         $this->authorize('view', $cdc);
 
