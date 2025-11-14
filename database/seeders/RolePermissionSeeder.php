@@ -74,25 +74,16 @@ class RolePermissionSeeder extends Seeder
 
         $admin = Role::create(['name' => 'admin']);
         $admin->givePermissionTo([
-            'cdcs.view', 'cdcs.create', 'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
+            'cdcs.view', 'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
             'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
             'template.view', 'template.create', 'template.edit', 'template.delete', 'template.import',
             'user.view', 'user.create', 'user.edit',
             'dashboard.view', 'settings.view', 'logs.view',
         ]);
 
-        $formateur = Role::create(['name' => 'formateur']);
-        $formateur->givePermissionTo([
-            'cdcs.view', 'cdcs.create', 'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
-            'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
-            'template.view', 'template.create', 'template.edit',
-            'user.view',
-            'dashboard.view',
-        ]);
-
         $user = Role::create(['name' => 'user']);
         $user->givePermissionTo([
-            'cdcs.view', 'cdcs.create', 'cdcs.export',
+            'cdcs.view', 'cdcs.export',
             'form.view',
             'template.view',
             'dashboard.view',
@@ -127,36 +118,6 @@ class RolePermissionSeeder extends Seeder
         );
         $adminUser->assignRole('admin');
 
-        $formateurUser = User::firstOrCreate(
-            ['email' => 'formateur@cdcs.com'],
-            [
-                'name' => 'formateur User',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $formateurUser->assignRole('formateur');
-
-        $normalUser = User::firstOrCreate(
-            ['email' => 'user@cdcs.com'],
-            [
-                'name' => 'Normal User',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $normalUser->assignRole('user');
-
-        $guestUser = User::firstOrCreate(
-            ['email' => 'guest@cdcs.com'],
-            [
-                'name' => 'Guest User',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $guestUser->assignRole('guest');
-
         $this->command->info('✅ Rôles et permissions créés avec succès !');
         $this->command->table(
             ['Email', 'Rôle', 'Mot de passe'],
@@ -165,7 +126,6 @@ class RolePermissionSeeder extends Seeder
                 ['admin@cdcs.com', 'Admin', 'password123'],
                 ['formateur@cdcs.com', 'formateur', 'password123'],
                 ['user@cdcs.com', 'User', 'password123'],
-                ['guest@cdcs.com', 'Guest', 'password123'],
             ]
         );
     }

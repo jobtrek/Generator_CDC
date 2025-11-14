@@ -3,7 +3,6 @@
 use App\Http\Controllers\CdcController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
