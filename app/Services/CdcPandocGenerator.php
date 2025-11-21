@@ -35,9 +35,7 @@ class CdcPandocGenerator
                 $docxPath
             );
 
-
             exec($command, $output, $returnCode);
-
             if (File::exists($htmlFile)) {
                 File::delete($htmlFile);
             }

@@ -30,14 +30,6 @@ class RolePermissionSeeder extends Seeder
             'form.publish',
         ];
 
-        $templatePermissions = [
-            'template.view',
-            'template.create',
-            'template.edit',
-            'template.delete',
-            'template.import',
-        ];
-
         $userPermissions = [
             'user.view',
             'user.create',
@@ -58,7 +50,6 @@ class RolePermissionSeeder extends Seeder
         $allPermissions = array_merge(
             $cdcPermissions,
             $formPermissions,
-            $templatePermissions,
             $userPermissions,
             $systemPermissions
         );
@@ -76,7 +67,6 @@ class RolePermissionSeeder extends Seeder
         $admin->givePermissionTo([
             'cdcs.view', 'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
             'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
-            'template.view', 'template.create', 'template.edit', 'template.delete', 'template.import',
             'user.view', 'user.create', 'user.edit',
             'dashboard.view', 'settings.view', 'logs.view',
         ]);
@@ -85,7 +75,6 @@ class RolePermissionSeeder extends Seeder
         $user->givePermissionTo([
             'cdcs.view', 'cdcs.export',
             'form.view',
-            'template.view',
             'dashboard.view',
         ]);
 
@@ -93,7 +82,6 @@ class RolePermissionSeeder extends Seeder
         $guest->givePermissionTo([
             'cdcs.view',
             'form.view',
-            'template.view',
             'dashboard.view',
         ]);
 

@@ -125,27 +125,6 @@
                         </div>
                     </div>
                 </a>
-
-                <a href="{{ route('cdcs.index') }}" aria-label="CDCs" class="group">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <h4 class="text-lg md:text-xl font-semibold text-gray-900 group-hover:text-blue-600">
-                                        Mes CDC
-                                    </h4>
-                                    <p class="mt-1 text-sm text-gray-600">
-                                        Cahiers des charges générés
-                                    </p>
-                                </div>
-                                <svg class="h-5 w-5 md:h-6 md:w-6 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
                 @if(!Auth::user()->hasAnyRole(['admin', 'super-admin']))
                     <a href="{{ route('profile.edit') }}" aria-label="Profile" class="group">
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">

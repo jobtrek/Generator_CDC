@@ -16,24 +16,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
+    // ✅ Routes CDC simplifiées (download uniquement)
     Route::prefix('cdcs')->name('cdcs.')->group(function () {
-        Route::get('/', [CdcController::class, 'index'])->name('index');
         Route::get('/create', [CdcController::class, 'create'])->name('create');
         Route::post('/', [CdcController::class, 'store'])->name('store');
-        Route::get('/{cdc}', [CdcController::class, 'show'])->name('show');
-        Route::put('/{cdc}', [CdcController::class, 'update'])->name('update');
         Route::get('/{cdc}/download', [CdcController::class, 'download'])->name('download');
-        Route::delete('/{cdc}', [CdcController::class, 'destroy'])->name('destroy');
     });
 
+    // ✅ Routes formulaires (complètes)
     Route::resource('forms', FormController::class);
 
+    // Routes profil
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
 
+    // Routes admin
     Route::middleware(['role:admin|super-admin'])
         ->prefix('admin')
         ->name('admin.')

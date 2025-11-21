@@ -1,557 +1,387 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center">
-            <a href="{{ route('forms.index') }}" class="mr-4 text-gray-600 hover:text-gray-900">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Créer un nouveau cahier des charges
-            </h2>
-        </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
-
-            @if(session('info'))
-                <div x-data="{ show: true }" x-show="show" x-transition
-                     class="mb-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700 rounded">
-                    <div class="flex items-center justify-between">
-                        <span>{{ session('info') }}</span>
-                        <button @click="show = false">✕</button>
-                    </div>
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
-                    <p class="font-bold">Erreurs de validation :</p>
-                    <ul class="list-disc list-inside mt-2">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('forms.store') }}" x-data="cdcFormBuilder()" class="space-y-6">
-                @csrf
-
-                <!-- Informations du formulaire -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            Informations du formulaire
-                        </h3>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-                                Nom du formulaire *
-                            </label>
-                            <input type="text" name="name" id="name" required
-                                   value="{{ old('name', $duplicateData['name'] ?? '') }}"
-                                   placeholder="Ex: Cahier des charges TPI 2025"
-                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
-
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                                Description
-                            </label>
-                            <textarea name="description" id="description" rows="2"
-                                      placeholder="Description du formulaire..."
-                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $duplicateData['description'] ?? '') }}</textarea>
-                        </div>
-
-                        <label class="flex items-center">
-                            <input type="checkbox" name="is_active" value="1" checked
-                                   class="rounded border-gray-300 text-indigo-600 shadow-sm">
-                            <span class="ml-2 text-sm text-gray-600">Formulaire actif</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Section 1: INFORMATIONS GÉNÉRALES -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">
-                            1. INFORMATIONS GÉNÉRALES
-                        </h3>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Nom du candidat *
-                                </label>
-                                <input type="text" name="candidat_nom" required
-                                       value="{{ old('candidat_nom') }}"
-                                       placeholder="Dupont"
-                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Prénom du candidat *
-                                </label>
-                                <input type="text" name="candidat_prenom" required
-                                       value="{{ old('candidat_prenom') }}"
-                                       placeholder="Jean"
-                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Lieu de travail *
-                            </label>
-                            <input type="text" name="lieu_travail" required
-                                   value="{{ old('lieu_travail') }}"
-                                   placeholder="Ex: ETML, Lausanne"
-                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Orientation *
-                            </label>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88601 Développement d'applications"
-                                           {{ old('orientation') == '88601 Développement d\'applications' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88601 Développement d'applications</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88602 Informatique d'entreprise"
-                                           {{ old('orientation') == '88602 Informatique d\'entreprise' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88602 Informatique d'entreprise</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88603 Technique des systèmes"
-                                           {{ old('orientation') == '88603 Technique des systèmes' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88603 Technique des systèmes</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88614 Informaticienne d'entreprise CFC"
-                                           {{ old('orientation') == '88614 Informaticienne d\'entreprise CFC' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88614 Informaticienne d'entreprise CFC</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Chef de projet -->
-                        <div class="border-t pt-4 mt-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input type="text" name="chef_projet_nom" required
-                                           value="{{ old('chef_projet_nom') }}"
-                                           placeholder="Martin"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input type="text" name="chef_projet_prenom" required
-                                           value="{{ old('chef_projet_prenom') }}"
-                                           placeholder="Sophie"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" name="chef_projet_email" required
-                                           value="{{ old('chef_projet_email') }}"
-                                           placeholder="sophie.martin@example.com"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="chef_projet_telephone" required
-                                           value="{{ old('chef_projet_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Expert 1 -->
-                        <div class="border-t pt-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Expert 1</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input type="text" name="expert1_nom" required
-                                           value="{{ old('expert1_nom') }}"
-                                           placeholder="Durand"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input type="text" name="expert1_prenom" required
-                                           value="{{ old('expert1_prenom') }}"
-                                           placeholder="Pierre"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" name="expert1_email" required
-                                           value="{{ old('expert1_email') }}"
-                                           placeholder="pierre.durand@example.com"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="expert1_telephone" required
-                                           value="{{ old('expert1_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Expert 2 -->
-                        <div class="border-t pt-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input type="text" name="expert2_nom" required
-                                           value="{{ old('expert2_nom') }}"
-                                           placeholder="Blanc"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input type="text" name="expert2_prenom" required
-                                           value="{{ old('expert2_prenom') }}"
-                                           placeholder="Marie"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" name="expert2_email" required
-                                           value="{{ old('expert2_email') }}"
-                                           placeholder="marie.blanc@example.com"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="expert2_telephone" required
-                                           value="{{ old('expert2_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Période, horaire, heures -->
-                        <div class="border-t pt-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Période de réalisation *
-                                    </label>
-                                    <input type="text" name="periode_realisation" required
-                                           value="{{ old('periode_realisation') }}"
-                                           placeholder="Ex: Du 3 au 26 mars 2025"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Horaire de travail *
-                                    </label>
-                                    <input type="text" name="horaire_travail" required
-                                           value="{{ old('horaire_travail') }}"
-                                           placeholder="Ex: 8h-12h, 13h-17h"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Nombre d'heures *
-                                    </label>
-                                    <input type="text" name="nombre_heures" required
-                                           value="{{ old('nombre_heures') }}"
-                                           placeholder="Ex: 120 heures"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Planning -->
-                        <div class="border-t pt-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Planning (en H ou %)</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Analyse</label>
-                                    <input type="text" name="planning_analyse"
-                                           value="{{ old('planning_analyse') }}"
-                                           placeholder="Ex: 20H ou 15%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Implémentation</label>
-                                    <input type="text" name="planning_implementation"
-                                           value="{{ old('planning_implementation') }}"
-                                           placeholder="Ex: 60H ou 50%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tests</label>
-                                    <input type="text" name="planning_tests"
-                                           value="{{ old('planning_tests') }}"
-                                           placeholder="Ex: 20H ou 15%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Documentations</label>
-                                    <input type="text" name="planning_documentation"
-                                           value="{{ old('planning_documentation') }}"
-                                           placeholder="Ex: 20H ou 20%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 2: PROCÉDURE -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Description de la procédure
-                        </label>
-                        <textarea name="procedure" rows="15"
-                                  placeholder="Points de la procédure (un par ligne)"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ old('procedure', 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.
-Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.
-Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.
-Le candidat est entièrement responsable de la sécurité de ses données.
-En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.
-Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.
-A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Séparez chaque point par une nouvelle ligne</p>
-                    </div>
-                </div>
-
-                <!-- Section 3: TITRE -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Titre du projet *
-                        </label>
-                        <input type="text" name="titre_projet" required
-                               value="{{ old('titre_projet') }}"
-                               placeholder="Ex: Skoob - Logiciel pour l'exploitation des librairies"
-                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    </div>
-                </div>
-
-                <!-- Section 4: MATÉRIEL ET LOGICIEL -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Matériel et logiciels (un par ligne)
-                        </label>
-                        <textarea name="materiel_logiciel" rows="6"
-                                  placeholder="1 PC en configuration standard&#10;Environnement de développement Visual Studio&#10;1 lecteur code-barres USB"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('materiel_logiciel') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Séparez chaque élément par une nouvelle ligne</p>
-                    </div>
-                </div>
-
-                <!-- Section 5: PRÉREQUIS -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Prérequis (un par ligne)
-                        </label>
-                        <textarea name="prerequis" rows="4"
-                                  placeholder="Connaissances du développement orienté objet&#10;Connaissance de C# et du framework .NET"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('prerequis') }}</textarea>
-                    </div>
-                </div>
-
-                <!-- Section 6: DESCRIPTIF DU PROJET -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Description complète du projet *
-                        </label>
-                        <div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
-                            <p class="text-sm text-blue-800 font-medium mb-2">💡 Aide au formatage Markdown :</p>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li>• <code class="bg-blue-100 px-1 rounded">**texte**</code> pour <strong>gras</strong></li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">*texte*</code> pour <em>italique</em></li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">- item</code> pour liste à puces</li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">1. item</code> pour liste numérotée</li>
-                                <li>• Laisser une ligne vide pour nouveau paragraphe</li>
-                            </ul>
-                        </div>
-                        <textarea name="descriptif_projet" rows="12" required
-                                  placeholder="Le projet consiste à réaliser une application clé en main pour la gestion du stock d'une petite librairie.
-
-L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en informatique.
-
-**Cas d'utilisation:**
-- Entrée en stock
-  - Scénario 1: saisie du code ISBN
-  - Scénario 2: saisie d'un nouvel ouvrage
-- Sortie de stock
-- Inventaire"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ old('descriptif_projet') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Utilisez le formatage Markdown pour structurer votre texte</p>
-                    </div>
-                </div>
-
-                <!-- Section 7: LIVRABLES -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Livrables attendus (un par ligne)
-                        </label>
-                        <textarea name="livrables" rows="6"
-                                  placeholder="Rapport de projet&#10;Journal de travail&#10;Planification initiale&#10;Code source complet&#10;Manuel utilisateur"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('livrables') }}</textarea>
-                    </div>
-                </div>
-
-                <!-- Champs personnalisés existants -->
-                <div class="bg-white shadow-sm rounded-lg" x-show="fields.length > 0">
-                    <div class="p-6 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <template x-for="(field, index) in fields" :key="field.tempId">
-                            <div class="border rounded-lg p-4 bg-gray-50 relative">
-                                <button type="button" @click="removeField(index)"
-                                        class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-
-                                <div class="grid grid-cols-2 gap-4 pr-12">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
-                                        <input type="text" :name="'fields[' + index + '][name]'" x-model="field.name" required
-                                               placeholder="nom_du_champ"
-                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
-                                        <input type="text" :name="'fields[' + index + '][label]'" x-model="field.label" required
-                                               placeholder="Libellé du champ"
-                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    </div>
-                                    <div class="col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
-                                        <textarea :name="'fields[' + index + '][value]'" x-model="field.value" rows="3"
-                                                  placeholder="Contenu du champ personnalisé"
-                                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
-                                    </div>
-                                    <input type="hidden" :name="'fields[' + index + '][field_type_id]'" value="1">
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Bouton ajouter champ -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6">
-                        <button type="button" @click="addField"
-                                class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition">
-                            + Ajouter un champ personnalisé
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Boutons d'action -->
-                <div class="flex justify-end gap-4">
-                    <a href="{{ route('forms.index') }}"
-                       class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-                        Annuler
-                    </a>
-                    <button type="submit"
-                            class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow-lg">
-                        Créer et générer le CDC
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        function cdcFormBuilder() {
-            const prefilledFields = @json($prefilledFields ?? []);
-
-            return {
-                fields: prefilledFields.filter(field =>
-                    !['candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
-                        'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
-                        'expert1_nom', 'expert1_prenom', 'expert1_email', 'expert1_telephone',
-                        'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',
-                        'periode_realisation', 'horaire_travail', 'nombre_heures',
-                        'planning_analyse', 'planning_implementation', 'planning_tests', 'planning_documentation',
-                        'titre_projet', 'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables'
-                    ].includes(field.name)
-                ).map((field, index) => ({
-                    ...field,
-                    tempId: Date.now() + index,
-                    value: field.value || ''
-                })),
-
-                tempIdCounter: Date.now() + (prefilledFields.length || 0),
-
-                addField() {
-                    this.fields.push({
-                        tempId: this.tempIdCounter++,
-                        name: '',
-                        label: '',
-                        field_type_id: '1',
-                        value: ''
-                    });
-                },
-
-                removeField(index) {
-                    if (confirm('Êtes-vous sûr de vouloir supprimer ce champ ?')) {
-                        this.fields.splice(index, 1);
-                    }
-                }
-            };
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $cdc->title }}</title>
+    <style>
+        @page {
+            margin: 2cm;
         }
-    </script>
-</x-app-layout>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #000;
+        }
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #1a5490;
+            margin-top: 0;
+            margin-bottom: 20pt;
+            text-align: center;
+        }
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1a5490;
+            margin-top: 20pt;
+            margin-bottom: 10pt;
+            border-bottom: 2px solid #1a5490;
+            padding-bottom: 5pt;
+        }
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 15pt;
+            margin-bottom: 8pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10pt 0;
+        }
+        table, th, td {
+            border: 1px solid #000;
+        }
+        th, td {
+            padding: 8pt;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        ul, ol {
+            margin: 10pt 0;
+            padding-left: 20pt;
+        }
+        li {
+            margin-bottom: 5pt;
+        }
+        .section {
+            margin-bottom: 20pt;
+        }
+        .signature-table {
+            margin-top: 30pt;
+        }
+        .signature-table td {
+            height: 60pt;
+        }
+        p {
+            margin: 8pt 0;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 5pt;
+        }
+        .label {
+            font-weight: bold;
+            width: 150pt;
+        }
+    </style>
+</head>
+<body>
+
+{{-- EN-TÊTE --}}
+<div style="text-align: center; margin-bottom: 30pt;">
+    <p style="margin: 0; font-size: 10pt;">Procédure de qualification : 88600/1/2/3 - 88614 Informaticien/ne CFC (Ordo 2014/21)</p>
+    <h1 style="margin-top: 10pt;">Cahier des charges</h1>
+    <p style="font-size: 9pt; color: #666;">Version 1.1 - {{ now()->format('d.m.Y') }}</p>
+</div>
+
+{{-- 1. INFORMATIONS GÉNÉRALES --}}
+<div class="section">
+    <h2>1 INFORMATIONS GÉNÉRALES</h2>
+
+    <table>
+        <tr>
+            <th style="width: 30%;">Candidat</th>
+            <th style="width: 20%;">Nom :</th>
+            <td style="width: 50%;">{{ $cdc->data['candidat_nom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Prénom :</th>
+            <td>{{ $cdc->data['candidat_prenom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th>Lieu de travail :</th>
+            <td colspan="2">{{ $cdc->data['lieu_travail'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th>Orientation :</th>
+            <td colspan="2">{{ $cdc->data['orientation'] ?? '' }}</td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 15pt;">
+        <tr>
+            <th style="width: 30%;">Chef de projet</th>
+            <th style="width: 20%;">Nom :</th>
+            <td style="width: 50%;">{{ $cdc->data['chef_projet_nom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Prénom :</th>
+            <td>{{ $cdc->data['chef_projet_prenom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>📧 :</th>
+            <td>{{ $cdc->data['chef_projet_email'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>☎ :</th>
+            <td>{{ $cdc->data['chef_projet_telephone'] ?? '' }}</td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 15pt;">
+        <tr>
+            <th style="width: 30%;">Expert 1</th>
+            <th style="width: 20%;">Nom :</th>
+            <td style="width: 50%;">{{ $cdc->data['expert1_nom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Prénom :</th>
+            <td>{{ $cdc->data['expert1_prenom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>📧 :</th>
+            <td>{{ $cdc->data['expert1_email'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>☎ :</th>
+            <td>{{ $cdc->data['expert1_telephone'] ?? '' }}</td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 15pt;">
+        <tr>
+            <th style="width: 30%;">Expert 2</th>
+            <th style="width: 20%;">Nom :</th>
+            <td style="width: 50%;">{{ $cdc->data['expert2_nom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Prénom :</th>
+            <td>{{ $cdc->data['expert2_prenom'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>📧 :</th>
+            <td>{{ $cdc->data['expert2_email'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <th>☎ :</th>
+            <td>{{ $cdc->data['expert2_telephone'] ?? '' }}</td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 15pt;">
+        <tr>
+            <th style="width: 40%;">Période de réalisation :</th>
+            <td>{{ $cdc->data['periode_realisation'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th>Horaire de travail :</th>
+            <td>{{ $cdc->data['horaire_travail'] ?? '' }}</td>
+        </tr>
+        <tr>
+            <th>Nombre d'heures :</th>
+            <td>{{ $cdc->data['nombre_heures'] ?? '' }}</td>
+        </tr>
+    </table>
+
+    @if(!empty($cdc->data['planning_analyse']) || !empty($cdc->data['planning_implementation']))
+        <table style="margin-top: 15pt;">
+            <tr>
+                <th colspan="2" style="background-color: #d0d0d0;">Planning (en H ou %)</th>
+            </tr>
+            @if(!empty($cdc->data['planning_analyse']))
+                <tr>
+                    <th style="width: 40%;">Analyse :</th>
+                    <td>{{ $cdc->data['planning_analyse'] }}</td>
+                </tr>
+            @endif
+            @if(!empty($cdc->data['planning_implementation']))
+                <tr>
+                    <th>Implémentation :</th>
+                    <td>{{ $cdc->data['planning_implementation'] }}</td>
+                </tr>
+            @endif
+            @if(!empty($cdc->data['planning_tests']))
+                <tr>
+                    <th>Tests :</th>
+                    <td>{{ $cdc->data['planning_tests'] }}</td>
+                </tr>
+            @endif
+            @if(!empty($cdc->data['planning_documentation']))
+                <tr>
+                    <th>Documentations :</th>
+                    <td>{{ $cdc->data['planning_documentation'] }}</td>
+                </tr>
+            @endif
+        </table>
+    @endif
+</div>
+
+{{-- 2. PROCÉDURE --}}
+<div class="section">
+    <h2>2 PROCÉDURE</h2>
+    @php
+        $procedure = $cdc->data['procedure'] ?? '';
+        $procedureItems = $procedure ? explode("\n", $procedure) : [];
+    @endphp
+    @if(count($procedureItems) > 0)
+        <ul>
+            @foreach($procedureItems as $item)
+                @if(trim($item))
+                    <li>{{ trim($item) }}</li>
+                @endif
+            @endforeach
+        </ul>
+    @else
+        <p><em>Non renseigné</em></p>
+    @endif
+</div>
+
+{{-- 3. TITRE --}}
+<div class="section">
+    <h2>3 TITRE</h2>
+    <p style="font-weight: bold; font-size: 12pt;">{{ $cdc->title }}</p>
+</div>
+
+{{-- 4. MATÉRIEL ET LOGICIEL À DISPOSITION --}}
+@if(!empty($cdc->data['materiel_logiciel']))
+    <div class="section">
+        <h2>4 MATÉRIEL ET LOGICIEL À DISPOSITION</h2>
+        @php
+            $materiel = $cdc->data['materiel_logiciel'];
+            $materielItems = explode("\n", $materiel);
+        @endphp
+        <ul>
+            @foreach($materielItems as $item)
+                @if(trim($item))
+                    <li>{{ trim($item) }}</li>
+                @endif
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+{{-- 5. PRÉREQUIS --}}
+@if(!empty($cdc->data['prerequis']))
+    <div class="section">
+        <h2>5 PRÉREQUIS</h2>
+        @php
+            $prerequis = $cdc->data['prerequis'];
+            $prerequisItems = explode("\n", $prerequis);
+        @endphp
+        <ul>
+            @foreach($prerequisItems as $item)
+                @if(trim($item))
+                    <li>{{ trim($item) }}</li>
+                @endif
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+{{-- 6. DESCRIPTIF DU PROJET --}}
+<div class="section">
+    <h2>6 DESCRIPTIF DU PROJET</h2>
+    <div style="white-space: pre-wrap;">{{ $cdc->data['descriptif_projet'] ?? 'Non renseigné' }}</div>
+</div>
+
+{{-- 7. LIVRABLES --}}
+@if(!empty($cdc->data['livrables']))
+    <div class="section">
+        <h2>7 LIVRABLES</h2>
+        <p>Le candidat est responsable de livrer à son chef de projet et aux deux experts :</p>
+        @php
+            $livrables = $cdc->data['livrables'];
+            $livrablesItems = explode("\n", $livrables);
+        @endphp
+        <ul>
+            @foreach($livrablesItems as $item)
+                @if(trim($item))
+                    <li>{{ trim($item) }}</li>
+                @endif
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+{{-- 8. POINTS TECHNIQUES ÉVALUÉS (si champs customs) --}}
+@php
+    $customFields = collect($cdc->data)->filter(function($value, $key) {
+        return !in_array($key, [
+            'candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
+            'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
+            'expert1_nom', 'expert1_prenom', 'expert1_email', 'expert1_telephone',
+            'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',
+            'periode_realisation', 'horaire_travail', 'nombre_heures',
+            'planning_analyse', 'planning_implementation', 'planning_tests', 'planning_documentation',
+            'procedure', 'titre_projet', 'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables'
+        ]) && !empty($value);
+    });
+@endphp
+
+@if($customFields->count() > 0)
+    <div class="section">
+        <h2>8 POINTS TECHNIQUES ÉVALUÉS SPÉCIFIQUES AU PROJET</h2>
+        <p>La grille d'évaluation définit les critères généraux selon lesquels le travail du candidat sera évalué (documentation, journal de travail, respect des normes, qualité, …).</p>
+        <p>En plus de cela, le travail sera évalué sur les points spécifiques suivants :</p>
+        <ol>
+            @foreach($customFields as $key => $value)
+                <li><strong>{{ ucfirst(str_replace('_', ' ', $key)) }}</strong><br>{{ $value }}</li>
+            @endforeach
+        </ol>
+    </div>
+@endif
+
+{{-- 9. VALIDATION --}}
+<div class="section">
+    <h2>9 VALIDATION</h2>
+    <table class="signature-table">
+        <tr>
+            <th style="width: 30%;">Lu et approuvé le :</th>
+            <th style="width: 70%;">Signature :</th>
+        </tr>
+        <tr>
+            <td>Candidat :</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Expert n°1 :</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Expert n°2 :</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Chef de projet :</td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+
+{{-- FOOTER --}}
+<div style="position: fixed; bottom: 0; left: 0; right: 0; text-align: center; font-size: 9pt; color: #666; border-top: 1px solid #ccc; padding-top: 10pt;">
+    <p style="margin: 0;">FONDATION JOBTREK</p>
+    <p style="margin: 0;">v1.1, {{ now()->format('Y-m-d') }}, JT_DEV_B100_1.0</p>
+    <p style="margin: 0;">jobtrek.ch</p>
+</div>
+
+</body>
+</html>
