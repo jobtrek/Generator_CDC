@@ -36,10 +36,10 @@
                 </div>
             @endif
 
+            {{-- Le cdcFormBuilder enveloppe tout le formulaire --}}
             <form method="POST" action="{{ route('forms.store') }}" x-data="cdcFormBuilder()" class="space-y-6">
                 @csrf
 
-                <!-- Informations du formulaire -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
@@ -77,7 +77,6 @@
                     </div>
                 </div>
 
-                <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">
@@ -123,7 +122,7 @@
                             <div class="space-y-2">
                                 <label class="flex items-center">
                                     <input type="radio" name="orientation" value="88601 Développement d'applications"
-                                           {{ old('orientation') == '88601 Développement d\'applications' ? 'checked' : '' }}
+                                           {{ old('orientation', '88601 Développement d\'applications') == '88601 Développement d\'applications' ? 'checked' : '' }}
                                            class="text-indigo-600">
                                     <span class="ml-2 text-sm">88601 Développement d'applications</span>
                                 </label>
@@ -147,8 +146,6 @@
                                 </label>
                             </div>
                         </div>
-
-                        <!-- Chef de projet -->
                         <div class="border-t pt-4 mt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,7 +182,6 @@
                             </div>
                         </div>
 
-                        <!-- Expert 1 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 1</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -222,7 +218,6 @@
                             </div>
                         </div>
 
-                        <!-- Expert 2 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -258,78 +253,195 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Période, horaire, heures -->
                         <div class="border-t pt-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{
+                                totalHours: {{ old('nombre_heures', '90') }}
+                            }">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
                                         Période de réalisation *
                                     </label>
-                                    <input type="text" name="periode_realisation" required
-                                           value="{{ old('periode_realisation') }}"
-                                           placeholder="Ex: Du 3 au 26 mars 2025"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="text-xs text-gray-500">Du</label>
+                                            <input type="date" name="date_debut" required
+                                                   value="{{ old('date_debut', $prefillData['date_debut'] ?? '') }}"
+                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">Au</label>
+                                            <input type="date" name="date_fin" required
+                                                   value="{{ old('date_fin', $prefillData['date_fin'] ?? '') }}"
+                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        </div>
+                                    </div>
                                 </div>
+
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
                                         Horaire de travail *
                                     </label>
-                                    <input type="text" name="horaire_travail" required
-                                           value="{{ old('horaire_travail') }}"
-                                           placeholder="Ex: 8h-12h, 13h-17h"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <div class="space-y-1">
+                                        <div>
+                                            <label class="text-xs text-gray-500">Matin</label>
+                                            <div class="flex gap-1 items-center">
+                                                <input type="time" name="heure_matin_debut" required
+                                                       value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                                <span class="text-xs">–</span>
+                                                <input type="time" name="heure_matin_fin" required
+                                                       value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">Après-midi</label>
+                                            <div class="flex gap-1 items-center">
+                                                <input type="time" name="heure_aprem_debut" required
+                                                       value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                                <span class="text-xs">–</span>
+                                                <input type="time" name="heure_aprem_fin" required
+                                                       value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Nombre d'heures *
-                                    </label>
-                                    <input type="text" name="nombre_heures" required
-                                           value="{{ old('nombre_heures') }}"
-                                           placeholder="Ex: 120 heures"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
+
+                                <input type="hidden" name="nombre_heures" x-model="totalHours" value="90">
                             </div>
                         </div>
 
-                        <!-- Planning -->
-                        <div class="border-t pt-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Planning (en H ou %)</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Analyse</label>
-                                    <input type="text" name="planning_analyse"
-                                           value="{{ old('planning_analyse') }}"
-                                           placeholder="Ex: 20H ou 15%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <div class="border-t pt-4" x-data="planningCalculatorEdit()">
+                            <h4 class="font-semibold text-gray-800 mb-3 flex items-center justify-between">
+                                <span>Planning (total : <span x-text="totalHeures + 'h'"></span>)</span>
+                                <div class="flex gap-2">
+                                    <button type="button"
+                                            @click="mode = 'heures'"
+                                            :class="mode === 'heures' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                            class="px-3 py-1 rounded-md text-xs font-medium transition">
+                                        Heures
+                                    </button>
+                                    <button type="button"
+                                            @click="mode = 'pourcentage'"
+                                            :class="mode === 'pourcentage' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                            class="px-3 py-1 rounded-md text-xs font-medium transition">
+                                        %
+                                    </button>
                                 </div>
+                            </h4>
+
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Implémentation</label>
-                                    <input type="text" name="planning_implementation"
-                                           value="{{ old('planning_implementation') }}"
-                                           placeholder="Ex: 60H ou 50%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Analyse
+                                        <span class="text-xs text-indigo-600 font-semibold" x-text="'(' + analyse + (mode === 'heures' ? 'h' : '%') + ')'"></span>
+                                    </label>
+                                    <input type="range"
+                                           x-model.number="analyse"
+                                           :min="0"
+                                           :max="mode === 'heures' ? totalHeures : 100"
+                                           :step="mode === 'heures' ? 1 : 5"
+                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                    <div class="flex justify-between items-center mt-2">
+                                        <input type="number"
+                                               x-model.number="analyse"
+                                               :min="0"
+                                               :max="mode === 'heures' ? totalHeures : 100"
+                                               class="w-20 text-sm rounded border-gray-300">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+                                    <input type="hidden" name="planning_analyse" :value="formatValue(analyse)">
                                 </div>
+
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tests</label>
-                                    <input type="text" name="planning_tests"
-                                           value="{{ old('planning_tests') }}"
-                                           placeholder="Ex: 20H ou 15%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Implémentation
+                                        <span class="text-xs text-green-600 font-semibold" x-text="'(' + implementation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
+                                    </label>
+                                    <input type="range"
+                                           x-model.number="implementation"
+                                           :min="0"
+                                           :max="mode === 'heures' ? totalHeures : 100"
+                                           :step="mode === 'heures' ? 1 : 5"
+                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
+                                    <div class="flex justify-between items-center mt-2">
+                                        <input type="number"
+                                               x-model.number="implementation"
+                                               :min="0"
+                                               :max="mode === 'heures' ? totalHeures : 100"
+                                               class="w-20 text-sm rounded border-gray-300">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+                                    <input type="hidden" name="planning_implementation" :value="formatValue(implementation)">
                                 </div>
+
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Documentations</label>
-                                    <input type="text" name="planning_documentation"
-                                           value="{{ old('planning_documentation') }}"
-                                           placeholder="Ex: 20H ou 20%"
-                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Tests
+                                        <span class="text-xs text-orange-600 font-semibold" x-text="'(' + tests + (mode === 'heures' ? 'h' : '%') + ')'"></span>
+                                    </label>
+                                    <input type="range"
+                                           x-model.number="tests"
+                                           :min="0"
+                                           :max="mode === 'heures' ? totalHeures : 100"
+                                           :step="mode === 'heures' ? 1 : 5"
+                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
+                                    <div class="flex justify-between items-center mt-2">
+                                        <input type="number"
+                                               x-model.number="tests"
+                                               :min="0"
+                                               :max="mode === 'heures' ? totalHeures : 100"
+                                               class="w-20 text-sm rounded border-gray-300">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+                                    <input type="hidden" name="planning_tests" :value="formatValue(tests)">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Documentation
+                                        <span class="text-xs text-purple-600 font-semibold" x-text="'(' + documentation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
+                                    </label>
+                                    <input type="range"
+                                           x-model.number="documentation"
+                                           :min="0"
+                                           :max="mode === 'heures' ? totalHeures : 100"
+                                           :step="mode === 'heures' ? 1 : 5"
+                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                                    <div class="flex justify-between items-center mt-2">
+                                        <input type="number"
+                                               x-model.number="documentation"
+                                               :min="0"
+                                               :max="mode === 'heures' ? totalHeures : 100"
+                                               class="w-20 text-sm rounded border-gray-300">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+                                    <input type="hidden" name="planning_documentation" :value="formatValue(documentation)">
+                                </div>
+                            </div>
+
+                            <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-indigo-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-800">Total planifié :</span>
+                                    <span class="text-lg font-bold"
+                                          :class="total > (mode === 'heures' ? totalHeures : 100) ? 'text-red-600' : 'text-green-600'"
+                                          x-text="total + (mode === 'heures' ? 'h' : '%')"></span>
+                                </div>
+                                <div class="mt-2 text-xs text-gray-600">
+                                <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
+                                    ⚠️ Le total devrait être 100%
+                                </span>
+                                    <span x-show="mode === 'heures' && total > totalHeures" class="text-red-600">
+                                    ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
+                                </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Section 2: PROCÉDURE -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
@@ -341,17 +453,16 @@
                         <textarea name="procedure" rows="15"
                                   placeholder="Points de la procédure (un par ligne)"
                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ old('procedure', 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.
-Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.
-Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.
-Le candidat est entièrement responsable de la sécurité de ses données.
-En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.
-Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.
-A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.') }}</textarea>
+                            Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.
+                            Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.
+                            Le candidat est entièrement responsable de la sécurité de ses données.
+                            En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.
+                            Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.
+                            A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.') }}</textarea>
                         <p class="mt-1 text-sm text-gray-500">Séparez chaque point par une nouvelle ligne</p>
                     </div>
                 </div>
 
-                <!-- Section 3: TITRE -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
@@ -367,7 +478,6 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                     </div>
                 </div>
 
-                <!-- Section 4: MATÉRIEL ET LOGICIEL -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
@@ -383,7 +493,6 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                     </div>
                 </div>
 
-                <!-- Section 5: PRÉREQUIS -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
@@ -398,7 +507,6 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                     </div>
                 </div>
 
-                <!-- Section 6: DESCRIPTIF DU PROJET -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
@@ -433,7 +541,6 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
                     </div>
                 </div>
 
-                <!-- Section 7: LIVRABLES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
@@ -448,7 +555,6 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
                     </div>
                 </div>
 
-                <!-- Champs personnalisés existants -->
                 <div class="bg-white shadow-sm rounded-lg" x-show="fields.length > 0">
                     <div class="p-6 border-b border-gray-200 bg-gray-50">
                         <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
@@ -489,7 +595,6 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
                     </div>
                 </div>
 
-                <!-- Bouton ajouter champ -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6">
                         <button type="button" @click="addField"
@@ -499,7 +604,6 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
                     </div>
                 </div>
 
-                <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.index') }}"
                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
@@ -515,7 +619,54 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
     </div>
 
     <script>
-        // add function for calculate the planing percentages
+        function planningCalculatorEdit() {
+            const parseOldValue = (oldStr, defaultVal) => {
+                if (!oldStr || oldStr === '') return defaultVal;
+                const cleaned = String(oldStr).replace(/[H%]/g, '').trim();
+                const parsed = parseInt(cleaned);
+                return isNaN(parsed) ? defaultVal : parsed;
+            };
+
+            const oldAnalyse = "{{ old('planning_analyse') }}";
+            const defaultMode = oldAnalyse.includes('H') ? 'heures' : 'pourcentage';
+
+            return {
+                mode: defaultMode,
+                analyse: parseOldValue("{{ old('planning_analyse') }}", 15),
+                implementation: parseOldValue("{{ old('planning_implementation') }}", 50),
+                tests: parseOldValue("{{ old('planning_tests') }}", 20),
+                documentation: parseOldValue("{{ old('planning_documentation') }}", 15),
+
+                get totalHeures() {
+                    const input = document.querySelector('input[name="nombre_heures"]');
+                    return parseInt(input?.value || 120);
+                },
+
+                get total() {
+                    return parseInt(this.analyse || 0) +
+                        parseInt(this.implementation || 0) +
+                        parseInt(this.tests || 0) +
+                        parseInt(this.documentation || 0);
+                },
+
+                formatValue(val) {
+                    return val + (this.mode === 'heures' ? 'H' : '%');
+                },
+
+                init() {
+                    this.$watch('mode', () => {
+                        if (this.mode === 'heures') {
+                            const max = this.totalHeures;
+                            this.analyse = Math.min(this.analyse, max);
+                            this.implementation = Math.min(this.implementation, max);
+                            this.tests = Math.min(this.tests, max);
+                            this.documentation = Math.min(this.documentation, max);
+                        }
+                    });
+                }
+            };
+        }
+
         function cdcFormBuilder() {
             const prefilledFields = @json($prefilledFields ?? []);
 
@@ -527,7 +678,8 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
                         'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',
                         'periode_realisation', 'horaire_travail', 'nombre_heures',
                         'planning_analyse', 'planning_implementation', 'planning_tests', 'planning_documentation',
-                        'titre_projet', 'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables'
+                        'titre_projet', 'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables',
+                        'date_debut', 'date_fin', 'heure_debut', 'heure_fin'
                     ].includes(field.name)
                 ).map((field, index) => ({
                     ...field,

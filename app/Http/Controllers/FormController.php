@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Carbon\Carbon;
 
 class FormController extends Controller
 {
@@ -81,9 +82,13 @@ class FormController extends Controller
             'expert2_email' => 'required|email',
             'expert2_telephone' => 'required|string',
 
-            'periode_realisation' => 'required|string|max:255',
-            'horaire_travail' => 'required|string|max:255',
-            'nombre_heures' => 'required|string|max:255',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'heure_matin_debut' => 'required|date_format:H:i',
+            'heure_matin_fin' => 'required|date_format:H:i',
+            'heure_aprem_debut' => 'required|date_format:H:i',
+            'heure_aprem_fin' => 'required|date_format:H:i',
+            'nombre_heures' => 'required|integer|min:1|max:90',
 
             'planning_analyse' => 'nullable|string',
             'planning_implementation' => 'nullable|string',
@@ -105,6 +110,11 @@ class FormController extends Controller
             'fields.*.value' => 'nullable|string',
         ]);
 
+        $dateDebut = Carbon::parse($validated['date_debut'])->locale('fr')->isoFormat('D MMMM YYYY');
+        $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');
+        $periodeRealisation = "Du {$dateDebut} au {$dateFin}";
+        $horaireTravail = $validated['heure_matin_debut'] . ' – ' . $validated['heure_matin_fin'] .
+            ', ' . $validated['heure_aprem_debut'] . ' – ' . $validated['heure_aprem_fin'];
         DB::beginTransaction();
 
         try {
@@ -140,6 +150,12 @@ class FormController extends Controller
                 ['name' => 'horaire_travail', 'label' => 'Horaire de travail', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'nombre_heures', 'label' => 'Nombre d\'heures', 'section' => 'section_1', 'field_type_id' => 1],
 
+                ['name' => 'heure_matin_debut', 'label' => 'Heure matin début', 'section' => 'hidden', 'field_type_id' => 5],
+                ['name' => 'heure_matin_fin', 'label' => 'Heure matin fin', 'section' => 'hidden', 'field_type_id' => 5],
+                ['name' => 'heure_aprem_debut', 'label' => 'Heure après-midi début', 'section' => 'hidden', 'field_type_id' => 5],
+                ['name' => 'heure_aprem_fin', 'label' => 'Heure après-midi fin', 'section' => 'hidden', 'field_type_id' => 5],
+
+
                 ['name' => 'planning_analyse', 'label' => 'Planning - Analyse', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'planning_implementation', 'label' => 'Planning - Implémentation', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'planning_tests', 'label' => 'Planning - Tests', 'section' => 'section_1', 'field_type_id' => 1],
@@ -158,6 +174,20 @@ class FormController extends Controller
 
             $orderIndex = 0;
             foreach ($fixedFieldsStructure as $fieldStructure) {
+                if (in_array($fieldStructure['name'], ['date_debut', 'date_fin', 'heure_debut', 'heure_fin'])) {
+                    $form->fields()->create([
+                        'name' => $fieldStructure['name'],
+                        'label' => $fieldStructure['label'],
+                        'field_type_id' => $fieldStructure['field_type_id'],
+                        'section' => 'hidden',
+                        'placeholder' => null,
+                        'is_required' => true,
+                        'options' => null,
+                        'order_index' => $orderIndex++,
+                    ]);
+                    continue;
+                }
+
                 $form->fields()->create([
                     'name' => $fieldStructure['name'],
                     'label' => $fieldStructure['label'],
@@ -191,9 +221,14 @@ class FormController extends Controller
                 'expert2_email' => $validated['expert2_email'],
                 'expert2_telephone' => $validated['expert2_telephone'],
 
-                'periode_realisation' => $validated['periode_realisation'],
-                'horaire_travail' => $validated['horaire_travail'],
+                'periode_realisation' => $periodeRealisation,
+                'horaire_travail' => $horaireTravail,
                 'nombre_heures' => $validated['nombre_heures'],
+
+                'date_debut' => $validated['date_debut'],
+                'date_fin' => $validated['date_fin'],
+                'heure_debut' => $validated['heure_debut'],
+                'heure_fin' => $validated['heure_fin'],
 
                 'procedure' => $validated['procedure'] ?? '',
                 'planning_analyse' => $validated['planning_analyse'] ?? '',
@@ -268,9 +303,27 @@ class FormController extends Controller
         $this->authorize('update', $form);
         $form->load('fields.fieldType');
         $fieldTypes = FieldType::all();
-        return view('forms.edit', compact('form', 'fieldTypes'));
-    }
 
+        $cdc = $form->cdcs()->first();
+        $cdcData = $cdc->data ?? [];
+
+        $prefillData = [
+            'date_debut' => $cdcData['date_debut'] ?? null,
+            'date_fin' => $cdcData['date_fin'] ?? null,
+            'heure_matin_debut' => $cdcData['heure_matin_debut'] ?? '08:30',
+            'heure_matin_fin' => $cdcData['heure_matin_fin'] ?? '12:30',
+            'heure_aprem_debut' => $cdcData['heure_aprem_debut'] ?? '13:30',
+            'heure_aprem_fin' => $cdcData['heure_aprem_fin'] ?? '17:30',
+            'nombre_heures' => $cdcData['nombre_heures'] ?? '90',
+            'planning_analyse' => $cdcData['planning_analyse'] ?? '',
+            'planning_implementation' => $cdcData['planning_implementation'] ?? '',
+            'planning_tests' => $cdcData['planning_tests'] ?? '',
+            'planning_documentation' => $cdcData['planning_documentation'] ?? '',
+        ];
+
+
+        return view('forms.edit', compact('form', 'fieldTypes', 'prefillData'));
+    }
     public function update(Request $request, Form $form)
     {
         $this->authorize('update', $form);
@@ -302,9 +355,12 @@ class FormController extends Controller
 
             'procedure' => ['nullable', 'string', 'max:5000'],
 
-            'periode_realisation' => 'required|string|max:255',
-            'horaire_travail' => 'required|string|max:255',
-            'nombre_heures' => 'required|string|max:255',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'heure_debut' => 'required|date_format:H:i',
+            'heure_fin' => 'required|date_format:H:i',
+
+            'nombre_heures' => 'required|integer|min:1',
 
             'planning_analyse' => 'nullable|string',
             'planning_implementation' => 'nullable|string',
@@ -332,6 +388,13 @@ class FormController extends Controller
             'deleted_fields' => 'nullable|array',
             'deleted_fields.*' => 'exists:fields,id',
         ]);
+
+        $dateDebut = Carbon::parse($validated['date_debut'])->locale('fr')->isoFormat('D MMMM YYYY');
+        $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');
+        $periodeRealisation = "Du {$dateDebut} au {$dateFin}";
+
+        $horaireTravail = $validated['heure_matin_debut'] . ' – ' . $validated['heure_matin_fin'] .
+            ', ' . $validated['heure_aprem_debut'] . ' – ' . $validated['heure_aprem_fin'];
 
         DB::beginTransaction();
 
@@ -363,9 +426,16 @@ class FormController extends Controller
                 'expert2_email' => $validated['expert2_email'],
                 'expert2_telephone' => $validated['expert2_telephone'],
 
-                'periode_realisation' => $validated['periode_realisation'],
-                'horaire_travail' => $validated['horaire_travail'],
+                'periode_realisation' => $periodeRealisation,
+                'horaire_travail' => $horaireTravail,
                 'nombre_heures' => $validated['nombre_heures'],
+
+                'date_debut' => $validated['date_debut'],
+                'date_fin' => $validated['date_fin'],
+                'heure_matin_debut' => $validated['heure_matin_debut'],
+                'heure_matin_fin' => $validated['heure_matin_fin'],
+                'heure_aprem_debut' => $validated['heure_aprem_debut'],
+                'heure_aprem_fin' => $validated['heure_aprem_fin'],
 
                 'planning_analyse' => $validated['planning_analyse'] ?? '',
                 'planning_implementation' => $validated['planning_implementation'] ?? '',
@@ -428,9 +498,15 @@ class FormController extends Controller
 
             $cdc = $form->cdcs()->first();
             if ($cdc) {
+                $fixedFieldNames = ['periode_realisation', 'horaire_travail', 'nombre_heures', 'date_debut', 'date_fin', 'heure_debut', 'heure_fin'];
+                $currentCdcData = $cdc->data;
+                foreach($fixedFieldNames as $name) {
+                    unset($currentCdcData[$name]);
+                }
+
                 $cdc->update([
                     'title' => $validated['titre_projet'],
-                    'data' => $cdcData,
+                    'data' => array_merge($currentCdcData, $cdcData),
                 ]);
             } else {
                 Cdc::create([
