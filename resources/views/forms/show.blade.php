@@ -17,15 +17,24 @@
                 @endphp
 
                 @if($cdc)
+                    <!-- Bouton Télécharger Word -->
                     <a href="{{ route('cdcs.download', $cdc) }}"
-                       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23 1.5q.41 0 .7.3.3.29.3.7v19q0 .41-.3.7-.29.3-.7.3H7q-.41 0-.7-.3-.3-.29-.3-.7V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h5V2.5q0-.41.3-.7.29-.3.7-.3zM6 13.28l1.42 5.42h2.03l2.14-9.4H9.41L8.05 15.38 6.4 9.3H4.75l-1.56 6.08L1.83 9.3H-.25l2.14 9.4h2.03z"/>
                         </svg>
-                        Télécharger le CDC
+                        Word
+                    </a>
+                    <!-- Bouton Télécharger PDF -->
+                    <a href="{{ route('cdcs.downloadPdf', $cdc) }}"
+                       class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+                            <path d="M8 15.5h1.5V17H8zm0-2h1.5v1.5H8zm6 0h1.5v1.5H14zm0 2h1.5V17H14zm-3-2h1.5v1.5H11zm0 2h1.5V17H11z"/>
+                        </svg>
+                        PDF
                     </a>
                 @endif
-
                 <a href="{{ route('forms.edit', $form) }}"
                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -42,6 +42,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('users/{user}/roles', [UserController::class, 'updateRoles'])
                 ->name('users.roles.update');
         });
-});
 
+    Route::get('/cdcs/{cdc}/download-pdf', [CdcController::class, 'downloadPdf'])
+        ->name('cdcs.downloadPdf')
+        ->middleware('auth');
+});
 require __DIR__.'/auth.php';
