@@ -515,6 +515,7 @@ L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en
     </div>
 
     <script>
+        // add function for calculate the planing percentages
         function cdcFormBuilder() {
             const prefilledFields = @json($prefilledFields ?? []);
 

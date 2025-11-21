@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cdc;
-use App\Models\Form;
 use App\Services\CdcPandocGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,38 +14,7 @@ class CdcController extends Controller
     use AuthorizesRequests;
 
     /**
-     * Affiche la liste des CDC de l'utilisateur
-     */
-    public function index(Request $request)
-    {
-        $query = Cdc::with(['form', 'user'])
-            ->where('user_id', Auth::id());
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhereHas('form', function($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
-                    });
-            });
-        }
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $cdcs = $query->latest()->paginate(10)->withQueryString();
-
-        return view('cdcs.index', compact('cdcs'));
-    }
-
-    /**
      * ✅ Prépare la duplication d'un formulaire pour générer un nouveau CDC
-     * Redirige vers forms.create avec les données en session
      */
     public function create(Request $request)
     {
@@ -90,58 +58,12 @@ class CdcController extends Controller
     }
 
     /**
-     * ✅ Store n'est plus utilisé directement
-     * La création du CDC se fait via FormController::store()
+     * ✅ Store n'est plus utilisé (CDC créé via FormController)
      */
     public function store(Request $request)
     {
         return redirect()->route('forms.create')
             ->with('error', 'Veuillez utiliser le formulaire de création pour générer un CDC.');
-    }
-
-    /**
-     * Affiche un CDC spécifique
-     */
-    public function show(Cdc $cdc)
-    {
-        $this->authorize('view', $cdc);
-        $cdc->load(['form.fields.fieldType', 'user']);
-
-        return view('cdcs.show', compact('cdc'));
-    }
-
-    /**
-     * Met à jour un CDC existant
-     */
-    public function update(Request $request, Cdc $cdc)
-    {
-        $this->authorize('update', $cdc);
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'data' => 'required|array',
-        ]);
-
-        try {
-            $cdc->update([
-                'title' => $validated['title'],
-                'data' => $validated['data'],
-            ]);
-
-            return redirect()->route('cdcs.show', $cdc)
-                ->with('success', 'CDC mis à jour avec succès !');
-
-        } catch (\Exception $e) {
-            Log::error('Erreur mise à jour CDC', [
-                'cdc_id' => $cdc->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage()
-            ]);
-
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Erreur lors de la mise à jour : ' . $e->getMessage());
-        }
     }
 
     /**
@@ -153,7 +75,6 @@ class CdcController extends Controller
 
         try {
             $path = $generator->generate($cdc);
-
             $fullPath = storage_path('app/public/' . $path);
 
             if (!file_exists($fullPath)) {
@@ -174,44 +95,17 @@ class CdcController extends Controller
             ]);
 
             return redirect()->back()
-                ->with('error', 'Une erreur est survenue lors de la génération du document. Veuillez réessayer.');
+                ->with('error', 'Une erreur est survenue lors de la génération du document.');
         }
     }
 
     /**
-     * Supprime un CDC
-     */
-    public function destroy(Cdc $cdc)
-    {
-        $this->authorize('delete', $cdc);
-
-        try {
-            $cdcTitle = $cdc->title;
-            $cdc->delete();
-
-            return redirect()->route('cdcs.index')
-                ->with('success', "Le CDC \"{$cdcTitle}\" a été supprimé avec succès !");
-
-        } catch (\Exception $e) {
-            Log::error('Erreur suppression CDC', [
-                'cdc_id' => $cdc->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage()
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * ✅ Génère un nom de fichier sécurisé pour le téléchargement
+     * ✅ Génère un nom de fichier sécurisé
      */
     private function generateFileName(Cdc $cdc): string
     {
         $slug = \Illuminate\Support\Str::slug($cdc->title);
         $timestamp = now()->format('Y-m-d');
-
         return "{$slug}_{$timestamp}.docx";
     }
 }
