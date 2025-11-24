@@ -357,8 +357,10 @@ class FormController extends Controller
 
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
-            'heure_debut' => 'required|date_format:H:i',
-            'heure_fin' => 'required|date_format:H:i',
+            'heure_matin_debut' => 'required|date_format:H:i',
+            'heure_matin_fin' => 'required|date_format:H:i',
+            'heure_aprem_debut' => 'required|date_format:H:i',
+            'heure_aprem_fin' => 'required|date_format:H:i',
 
             'nombre_heures' => 'required|integer|min:1',
 
@@ -388,6 +390,8 @@ class FormController extends Controller
             'deleted_fields' => 'nullable|array',
             'deleted_fields.*' => 'exists:fields,id',
         ]);
+        $validated['heure_debut'] = $validated['heure_matin_debut'] ?? '08:30';
+        $validated['heure_fin'] = $validated['heure_aprem_fin'] ?? '17:30';
 
         $dateDebut = Carbon::parse($validated['date_debut'])->locale('fr')->isoFormat('D MMMM YYYY');
         $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');

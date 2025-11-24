@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div class="flex items-center">
-                <a href="{{ route('forms.index') }}" class="mr-4 text-gray-600 hover:text-gray-900">
+                <a href="{{ route('forms.index') }}" class="p-2 mr-4 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
@@ -11,36 +11,35 @@
                     {{ $form->name }}
                 </h2>
             </div>
+
             <div class="flex gap-2">
                 @php
                     $cdc = $form->cdcs()->first();
                 @endphp
 
                 @if($cdc)
-                    <!-- Bouton Télécharger Word -->
                     <a href="{{ route('cdcs.download', $cdc) }}"
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-md">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M23 1.5q.41 0 .7.3.3.29.3.7v19q0 .41-.3.7-.29.3-.7.3H7q-.41 0-.7-.3-.3-.29-.3-.7V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h5V2.5q0-.41.3-.7.29-.3.7-.3zM6 13.28l1.42 5.42h2.03l2.14-9.4H9.41L8.05 15.38 6.4 9.3H4.75l-1.56 6.08L1.83 9.3H-.25l2.14 9.4h2.03z"/>
+                       class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                       title="Télécharger Word" aria-label="Télécharger le document Word">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.06 14.88c-.61.3-1.25.46-1.94.46-.71 0-1.39-.16-2.02-.49-.62-.31-1.13-.76-1.52-1.36-.39-.58-.59-1.28-.59-2.06 0-.79.2-1.48.59-2.06.39-.6.9-1.04 1.52-1.36.63-.33 1.31-.49 2.02-.49.69 0 1.33.16 1.94.46.61.3 1.13.75 1.52 1.36.39.58.59 1.28.59 2.06 0 .78-.2 1.48-.59 2.06-.39.6-.9 1.05-1.52 1.36z" fill="white"/>
                         </svg>
-                        Word
                     </a>
-                    <!-- Bouton Télécharger PDF -->
                     <a href="{{ route('cdcs.downloadPdf', $cdc) }}"
-                       class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition shadow-md">
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                       class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                       title="Télécharger PDF" aria-label="Télécharger le document PDF">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
                             <path d="M8 15.5h1.5V17H8zm0-2h1.5v1.5H8zm6 0h1.5v1.5H14zm0 2h1.5V17H14zm-3-2h1.5v1.5H11zm0 2h1.5V17H11z"/>
                         </svg>
-                        PDF
                     </a>
                 @endif
                 <a href="{{ route('forms.edit', $form) }}"
-                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                   title="Modifier le formulaire" aria-label="Modifier">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
-                    Modifier
                 </a>
 
                 <form method="POST"
@@ -49,16 +48,17 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                            title="Supprimer le formulaire" aria-label="Supprimer">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Supprimer
                     </button>
                 </form>
             </div>
         </div>
     </x-slot>
+
     <div class="py-12">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
@@ -80,115 +80,13 @@
             @endif
 
             @php
-                // Récupérer les données du CDC associé
                 $cdc = $form->cdcs()->first();
                 $cdcData = $cdc ? $cdc->data : [];
 
-                // Fonction helper pour récupérer les valeurs
                 $getValue = function($key, $default = 'Non renseigné') use ($cdcData) {
                     return $cdcData[$key] ?? $default;
                 };
             @endphp
-
-                <!-- Informations du formulaire -->
-            <div class="bg-white shadow-sm rounded-lg mb-6">
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
-                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        Informations du formulaire
-                    </h3>
-                </div>
-                <div class="p-6">
-                    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <dt class="text-sm font-medium text-gray-500 flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
-                                </svg>
-                                Description
-                            </dt>
-                            <dd class="text-sm text-gray-900">
-                                {{ $form->description ?? 'Aucune description' }}
-                            </dd>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <dt class="text-sm font-medium text-gray-500 flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                Statut
-                            </dt>
-                            <dd>
-                                @if($form->is_active)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
-                                        Actif
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                        Inactif
-                                    </span>
-                                @endif
-                            </dd>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <dt class="text-sm font-medium text-gray-500 flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
-                                Créé par
-                            </dt>
-                            <dd class="text-sm text-gray-900">
-                                {{ $form->user->name }}
-                            </dd>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <dt class="text-sm font-medium text-gray-500 flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                Date de création
-                            </dt>
-                            <dd class="text-sm text-gray-900">
-                                {{ $form->created_at->format('d/m/Y à H:i') }}
-                            </dd>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <dt class="text-sm font-medium text-gray-500 flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                Dernière modification
-                            </dt>
-                            <dd class="text-sm text-gray-900">
-                                {{ $form->updated_at->format('d/m/Y à H:i') }}
-                            </dd>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <dt class="text-sm font-medium text-gray-500 flex items-center mb-2">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                </svg>
-                                Nombre de champs
-                            </dt>
-                            <dd>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $form->fields->count() }} champ{{ $form->fields->count() > 1 ? 's' : '' }}
-                                </span>
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
 
             <!-- Section 1: INFORMATIONS GÉNÉRALES -->
             <div class="bg-white shadow-sm rounded-lg mb-6">

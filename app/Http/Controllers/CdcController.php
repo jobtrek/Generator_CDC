@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cdc;
 use App\Models\Form;
-use App\Services\CdcPandocGenerator;
+use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -71,104 +71,31 @@ class CdcController extends Controller
     /**
      * ✅ Télécharge le CDC au format Word (.docx)
      */
-    public function download(Cdc $cdc, CdcPandocGenerator $generator)
+    public function download(Cdc $cdc)
     {
-        $this->authorize('view', $cdc->form);
-
         try {
-            $path = $generator->generate($cdc);
-            $fullPath = storage_path('app/public/' . $path);
+            $generator = new \App\Services\CdcPhpWordGenerator();
+            $filePath = $generator->generate($cdc);
 
-            if (!file_exists($fullPath)) {
-                throw new \Exception('Le fichier généré est introuvable.');
+            $fullPath = storage_path('app/public/' . $filePath);
+
+            if (!File::exists($fullPath)) {
+                return back()->with('error', 'Le fichier n\'a pas pu être généré.');
             }
 
             return response()->download(
                 $fullPath,
-                $this->generateFileName($cdc)
-            )->deleteFileAfterSend(true);
+                'cdc-' . Str::slug($cdc->title) . '.docx',
+                ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            );
 
         } catch (\Exception $e) {
-            Log::error('Erreur génération CDC Word', [
-                'cdc_id' => $cdc->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Une erreur est survenue lors de la génération du document Word.');
+            return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
         }
     }
-
     /**
      * ✅ Télécharge le CDC au format PDF (conversion depuis Word généré)
      */
-    public function downloadPdf(Cdc $cdc, CdcPandocGenerator $generator)
-    {
-        $this->authorize('view', $cdc->form);
-
-        try {
-            $path = $generator->generate($cdc);
-            $wordPath = storage_path('app/public/' . $path);
-
-            if (!file_exists($wordPath)) {
-                throw new \Exception('Le fichier Word généré est introuvable.');
-            }
-
-            Log::info('Fichier Word généré pour PDF', ['path' => $wordPath]);
-
-            $pdfPath = storage_path('app/cdc_' . $cdc->id . '_' . time() . '.pdf');
-
-            $pandocCommand = sprintf(
-                'pandoc %s -o %s --pdf-engine=xelatex 2>&1',
-                escapeshellarg($wordPath),
-                escapeshellarg($pdfPath)
-            );
-
-            Log::info('Commande Pandoc', ['command' => $pandocCommand]);
-
-            exec($pandocCommand, $output, $returnCode);
-
-            if ($returnCode !== 0) {
-                Log::error('Erreur Pandoc', [
-                    'return_code' => $returnCode,
-                    'output' => implode("\n", $output)
-                ]);
-
-                @unlink($wordPath);
-
-                return redirect()->back()->with('error', 'Erreur lors de la conversion PDF : ' . implode(' ', $output));
-            }
-
-            if (!file_exists($pdfPath)) {
-                Log::error('PDF non généré', ['path' => $pdfPath]);
-                @unlink($wordPath);
-                return redirect()->back()->with('error', 'Le fichier PDF n\'a pas été généré.');
-            }
-
-            Log::info('PDF généré avec succès', ['path' => $pdfPath, 'size' => filesize($pdfPath)]);
-
-            @unlink($wordPath);
-
-            $fileName = $this->generatePdfFileName($cdc);
-
-            return response()->download($pdfPath, $fileName, [
-                'Content-Type' => 'application/pdf',
-            ])->deleteFileAfterSend(true);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur génération PDF CDC', [
-                'cdc_id' => $cdc->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Une erreur est survenue lors de la génération du PDF : ' . $e->getMessage());
-        }
-    }
 
     /**
      * ✅ Génère un nom de fichier Word sécurisé

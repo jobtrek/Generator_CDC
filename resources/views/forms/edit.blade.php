@@ -49,44 +49,10 @@
                 @csrf
                 @method('PUT')
 
-                <!-- Informations du formulaire -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-indigo-700 flex items-center">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            Informations du formulaire
-                        </h3>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-                                Nom du formulaire *
-                            </label>
-                            <input type="text" name="name" id="name" required
-                                   value="{{ old('name', $form->name) }}"
-                                   placeholder="Ex: Cahier des charges TPI 2025"
-                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        </div>
-
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                                Description
-                            </label>
-                            <textarea name="description" id="description" rows="2"
-                                      placeholder="Description du formulaire..."
-                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('description', $form->description) }}</textarea>
-                        </div>
-
-                        <label class="flex items-center">
-                            <input type="checkbox" name="is_active" value="1"
-                                   {{ old('is_active', $form->is_active) ? 'checked' : '' }}
-                                   class="rounded border-gray-300 text-indigo-600 shadow-sm">
-                            <span class="ml-2 text-sm text-gray-600">Formulaire actif</span>
-                        </label>
-                    </div>
-                </div>
+                <!-- Champs cachés requis pour le formulaire -->
+                <input type="hidden" name="name" value="{{ old('name', $form->name) }}">
+                <input type="hidden" name="description" value="{{ old('description', $form->description) }}">
+                <input type="hidden" name="is_active" value="{{ old('is_active', $form->is_active ? '1' : '0') }}">
 
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
@@ -235,7 +201,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- Expert 2 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
@@ -276,9 +241,8 @@
                         <!-- Période, horaire, heures -->
                         <div class="border-t pt-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{
-        totalHours: {{ old('nombre_heures', $getValue('nombre_heures', '90')) }}
-    }">
-                                <!-- Période de réalisation -->
+                            totalHours: {{ old('nombre_heures', $getValue('nombre_heures', '90')) }}
+                        }">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
                                         Période de réalisation *
@@ -461,15 +425,16 @@
                                           x-text="total + (mode === 'heures' ? 'h' : '%')"></span>
                                 </div>
                                 <div class="mt-2 text-xs text-gray-600">
-            <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
-                ⚠️ Le total devrait être 100%
-            </span>
+                                    <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
+                                        ⚠️ Le total devrait être 100%
+                                    </span>
                                     <span x-show="mode === 'heures' && total > totalHeures" class="text-red-600">
-                ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
-            </span>
+                                ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
+                                </span>
                                 </div>
                             </div>
                         </div>
+
                 <!-- Section 2: PROCÉDURE -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
@@ -631,10 +596,6 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                 <!-- Nouveaux champs personnalisés -->
                 <div class="bg-white shadow-sm rounded-lg" x-data="{ newFields: [] }">
                     <div class="p-6">
-                        <button type="button" @click="newFields.push({ tempId: Date.now(), name: '', label: '', value: '' })"
-                                class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition">
-                            + Ajouter un champ personnalisé
-                        </button>
 
                         <div class="mt-4 space-y-4" x-show="newFields.length > 0">
                             <template x-for="(field, index) in newFields" :key="field.tempId">
@@ -711,7 +672,8 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
 
                 get totalHeures() {
                     const input = document.querySelector('input[name="nombre_heures"]');
-                    return parseInt(input?.value || {{ $prefillData['nombre_heures'] ?? 120 }});
+                    const value = parseInt(input?.value || {{ $prefillData['nombre_heures'] ?? 90 }});
+                    return value === 120 ? 90 : value;
                 },
 
                 get total() {
