@@ -504,31 +504,22 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                     </div>
                 </div>
 
-                <!-- Section 6: DESCRIPTIF DU PROJET -->
-                <div class="bg-white shadow-sm rounded-lg">
-                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Description complète du projet *
-                        </label>
-                        <div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
-                            <p class="text-sm text-blue-800 font-medium mb-2">💡 Aide au formatage Markdown :</p>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li>• <code class="bg-blue-100 px-1 rounded">**texte**</code> pour <strong>gras</strong></li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">*texte*</code> pour <em>italique</em></li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">- item</code> pour liste à puces</li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">1. item</code> pour liste numérotée</li>
-                                <li>• Laisser une ligne vide pour nouveau paragraphe</li>
-                            </ul>
+                        {{-- Section 6: DESCRIPTIF DU PROJET --}}
+                        <div class="bg-white shadow-sm rounded-lg">
+                            <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                                <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
+                            </div>
+                            <div class="p-6">
+                                <x-markdown-editor
+                                    name="descriptif_projet"
+                                    :value="$getValue('descriptif_projet', '')"
+                                    label="Description complète du projet"
+                                    placeholder="Le projet consiste à réaliser une application..."
+                                    help="Utilisez Markdown pour structurer et formater votre texte"
+                                    required
+                                />
+                            </div>
                         </div>
-                        <textarea name="descriptif_projet" rows="12" required
-                                  placeholder="Le projet consiste à réaliser une application clé en main..."
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ $getValue('descriptif_projet') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Utilisez le formatage Markdown pour structurer votre texte</p>
-                    </div>
-                </div>
 
                 <!-- Section 7: LIVRABLES -->
                 <div class="bg-white shadow-sm rounded-lg">
@@ -670,6 +661,9 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                 tests: parseValue("{{ $prefillData['planning_tests'] ?? '' }}", 20),
                 documentation: parseValue("{{ $prefillData['planning_documentation'] ?? '' }}", 15),
 
+                showWarning: false,
+                warningMessage: '',
+
                 get totalHeures() {
                     const input = document.querySelector('input[name="nombre_heures"]');
                     const value = parseInt(input?.value || {{ $prefillData['nombre_heures'] ?? 90 }});
@@ -681,6 +675,14 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         parseInt(this.implementation || 0) +
                         parseInt(this.tests || 0) +
                         parseInt(this.documentation || 0);
+                },
+
+                get isValid() {
+                    if (this.mode === 'heures') {
+                        return this.total <= this.totalHeures;
+                    } else {
+                        return this.total === 100;
+                    }
                 },
 
                 formatValue(val) {
@@ -697,6 +699,23 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                             this.documentation = Math.min(this.documentation, max);
                         }
                     });
+
+                    this.$watch('total', (newTotal) => {
+                        this.checkValidity();
+                    });
+                },
+
+                checkValidity() {
+                    if (this.mode === 'heures' && this.total > this.totalHeures) {
+                        this.showWarning = true;
+                        this.warningMessage = `Le total (${this.total}h) dépasse le nombre d'heures disponibles (${this.totalHeures}h)`;
+                    } else if (this.mode === 'pourcentage' && this.total !== 100) {
+                        this.showWarning = true;
+                        this.warningMessage = `Le total doit être exactement 100% (actuellement ${this.total}%)`;
+                    } else {
+                        this.showWarning = false;
+                        this.warningMessage = '';
+                    }
                 }
             };
         }
@@ -719,5 +738,58 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                 }
             };
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form[action*="forms.update"]');
+
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const planningSection = Alpine.$data(document.querySelector('[x-data*="planningCalculatorEdit"]'));
+
+                    if (!planningSection.isValid) {
+                        e.preventDefault();
+
+                        const popup = document.createElement('div');
+                        popup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                        popup.innerHTML = `
+                    <div class="bg-white rounded-lg shadow-xl p-6 max-w-md mx-4">
+                        <div class="flex items-start mb-4">
+                            <div class="flex-shrink-0">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                                    ⚠️ Planning invalide
+                                </h3>
+                                <p class="text-sm text-gray-600">
+                                    ${planningSection.warningMessage}
+                                </p>
+                                <p class="text-sm text-gray-500 mt-2">
+                                    Veuillez ajuster le planning avant de continuer.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium">
+                                Compris
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                        document.body.appendChild(popup);
+
+                        document.querySelector('[x-data*="planningCalculatorEdit"]').scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+
+                        return false;
+                    }
+                });
+            }
+        });
     </script>
 </x-app-layout>
