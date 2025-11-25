@@ -9,18 +9,27 @@ use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\SimpleType\TblWidth;
 use PhpOffice\PhpWord\IOFactory;
+use League\CommonMark\CommonMarkConverter;
 
 class CdcPhpWordGenerator
 {
     private $phpWord;
     private $section;
+    private $markdownConverter;
+
+    public function __construct()
+    {
+        $this->markdownConverter = new CommonMarkConverter([
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+        ]);
+    }
 
     public function generate(Cdc $cdc): string
     {
         try {
             $this->phpWord = new PhpWord();
 
-            // Configuration de la page
             $sectionStyle = [
                 'marginTop' => 1134,
                 'marginBottom' => 1134,
@@ -32,10 +41,8 @@ class CdcPhpWordGenerator
 
             $this->section = $this->phpWord->addSection($sectionStyle);
 
-            // Ajouter en-tête et pied de page
             $this->addHeaderFooter();
 
-            // Générer le contenu
             $this->addDocumentHeader();
             $this->addInformationsGenerales($cdc);
             $this->addProcedure($cdc);
@@ -47,7 +54,6 @@ class CdcPhpWordGenerator
             $this->addPointsTechniques($cdc);
             $this->addValidation();
 
-            // Sauvegarder le fichier
             $timestamp = time();
             $docxFileName = 'cdc-' . $cdc->id . '-' . $timestamp . '.docx';
             $docxPath = storage_path('app/public/cdcs/' . $docxFileName);
@@ -77,7 +83,6 @@ class CdcPhpWordGenerator
 
     private function addHeaderFooter()
     {
-        // En-tête
         $header = $this->section->addHeader();
         $header->addText(
             'Centre de formation - DEV - Brief projet',
@@ -85,12 +90,11 @@ class CdcPhpWordGenerator
             ['alignment' => Jc::END]
         );
 
-        // Pied de page
         $footer = $this->section->addFooter();
-        $footer->addText(
-            'FONDATION JOBTREK',
-            ['name' => 'Calibri', 'size' => 8, 'color' => '666666']
-        );
+        $lineStyle = ['weight' => 1.5, 'width' => 450, 'height' => 0, 'color' => '000000'];
+        $footer->addLine($lineStyle);
+        $paragraphStyle = ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
+        $footer->addPreserveText('Page {PAGE} sur {NUMPAGES}', null, $paragraphStyle);
     }
 
     private function addDocumentHeader()
@@ -124,9 +128,48 @@ class CdcPhpWordGenerator
     {
         $this->section->addText(
             $title,
-            ['name' => 'Calibri', 'size' => 15, 'color' => '17365D'],
+            ['name' => 'Calibri','size' => 15, 'color' => '17365D'],
             ['alignment' => Jc::START, 'spaceBefore' => 240, 'spaceAfter' => 120]
         );
+    }
+
+    /**
+     * Calcule le nombre total d'heures à partir du planning
+     */
+    private function calculateTotalHeures(Cdc $cdc): string
+    {
+        $planning = [
+            'analyse' => $cdc->data['planning_analyse'] ?? '0H',
+            'implementation' => $cdc->data['planning_implementation'] ?? '0H',
+            'tests' => $cdc->data['planning_tests'] ?? '0H',
+            'documentation' => $cdc->data['planning_documentation'] ?? '0H',
+        ];
+
+        $total = 0;
+        $isPercentage = false;
+
+        foreach ($planning as $value) {
+            // Nettoyer la valeur (enlever H, %, espaces)
+            $cleaned = preg_replace('/[^0-9.]/', '', $value);
+
+            if (empty($cleaned)) {
+                continue;
+            }
+
+            // Détecter si c'est en pourcentage
+            if (stripos($value, '%') !== false) {
+                $isPercentage = true;
+            }
+
+            $total += (float) $cleaned;
+        }
+
+        // Retourner le total avec la bonne unité
+        if ($isPercentage) {
+            return round($total) . '%';
+        }
+
+        return round($total) . 'H';
     }
 
     private function addInformationsGenerales(Cdc $cdc)
@@ -144,145 +187,164 @@ class CdcPhpWordGenerator
         $cellBgColor = ['bgColor' => 'f0f0f0'];
         $fontStyle = ['name' => 'Calibri', 'size' => 10];
 
-        // Tableau Candidat
         $table = $this->section->addTable($tableStyle);
+
+        // --- CANDIDAT ---
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Candidat:', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(3000)
+            ->addText('Nom:', $fontStyle);
+        $table->addCell(3000)
+            ->addText('Prénom:', $fontStyle);
+
+        $table->addRow();
+        $table->addCell(3000); // Cellule vide
+        $table->addCell(3000)
+            ->addText($cdc->data['candidat_nom'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['candidat_prenom'] ?? '', $fontStyle);
+
+        // --- LIEU DE TRAVAIL ---
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Lieu de travail:', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($cdc->data['lieu_travail'] ?? '', $fontStyle);
+
+        // --- ORIENTATION ---
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Orientation :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($cdc->data['orientation'] ?? '', $fontStyle);
+
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Candidat', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(1500, $cellBgColor)->addText('Nom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['candidat_nom'] ?? '', $fontStyle);
+            ->addText('Chef de projet:', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(3000)
+            ->addText('Nom:', $fontStyle);
+        $table->addCell(3000)
+            ->addText('Prénom:', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('Prénom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['candidat_prenom'] ?? '', $fontStyle);
-
-        // Tableau Lieu de travail
-        $table = $this->section->addTable($tableStyle);
-        $table->addRow();
-        $table->addCell(3000, $cellBgColor)->addText('Lieu de travail :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(6000)->addText($cdc->data['lieu_travail'] ?? '', $fontStyle);
-
-        // Tableau Orientation
-        $table = $this->section->addTable($tableStyle);
-        $table->addRow();
-        $table->addCell(3000, $cellBgColor)->addText('Orientation :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(6000)->addText($cdc->data['orientation'] ?? '', $fontStyle);
-
-        // Tableau Chef de projet
-        $table = $this->section->addTable($tableStyle);
-        $table->addRow();
-        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Chef de projet', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(1500, $cellBgColor)->addText('Nom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['chef_projet_nom'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['chef_projet_nom'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['chef_projet_prenom'] ?? '', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('Prénom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['chef_projet_prenom'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText('Email :', $fontStyle);
+        $table->addCell(3000)
+            ->addText('☎ :', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('📧 :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['chef_projet_email'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['chef_projet_email'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['chef_projet_telephone'] ?? '', $fontStyle);
 
-        $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('☎ :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['chef_projet_telephone'] ?? '', $fontStyle);
-
-        // Tableau Expert 1
-        $table = $this->section->addTable($tableStyle);
+        // --- EXPERT 1 ---
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Expert 1', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(1500, $cellBgColor)->addText('Nom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert1_nom'] ?? '', $fontStyle);
+            ->addText('Expert 1:', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(3000)
+            ->addText('Nom:', $fontStyle);
+        $table->addCell(3000)
+            ->addText('Prénom:', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('Prénom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert1_prenom'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert1_nom'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert1_prenom'] ?? '', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('📧 :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert1_email'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText('Email :', $fontStyle);
+        $table->addCell(3000)
+            ->addText('☎ :', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('☎ :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert1_telephone'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert1_email'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert1_telephone'] ?? '', $fontStyle);
 
-        // Tableau Expert 2
-        $table = $this->section->addTable($tableStyle);
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Expert 2', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(1500, $cellBgColor)->addText('Nom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert2_nom'] ?? '', $fontStyle);
+            ->addText('Expert 2:', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(3000)
+            ->addText('Nom:', $fontStyle);
+        $table->addCell(3000)
+            ->addText('Prénom:', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('Prénom :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert2_prenom'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert2_nom'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert2_prenom'] ?? '', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('📧 :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert2_email'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText('Email :', $fontStyle);
+        $table->addCell(3000)
+            ->addText('☎ :', $fontStyle);
 
         $table->addRow();
-        $table->addCell(null, ['vMerge' => 'continue']);
-        $table->addCell(1500, $cellBgColor)->addText('☎ :', $fontStyle);
-        $table->addCell(4500)->addText($cdc->data['expert2_telephone'] ?? '', $fontStyle);
-
-        // Tableau Période/Horaire/Heures
-        $table = $this->section->addTable($tableStyle);
-        $table->addRow();
-        $table->addCell(3600, $cellBgColor)->addText('Période de réalisation :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(5400)->addText($cdc->data['periode_realisation'] ?? '', $fontStyle);
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert2_email'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['expert2_telephone'] ?? '', $fontStyle);
 
         $table->addRow();
-        $table->addCell(3600, $cellBgColor)->addText('Horaire de travail :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(5400)->addText($cdc->data['horaire_travail'] ?? '', $fontStyle);
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Période de réalisation :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($cdc->data['periode_realisation'] ?? '', $fontStyle);
 
         $table->addRow();
-        $table->addCell(3600, $cellBgColor)->addText('Nombre d\'heures :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(5400)->addText($cdc->data['nombre_heures'] ?? '', $fontStyle);
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Horaire de travail :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($cdc->data['horaire_travail'] ?? '', $fontStyle);
 
-        // Tableau Planning
-        if (!empty($cdc->data['planning_analyse']) || !empty($cdc->data['planning_implementation'])) {
-            $table = $this->section->addTable($tableStyle);
-            $table->addRow();
-            $table->addCell(9000, ['gridSpan' => 2, 'bgColor' => 'd0d0d0'])
-                ->addText('Planning (en H ou %)', array_merge($fontStyle, ['bold' => true]), ['alignment' => Jc::CENTER]);
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Nombre d\'heures :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($this->calculateTotalHeures($cdc), $fontStyle);
 
-            if (!empty($cdc->data['planning_analyse'])) {
-                $table->addRow();
-                $table->addCell(3600, $cellBgColor)->addText('Analyse :', array_merge($fontStyle, ['bold' => true]));
-                $table->addCell(5400)->addText($cdc->data['planning_analyse'], $fontStyle);
-            }
+        $table->addRow();
+        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
+            ->addText('Planning (en H ou %)', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText('Analyse : ' . ($cdc->data['planning_analyse'] ?? '0H'), $fontStyle);
 
-            if (!empty($cdc->data['planning_implementation'])) {
-                $table->addRow();
-                $table->addCell(3600, $cellBgColor)->addText('Implémentation :', array_merge($fontStyle, ['bold' => true]));
-                $table->addCell(5400)->addText($cdc->data['planning_implementation'], $fontStyle);
-            }
+        $table->addRow();
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText('Implémentation : ' . ($cdc->data['planning_implementation'] ?? '0H'), $fontStyle);
 
-            if (!empty($cdc->data['planning_tests'])) {
-                $table->addRow();
-                $table->addCell(3600, $cellBgColor)->addText('Tests :', array_merge($fontStyle, ['bold' => true]));
-                $table->addCell(5400)->addText($cdc->data['planning_tests'], $fontStyle);
-            }
+        $table->addRow();
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText('Tests : ' . ($cdc->data['planning_tests'] ?? '0H'), $fontStyle);
 
-            if (!empty($cdc->data['planning_documentation'])) {
-                $table->addRow();
-                $table->addCell(3600, $cellBgColor)->addText('Documentations :', array_merge($fontStyle, ['bold' => true]));
-                $table->addCell(5400)->addText($cdc->data['planning_documentation'], $fontStyle);
-            }
-        }
+        $table->addRow();
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText('Documentations : ' . ($cdc->data['planning_documentation'] ?? '0H'), $fontStyle);
     }
 
     private function addProcedure(Cdc $cdc)
@@ -355,13 +417,230 @@ class CdcPhpWordGenerator
         }
     }
 
+    /**
+     * ✅ MÉTHODE AVEC SUPPORT MARKDOWN COMPLET
+     */
     private function addDescriptifProjet(Cdc $cdc)
     {
         $this->addSectionTitle('6 DESCRIPTIF DU PROJET');
-        $this->section->addText(
-            $cdc->data['descriptif_projet'] ?? 'Non renseigné',
-            ['name' => 'Calibri', 'size' => 10]
-        );
+
+        $descriptif = $cdc->data['descriptif_projet'] ?? 'Non renseigné';
+
+        try {
+            $html = $this->markdownConverter->convert($descriptif);
+            $this->parseMarkdownToWord($html->getContent());
+        } catch (\Exception $e) {
+            Log::warning('Erreur conversion Markdown', ['error' => $e->getMessage()]);
+            $this->section->addText($descriptif, ['name' => 'Calibri', 'size' => 10]);
+        }
+    }
+
+    /**
+     * ✅ Parse le HTML (issu du Markdown) et l'ajoute au document Word
+     */
+    private function parseMarkdownToWord(string $html)
+    {
+        $fontStyle = ['name' => 'Calibri', 'size' => 10];
+
+        $html = strip_tags($html, '<p><strong><em><ul><ol><li><h1><h2><h3><h4><br><code><pre><blockquote>');
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        libxml_use_internal_errors(true);
+        @$dom->loadHTML('<?xml encoding="UTF-8"><body>' . $html . '</body>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        if ($dom->documentElement) {
+            $this->parseNode($dom->documentElement, $fontStyle);
+        }
+    }
+
+    /**
+     * ✅ Parse récursivement les nœuds DOM
+     */
+    private function parseNode($node, $fontStyle, $depth = 0)
+    {
+        if (!$node || !$node->childNodes) return;
+
+        foreach ($node->childNodes as $child) {
+            switch ($child->nodeName) {
+                case 'h1':
+                case 'h2':
+                case 'h3':
+                case 'h4':
+                    $level = (int)substr($child->nodeName, 1);
+                    $this->section->addText(
+                        trim($child->textContent),
+                        array_merge($fontStyle, ['bold' => true, 'size' => 16 - ($level * 2)]),
+                        ['spaceAfter' => 120, 'spaceBefore' => 240]
+                    );
+                    break;
+
+                case 'p':
+                    if (trim($child->textContent)) {
+                        $this->addParagraphWithFormatting($child, $fontStyle);
+                    }
+                    break;
+
+                case 'ul':
+                case 'ol':
+                    $this->parseList($child, $fontStyle, $depth);
+                    break;
+
+                case 'blockquote':
+                    $textRun = $this->section->addTextRun(['spaceAfter' => 120, 'spaceBefore' => 120]);
+                    $textRun->addText(
+                        trim($child->textContent),
+                        array_merge($fontStyle, ['italic' => true, 'color' => '666666'])
+                    );
+                    break;
+
+                case 'pre':
+                    $this->section->addText(
+                        trim($child->textContent),
+                        array_merge($fontStyle, ['name' => 'Courier New', 'size' => 9, 'color' => '333333']),
+                        ['spaceAfter' => 120, 'spaceBefore' => 120]
+                    );
+                    break;
+
+                case 'code':
+                    break;
+
+                case 'body':
+                    $this->parseNode($child, $fontStyle, $depth);
+                    break;
+
+                case '#text':
+                    $text = trim($child->textContent);
+                    if ($text && strlen($text) > 0) {
+                        $this->section->addText($text, $fontStyle, ['spaceAfter' => 120]);
+                    }
+                    break;
+
+                default:
+                    if ($child->hasChildNodes()) {
+                        $this->parseNode($child, $fontStyle, $depth);
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * ✅ Ajoute un paragraphe avec formatage inline (gras, italique, code)
+     */
+    private function addParagraphWithFormatting($node, $baseFontStyle)
+    {
+        $textRun = $this->section->addTextRun(['spaceAfter' => 120]);
+        $this->addFormattedText($node, $textRun, $baseFontStyle);
+    }
+
+    /**
+     * ✅ Ajoute du texte formaté (gras, italique, code inline)
+     */
+    private function addFormattedText($node, $textRun, $baseFontStyle)
+    {
+        if (!$node->hasChildNodes()) {
+            $text = trim($node->textContent);
+            if ($text) {
+                $textRun->addText($text, $baseFontStyle);
+            }
+            return;
+        }
+
+        foreach ($node->childNodes as $child) {
+            if ($child->nodeName === '#text') {
+                $text = $child->textContent;
+                if ($text && $text !== "\n") {
+                    $textRun->addText($text, $baseFontStyle);
+                }
+            }
+            elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
+                $textRun->addText(
+                    $child->textContent,
+                    array_merge($baseFontStyle, ['bold' => true])
+                );
+            }
+            elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
+                $textRun->addText(
+                    $child->textContent,
+                    array_merge($baseFontStyle, ['italic' => true])
+                );
+            }
+            elseif ($child->nodeName === 'code') {
+                $textRun->addText(
+                    $child->textContent,
+                    array_merge($baseFontStyle, [
+                        'name' => 'Courier New',
+                        'size' => 9,
+                        'color' => 'D32F2F'
+                    ])
+                );
+            }
+            elseif ($child->nodeName === 'br') {
+                $textRun->addTextBreak();
+            }
+            else {
+                $this->addFormattedText($child, $textRun, $baseFontStyle);
+            }
+        }
+    }
+
+    /**
+     * ✅ Parse les listes (ul/ol)
+     */
+    private function parseList($listNode, $fontStyle, $depth = 0)
+    {
+        foreach ($listNode->childNodes as $li) {
+            if ($li->nodeName === 'li') {
+                $textContent = $this->extractFormattedText($li, $fontStyle);
+
+                if ($textContent) {
+                    $this->section->addListItem(
+                        $textContent,
+                        $depth,
+                        $fontStyle,
+                        ['spaceAfter' => 60]
+                    );
+                }
+
+                foreach ($li->childNodes as $subNode) {
+                    if ($subNode->nodeName === 'ul' || $subNode->nodeName === 'ol') {
+                        $this->parseList($subNode, $fontStyle, $depth + 1);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * ✅ Extrait le texte formaté d'un nœud (pour les listes)
+     */
+    private function extractFormattedText($node, $fontStyle)
+    {
+        $text = '';
+
+        foreach ($node->childNodes as $child) {
+            if ($child->nodeName === '#text') {
+                $text .= $child->textContent;
+            }
+            elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
+                $text .= $child->textContent;
+            }
+            elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
+                $text .= $child->textContent;
+            }
+            elseif ($child->nodeName === 'code') {
+                $text .= $child->textContent;
+            }
+            elseif ($child->nodeName === 'br') {
+                $text .= ' ';
+            }
+            elseif ($child->nodeName !== 'ul' && $child->nodeName !== 'ol') {
+                $text .= $this->extractFormattedText($child, $fontStyle);
+            }
+        }
+
+        return trim($text);
     }
 
     private function addLivrables(Cdc $cdc)

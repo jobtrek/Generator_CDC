@@ -197,5 +197,4 @@ Si tu veux, je peux :
 - Committer automatiquement une branche `cleanup/rolehelper-remove` et supprimer `app/Helpers/RoleHelper.php` puis exécuter les tests pour valider (action sûre). Ou :
 - Implémenter tout de suite un refactor pour `CdcPandocGenerator` en extrayant une interface + fallback HTML (je te ferai une PR locale dans le repo).
 
-Dis-moi quelle action tu veux que j'effectue maintenant : supprimer `RoleHelper` en commit, ou créer l'interface + fallback pour l'export, ou générer des slides basés sur ce markdown (format PDF/slide)?
 

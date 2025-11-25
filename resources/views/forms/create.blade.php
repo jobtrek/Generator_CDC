@@ -469,37 +469,20 @@
                     </div>
                 </div>
 
+                {{-- Section 6: DESCRIPTIF DU PROJET --}}
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Description complète du projet *
-                        </label>
-                        <div class="mb-2 p-3 bg-blue-50 border border-blue-200 rounded">
-                            <p class="text-sm text-blue-800 font-medium mb-2">💡 Aide au formatage Markdown :</p>
-                            <ul class="text-xs text-blue-700 space-y-1">
-                                <li>• <code class="bg-blue-100 px-1 rounded">**texte**</code> pour <strong>gras</strong></li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">*texte*</code> pour <em>italique</em></li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">- item</code> pour liste à puces</li>
-                                <li>• <code class="bg-blue-100 px-1 rounded">1. item</code> pour liste numérotée</li>
-                                <li>• Laisser une ligne vide pour nouveau paragraphe</li>
-                            </ul>
-                        </div>
-                        <textarea name="descriptif_projet" rows="12" required
-                                  placeholder="Le projet consiste à réaliser une application clé en main pour la gestion du stock d'une petite librairie.
-
-L'application s'adresse à des personnes qui n'ont pratiquement aucune notion en informatique.
-
-**Cas d'utilisation:**
-- Entrée en stock
-  - Scénario 1: saisie du code ISBN
-  - Scénario 2: saisie d'un nouvel ouvrage
-- Sortie de stock
-- Inventaire"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm">{{ old('descriptif_projet') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Utilisez le formatage Markdown pour structurer votre texte</p>
+                        <x-markdown-editor
+                            name="descriptif_projet"
+                            :value="old('descriptif_projet', '')"
+                            label="Description complète du projet"
+                            placeholder="Le projet consiste à réaliser une application..."
+                            help="Utilisez Markdown pour structurer et formater votre texte"
+                            required
+                        />
                     </div>
                 </div>
 
