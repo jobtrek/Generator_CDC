@@ -91,10 +91,42 @@ class CdcPhpWordGenerator
         );
 
         $footer = $this->section->addFooter();
-        $lineStyle = ['weight' => 1.5, 'width' => 450, 'height' => 0, 'color' => '000000'];
-        $footer->addLine($lineStyle);
-        $paragraphStyle = ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER];
-        $footer->addPreserveText('Page {PAGE} sur {NUMPAGES}', null, $paragraphStyle);
+
+        $footerTable = $footer->addTable([
+            'borderSize' => 0,
+            'borderColor' => 'FFFFFF',
+            'width' => 100 * 50,
+            'unit' => TblWidth::PERCENT,
+            'cellMargin' => 0,
+            'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED
+        ]);
+
+        $footerTable->addRow();
+
+        $cellLeft = $footerTable->addCell(4500, [
+            'borderSize' => 0,
+            'borderColor' => 'FFFFFF'
+        ]);
+        $cellLeft->addPreserveText(
+            'Page {PAGE} sur {NUMPAGES}',
+            ['name' => 'Calibri', 'size' => 9],
+            ['alignment' => Jc::START]
+        );
+
+        $cellRight = $footerTable->addCell(4500, [
+            'borderSize' => 0,
+            'borderColor' => 'FFFFFF'
+        ]);
+        $cellRight->addText(
+            'Version 1.1-ordo2k104-21 (18.01.2025)',
+            ['name' => 'Calibri', 'size' => 9],
+            ['alignment' => Jc::END, 'spaceAfter' => 0]
+        );
+        $cellRight->addText(
+            '© I-CQ VD 2017/25',
+            ['name' => 'Calibri', 'size' => 9],
+            ['alignment' => Jc::END, 'spaceAfter' => 0]
+        );
     }
 
     private function addDocumentHeader()
@@ -128,9 +160,17 @@ class CdcPhpWordGenerator
     {
         $this->section->addText(
             $title,
-            ['name' => 'Calibri','size' => 15, 'color' => '17365D'],
-            ['alignment' => Jc::START, 'spaceBefore' => 240, 'spaceAfter' => 120]
+            ['name' => 'Calibri', 'size' => 15, 'color' => '17365D'],
+            ['alignment' => Jc::START, 'spaceBefore' => 120, 'spaceAfter' => 120]
         );
+    }
+
+    /**
+     * Ajoute une ligne horizontale avant chaque section
+     */
+    private function addSectionSeparator()
+    {
+        $this->section->addTextBreak(1);
     }
 
     /**
@@ -149,14 +189,12 @@ class CdcPhpWordGenerator
         $isPercentage = false;
 
         foreach ($planning as $value) {
-            // Nettoyer la valeur (enlever H, %, espaces)
             $cleaned = preg_replace('/[^0-9.]/', '', $value);
 
             if (empty($cleaned)) {
                 continue;
             }
 
-            // Détecter si c'est en pourcentage
             if (stripos($value, '%') !== false) {
                 $isPercentage = true;
             }
@@ -164,7 +202,6 @@ class CdcPhpWordGenerator
             $total += (float) $cleaned;
         }
 
-        // Retourner le total avec la bonne unité
         if ($isPercentage) {
             return round($total) . '%';
         }
@@ -177,9 +214,12 @@ class CdcPhpWordGenerator
         $this->addSectionTitle('1 INFORMATIONS GÉNÉRALES');
 
         $tableStyle = [
-            'borderSize' => 6,
+            'borderSize' => 1,
             'borderColor' => '000000',
-            'cellMargin' => 80,
+            'cellMarginLeft' => 60,
+            'cellMarginRight' => 20,
+            'cellMarginTop' => 20,
+            'cellMarginBottom' => 20,
             'width' => 100 * 50,
             'unit' => TblWidth::PERCENT
         ];
@@ -192,14 +232,14 @@ class CdcPhpWordGenerator
         // --- CANDIDAT ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
-            ->addText('Candidat:', array_merge($fontStyle, ['bold' => true]));
+            ->addText('Candidat :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(3000)
-            ->addText('Nom:', $fontStyle);
+            ->addText('Nom :', $fontStyle);
         $table->addCell(3000)
-            ->addText('Prénom:', $fontStyle);
+            ->addText('Prénom :', $fontStyle);
 
         $table->addRow();
-        $table->addCell(3000); // Cellule vide
+        $table->addCell(3000);
         $table->addCell(3000)
             ->addText($cdc->data['candidat_nom'] ?? '', $fontStyle);
         $table->addCell(3000)
@@ -208,7 +248,7 @@ class CdcPhpWordGenerator
         // --- LIEU DE TRAVAIL ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
-            ->addText('Lieu de travail:', array_merge($fontStyle, ['bold' => true]));
+            ->addText('Lieu de travail :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText($cdc->data['lieu_travail'] ?? '', $fontStyle);
 
@@ -219,13 +259,14 @@ class CdcPhpWordGenerator
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText($cdc->data['orientation'] ?? '', $fontStyle);
 
+        // --- CHEF DE PROJET ---
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Chef de projet:', array_merge($fontStyle, ['bold' => true]));
+            ->addText('Chef de projet :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(3000)
-            ->addText('Nom:', $fontStyle);
+            ->addText('Nom :', $fontStyle);
         $table->addCell(3000)
-            ->addText('Prénom:', $fontStyle);
+            ->addText('Prénom :', $fontStyle);
 
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
@@ -237,7 +278,7 @@ class CdcPhpWordGenerator
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(3000)
-            ->addText('Email :', $fontStyle);
+            ->addText('✉ :', $fontStyle);
         $table->addCell(3000)
             ->addText('☎ :', $fontStyle);
 
@@ -251,11 +292,11 @@ class CdcPhpWordGenerator
         // --- EXPERT 1 ---
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Expert 1:', array_merge($fontStyle, ['bold' => true]));
+            ->addText('Expert 1 :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(3000)
-            ->addText('Nom:', $fontStyle);
+            ->addText('Nom :', $fontStyle);
         $table->addCell(3000)
-            ->addText('Prénom:', $fontStyle);
+            ->addText('Prénom :', $fontStyle);
 
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
@@ -267,7 +308,7 @@ class CdcPhpWordGenerator
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(3000)
-            ->addText('Email :', $fontStyle);
+            ->addText('✉ :', $fontStyle);
         $table->addCell(3000)
             ->addText('☎ :', $fontStyle);
 
@@ -278,13 +319,14 @@ class CdcPhpWordGenerator
         $table->addCell(3000)
             ->addText($cdc->data['expert1_telephone'] ?? '', $fontStyle);
 
+        // --- EXPERT 2 ---
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Expert 2:', array_merge($fontStyle, ['bold' => true]));
+            ->addText('Expert 2 :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(3000)
-            ->addText('Nom:', $fontStyle);
+            ->addText('Nom :', $fontStyle);
         $table->addCell(3000)
-            ->addText('Prénom:', $fontStyle);
+            ->addText('Prénom :', $fontStyle);
 
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
@@ -296,7 +338,7 @@ class CdcPhpWordGenerator
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(3000)
-            ->addText('Email :', $fontStyle);
+            ->addText('✉ :', $fontStyle);
         $table->addCell(3000)
             ->addText('☎ :', $fontStyle);
 
@@ -307,27 +349,31 @@ class CdcPhpWordGenerator
         $table->addCell(3000)
             ->addText($cdc->data['expert2_telephone'] ?? '', $fontStyle);
 
+        // --- PÉRIODE DE RÉALISATION ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
             ->addText('Période de réalisation :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText($cdc->data['periode_realisation'] ?? '', $fontStyle);
 
+        // --- HORAIRE DE TRAVAIL ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
             ->addText('Horaire de travail :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText($cdc->data['horaire_travail'] ?? '', $fontStyle);
 
+        // --- NOMBRE D'HEURES ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
             ->addText('Nombre d\'heures :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText($this->calculateTotalHeures($cdc), $fontStyle);
 
+        // --- PLANNING ---
         $table->addRow();
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Planning (en H ou %)', array_merge($fontStyle, ['bold' => true]));
+            ->addText('Planning (en H ou %) :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText('Analyse : ' . ($cdc->data['planning_analyse'] ?? '0H'), $fontStyle);
 
@@ -345,6 +391,9 @@ class CdcPhpWordGenerator
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText('Documentations : ' . ($cdc->data['planning_documentation'] ?? '0H'), $fontStyle);
+
+        // ✅ Ligne de fin de section
+        $this->addSectionSeparator();
     }
 
     private function addProcedure(Cdc $cdc)
@@ -367,12 +416,18 @@ class CdcPhpWordGenerator
                 }
             }
         }
+
+        // ✅ Ligne de fin de section
+        $this->addSectionSeparator();
     }
 
     private function addTitre(Cdc $cdc)
     {
         $this->addSectionTitle('3 TITRE');
         $this->section->addText($cdc->title, ['name' => 'Calibri', 'size' => 10]);
+
+        // ✅ Ligne de fin de section
+        $this->addSectionSeparator();
     }
 
     private function addMaterielLogiciel(Cdc $cdc)
@@ -393,6 +448,9 @@ class CdcPhpWordGenerator
                     );
                 }
             }
+
+            // ✅ Ligne de fin de section
+            $this->addSectionSeparator();
         }
     }
 
@@ -414,12 +472,11 @@ class CdcPhpWordGenerator
                     );
                 }
             }
+
+            $this->addSectionSeparator();
         }
     }
 
-    /**
-     * ✅ MÉTHODE AVEC SUPPORT MARKDOWN COMPLET
-     */
     private function addDescriptifProjet(Cdc $cdc)
     {
         $this->addSectionTitle('6 DESCRIPTIF DU PROJET');
@@ -433,11 +490,10 @@ class CdcPhpWordGenerator
             Log::warning('Erreur conversion Markdown', ['error' => $e->getMessage()]);
             $this->section->addText($descriptif, ['name' => 'Calibri', 'size' => 10]);
         }
+
+        $this->addSectionSeparator();
     }
 
-    /**
-     * ✅ Parse le HTML (issu du Markdown) et l'ajoute au document Word
-     */
     private function parseMarkdownToWord(string $html)
     {
         $fontStyle = ['name' => 'Calibri', 'size' => 10];
@@ -454,9 +510,6 @@ class CdcPhpWordGenerator
         }
     }
 
-    /**
-     * ✅ Parse récursivement les nœuds DOM
-     */
     private function parseNode($node, $fontStyle, $depth = 0)
     {
         if (!$node || !$node->childNodes) return;
@@ -525,18 +578,12 @@ class CdcPhpWordGenerator
         }
     }
 
-    /**
-     * ✅ Ajoute un paragraphe avec formatage inline (gras, italique, code)
-     */
     private function addParagraphWithFormatting($node, $baseFontStyle)
     {
         $textRun = $this->section->addTextRun(['spaceAfter' => 120]);
         $this->addFormattedText($node, $textRun, $baseFontStyle);
     }
 
-    /**
-     * ✅ Ajoute du texte formaté (gras, italique, code inline)
-     */
     private function addFormattedText($node, $textRun, $baseFontStyle)
     {
         if (!$node->hasChildNodes()) {
@@ -585,9 +632,6 @@ class CdcPhpWordGenerator
         }
     }
 
-    /**
-     * ✅ Parse les listes (ul/ol)
-     */
     private function parseList($listNode, $fontStyle, $depth = 0)
     {
         foreach ($listNode->childNodes as $li) {
@@ -612,9 +656,6 @@ class CdcPhpWordGenerator
         }
     }
 
-    /**
-     * ✅ Extrait le texte formaté d'un nœud (pour les listes)
-     */
     private function extractFormattedText($node, $fontStyle)
     {
         $text = '';
@@ -667,6 +708,8 @@ class CdcPhpWordGenerator
                     );
                 }
             }
+
+            $this->addSectionSeparator();
         }
     }
 
@@ -715,18 +758,22 @@ class CdcPhpWordGenerator
                 );
                 $counter++;
             }
+
+            $this->addSectionSeparator();
         }
     }
 
     private function addValidation()
     {
-        $this->section->addPageBreak();
         $this->addSectionTitle('9 VALIDATION');
 
         $tableStyle = [
-            'borderSize' => 6,
+            'borderSize' => 1,
             'borderColor' => '000000',
-            'cellMargin' => 80,
+            'cellMarginLeft' => 60,
+            'cellMarginRight' => 20,
+            'cellMarginTop' => 20,
+            'cellMarginBottom' => 20,
             'width' => 100 * 50,
             'unit' => TblWidth::PERCENT
         ];
@@ -740,19 +787,19 @@ class CdcPhpWordGenerator
         $table->addCell(3500, $cellBgColor)->addText('Lu et approuvé le :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(5500, $cellBgColor)->addText('Signature :', array_merge($fontStyle, ['bold' => true]));
 
-        $table->addRow(800);
+        $table->addRow(600);
         $table->addCell(3500)->addText('Candidat :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
 
-        $table->addRow(800);
+        $table->addRow(600);
         $table->addCell(3500)->addText('Expert n°1 :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
 
-        $table->addRow(800);
+        $table->addRow(600);
         $table->addCell(3500)->addText('Expert n°2 :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
 
-        $table->addRow(800);
+        $table->addRow(600);
         $table->addCell(3500)->addText('Chef de projet :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
     }
