@@ -123,9 +123,8 @@
                                                         $colors = [
                                                             'super-admin' => 'bg-red-100 text-red-800',
                                                             'admin' => 'bg-orange-100 text-orange-800',
-                                                            'manager' => 'bg-blue-100 text-blue-800',
+                                                            'formateur' => 'bg-blue-100 text-blue-800',
                                                             'user' => 'bg-green-100 text-green-800',
-                                                            'guest' => 'bg-gray-100 text-gray-800',
                                                         ];
                                                         $color = $colors[$role] ?? 'bg-gray-100 text-gray-800';
                                                     @endphp
@@ -212,9 +211,8 @@
                                                         $colors = [
                                                             'super-admin' => 'bg-red-100 text-red-800',
                                                             'admin' => 'bg-orange-100 text-orange-800',
-                                                            'manager' => 'bg-blue-100 text-blue-800',
+                                                            'formateur' => 'bg-blue-100 text-blue-800',
                                                             'user' => 'bg-green-100 text-green-800',
-                                                            'guest' => 'bg-gray-100 text-gray-800',
                                                         ];
                                                         $color = $colors[$role] ?? 'bg-gray-100 text-gray-800';
                                                     @endphp

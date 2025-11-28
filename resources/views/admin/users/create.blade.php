@@ -86,13 +86,13 @@
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                    placeholder="Répétez le mot de passe">
                         </div>
-
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Rôles
                             </label>
                             <div class="space-y-2 border rounded-md p-3 bg-gray-50">
                                 @forelse($roles ?? [] as $role)
+                                    @if($role->name !== 'guest') {{-- ✅ Exclure guest --}}
                                     <label class="flex items-center">
                                         <input type="checkbox"
                                                name="roles[]"
@@ -100,26 +100,24 @@
                                                {{ in_array($role->name, old('roles', [])) ? 'checked' : '' }}
                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                         <span class="ml-2 text-sm text-gray-700">
-                                            {{ ucfirst($role->name) }}
+                                        {{ ucfirst($role->name) }}
                                             @if($role->name == 'super-admin')
                                                 <span class="text-xs text-red-600">(Accès total)</span>
                                             @elseif($role->name == 'admin')
                                                 <span class="text-xs text-orange-600">(Administration)</span>
-                                            @elseif($role->name == 'manager')
-                                                <span class="text-xs text-blue-600">(Gestion)</span>
+                                            @elseif($role->name == 'formateur')
+                                                <span class="text-xs text-blue-600">(Formateur)</span>
                                             @elseif($role->name == 'user')
                                                 <span class="text-xs text-green-600">(Utilisateur standard)</span>
-                                            @elseif($role->name == 'guest')
-                                                <span class="text-xs text-gray-600">(Lecture seule)</span>
                                             @endif
-                                        </span>
+                    </span>
                                     </label>
+                                    @endif
                                 @empty
                                     <p class="text-sm text-gray-500">Aucun rôle disponible</p>
                                 @endforelse
                             </div>
                         </div>
-
 
                         <div>
                             <label class="flex items-center">

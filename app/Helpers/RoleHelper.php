@@ -35,7 +35,6 @@ class RoleHelper
             'admin',
             'formateur',
             'user',
-            'guest'
         ];
 
         foreach ($rolePriority as $role) {
@@ -57,7 +56,6 @@ class RoleHelper
             'admin' => 'orange',
             'formateur' => 'blue',
             'user' => 'green',
-            'guest' => 'gray',
             default => 'gray'
         };
     }
@@ -72,7 +70,6 @@ class RoleHelper
             'admin' => 'Administrateur',
             'formateur' => 'Gestionnaire',
             'user' => 'Utilisateur',
-            'guest' => 'Invité',
             default => ucfirst($role)
         };
     }

@@ -58,9 +58,7 @@ class FormController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            // ✅ Supprimé : name, description, is_active
 
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
@@ -115,13 +113,15 @@ class FormController extends Controller
         $periodeRealisation = "Du {$dateDebut} au {$dateFin}";
         $horaireTravail = $validated['heure_matin_debut'] . ' – ' . $validated['heure_matin_fin'] .
             ', ' . $validated['heure_aprem_debut'] . ' – ' . $validated['heure_aprem_fin'];
+
         DB::beginTransaction();
 
         try {
+            // ✅ Créer le formulaire avec un nom automatique basé sur le titre du projet
             $form = Form::create([
-                'name' => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'is_active' => $request->has('is_active'),
+                'name' => $validated['titre_projet'], // ✅ Utilise le titre du projet comme nom
+                'description' => null,
+                'is_active' => true, // ✅ Toujours actif par défaut
                 'user_id' => Auth::id(),
             ]);
 
@@ -155,20 +155,15 @@ class FormController extends Controller
                 ['name' => 'heure_aprem_debut', 'label' => 'Heure après-midi début', 'section' => 'hidden', 'field_type_id' => 5],
                 ['name' => 'heure_aprem_fin', 'label' => 'Heure après-midi fin', 'section' => 'hidden', 'field_type_id' => 5],
 
-
                 ['name' => 'planning_analyse', 'label' => 'Planning - Analyse', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'planning_implementation', 'label' => 'Planning - Implémentation', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'planning_tests', 'label' => 'Planning - Tests', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'planning_documentation', 'label' => 'Planning - Documentation', 'section' => 'section_1', 'field_type_id' => 1],
 
                 ['name' => 'titre_projet', 'label' => 'Titre du projet', 'section' => 'section_3', 'field_type_id' => 1],
-
                 ['name' => 'materiel_logiciel', 'label' => 'Matériel et logiciel', 'section' => 'section_4', 'field_type_id' => 2],
-
                 ['name' => 'prerequis', 'label' => 'Prérequis', 'section' => 'section_5', 'field_type_id' => 2],
-
                 ['name' => 'descriptif_projet', 'label' => 'Descriptif du projet', 'section' => 'section_6', 'field_type_id' => 2],
-
                 ['name' => 'livrables', 'label' => 'Livrables', 'section' => 'section_7', 'field_type_id' => 2],
             ];
 
@@ -198,6 +193,7 @@ class FormController extends Controller
                     'options' => null,
                     'order_index' => $orderIndex++,
                 ]);
+              //  dd($request->all());
             }
 
             $cdcData = [
@@ -227,8 +223,10 @@ class FormController extends Controller
 
                 'date_debut' => $validated['date_debut'],
                 'date_fin' => $validated['date_fin'],
-                'heure_debut' => $validated['heure_debut'],
-                'heure_fin' => $validated['heure_fin'],
+                'heure_matin_debut' => $validated['heure_matin_debut'],
+                'heure_matin_fin' => $validated['heure_matin_fin'],
+                'heure_aprem_debut' => $validated['heure_aprem_debut'],
+                'heure_aprem_fin' => $validated['heure_aprem_fin'],
 
                 'procedure' => $validated['procedure'] ?? '',
                 'planning_analyse' => $validated['planning_analyse'] ?? '',
@@ -273,8 +271,8 @@ class FormController extends Controller
 
             session()->forget('duplicate_form');
 
-            return redirect()->route('cdcs.show', $cdc)
-                ->with('success', 'Formulaire créé et CDC généré avec succès ! Vous pouvez maintenant le télécharger.');
+            return redirect()->route('cdcs.download', $cdc)
+                ->with('success', 'Formulaire créé et CDC généré avec succès ! Téléchargement en cours...');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -321,17 +319,15 @@ class FormController extends Controller
             'planning_documentation' => $cdcData['planning_documentation'] ?? '',
         ];
 
-
         return view('forms.edit', compact('form', 'fieldTypes', 'prefillData'));
     }
+
     public function update(Request $request, Form $form)
     {
         $this->authorize('update', $form);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            // ✅ Supprimé : name, description, is_active
 
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
@@ -390,8 +386,6 @@ class FormController extends Controller
             'deleted_fields' => 'nullable|array',
             'deleted_fields.*' => 'exists:fields,id',
         ]);
-        $validated['heure_debut'] = $validated['heure_matin_debut'] ?? '08:30';
-        $validated['heure_fin'] = $validated['heure_aprem_fin'] ?? '17:30';
 
         $dateDebut = Carbon::parse($validated['date_debut'])->locale('fr')->isoFormat('D MMMM YYYY');
         $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');
@@ -403,10 +397,9 @@ class FormController extends Controller
         DB::beginTransaction();
 
         try {
+            // ✅ Mise à jour simplifiée (pas de name, description, is_active)
             $form->update([
-                'name' => $validated['name'],
-                'description' => $validated['description'] ?? null,
-                'is_active' => $request->has('is_active'),
+                'name' => $validated['titre_projet'], // ✅ Met à jour avec le nouveau titre
             ]);
 
             $cdcData = [
@@ -502,15 +495,9 @@ class FormController extends Controller
 
             $cdc = $form->cdcs()->first();
             if ($cdc) {
-                $fixedFieldNames = ['periode_realisation', 'horaire_travail', 'nombre_heures', 'date_debut', 'date_fin', 'heure_debut', 'heure_fin'];
-                $currentCdcData = $cdc->data;
-                foreach($fixedFieldNames as $name) {
-                    unset($currentCdcData[$name]);
-                }
-
                 $cdc->update([
                     'title' => $validated['titre_projet'],
-                    'data' => array_merge($currentCdcData, $cdcData),
+                    'data' => $cdcData,
                 ]);
             } else {
                 Cdc::create([
