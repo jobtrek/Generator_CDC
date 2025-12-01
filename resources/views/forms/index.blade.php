@@ -1,11 +1,16 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Mes formulaires
-            </h2>
+            <div>
+                <h2 class="font-bold text-2xl text-gray-900 leading-tight">
+                    Mes formulaires
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">Gérez et organisez vos documents administratifs.</p>
+            </div>
+
+
             <a href="{{ route('forms.create') }}"
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+               class="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition shadow-lg shadow-gray-900/20">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -14,232 +19,128 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-12 bg-gray-50 min-h-screen">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition
-                     class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded flex items-center justify-between">
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>{{ session('success') }}</span>
+            {{-- Section Alertes --}}
+            @if(session('success') || session('error'))
+                <div x-data="{ show: true }" x-show="show" x-transition.duration.300ms
+                     class="rounded-lg p-4 shadow-sm border {{ session('error') ? 'bg-red-50 border-red-100 text-red-700' : 'bg-emerald-50 border-emerald-100 text-emerald-700' }} flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="font-medium">{{ session('success') ?? session('error') }}</span>
                     </div>
-                    <button @click="show = false" class="text-green-700 hover:text-green-900">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
+                    <button @click="show = false" class="opacity-60 hover:opacity-100 transition">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                     </button>
                 </div>
             @endif
 
-            @if(session('error'))
-                <div x-data="{ show: true }" x-show="show" x-transition
-                     class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded flex items-center justify-between">
-                    <span>{{ session('error') }}</span>
-                    <button @click="show = false" class="text-red-700 hover:text-red-900">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
+            {{-- Barre de Recherche Simplifiée --}}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <form method="GET" action="{{ route('forms.index') }}" class="flex gap-2">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text"
+                               name="search"
+                               value="{{ request('search') }}"
+                               placeholder="Rechercher un formulaire..."
+                               class="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border-gray-200 text-gray-900 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm transition placeholder-gray-400 hover:bg-white hover:border-gray-300">
+                    </div>
+
+                    <button type="submit" class="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition shadow-sm">
+                        Rechercher
                     </button>
-                </div>
-            @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6" x-data="{ showFilters: false }">
-                <div class="p-6">
-                    <form method="GET" action="{{ route('forms.index') }}">
-                        <div class="flex flex-col md:flex-row gap-4 mb-4">
-                            <div class="flex-1">
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
-                                    </div>
-                                    <input type="text"
-                                           name="search"
-                                           value="{{ request('search') }}"
-                                           placeholder="Rechercher par nom ou description..."
-                                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <button type="button"
-                                        @click="showFilters = !showFilters"
-                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                                    </svg>
-                                    Filtres
-                                    @if(request()->hasAny(['status', 'date_from', 'date_to']))
-                                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                            {{ collect(['status', 'date_from', 'date_to'])->filter(fn($key) => request()->filled($key))->count() }}
-                                        </span>
-                                    @endif
-                                </button>
-
-                                <button type="submit"
-                                        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                                    Rechercher
-                                </button>
-
-                                @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                                    <a href="{{ route('forms.index') }}"
-                                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                        Réinitialiser
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                        <div x-show="showFilters" x-transition
-                             class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                                <select name="status"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Tous</option>
-                                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Actif</option>
-                                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactif</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Créé après le</label>
-                                <input type="date"
-                                       name="date_from"
-                                       value="{{ request('date_from') }}"
-                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Créé avant le</label>
-                                <input type="date"
-                                       name="date_to"
-                                       value="{{ request('date_to') }}"
-                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                    @if(request('search'))
+                        <a href="{{ route('forms.index') }}" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition flex items-center">
+                            Réinitialiser
+                        </a>
+                    @endif
+                </form>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if($forms->count() > 0)
-                        <div class="mb-4 flex justify-between items-center">
-                            <div class="text-sm text-gray-600">
-                                {{ $forms->total() }} formulaire{{ $forms->total() > 1 ? 's' : '' }}
-                            </div>
-                        </div>
+            {{-- Liste des Formulaires --}}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                @if($forms->count() > 0)
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                             {{ $forms->total() }} Résultat{{ $forms->total() > 1 ? 's' : '' }}
+                        </span>
+                    </div>
 
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nom</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-                                </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($forms as $form)
-                                    <tr class="hover:bg-gray-50 transition">
-                                        <td class="px-6 py-4">
-                                            <div class="text-sm font-medium text-gray-900">{{ $form->name }}</div>
-                                            @if($form->description)
-                                                <div class="text-sm text-gray-500">{{ Str::limit($form->description, 50) }}</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 text-right">
-                                            <div class="flex justify-end gap-2">
-                                                @php
-                                                    $cdc = $form->cdcs()->first();
-                                                @endphp
-
-                                                @if($cdc)
-                                                    {{-- Bouton Télécharger CDC (vert) --}}
-                                                    <a href="{{ route('cdcs.download', $cdc) }}"
-                                                       class="inline-flex items-center p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded transition"
-                                                       title="Télécharger le CDC">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                        </svg>
-                                                    </a>
-                                                @endif
-
-                                                <a href="{{ route('forms.show', $form) }}"
-                                                   class="inline-flex items-center p-2 text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 rounded transition"
-                                                   title="Voir">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                    </svg>
-                                                </a>
-
-                                                <a href="{{ route('forms.edit', $form) }}"
-                                                   class="inline-flex items-center p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition"
-                                                   title="Modifier">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                    </svg>
-                                                </a>
-
-                                                <form method="POST"
-                                                      action="{{ route('forms.destroy', $form) }}"
-                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce formulaire ?');"
-                                                      class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                            class="inline-flex items-center p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition"
-                                                            title="Supprimer">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-100">
+                            <tbody class="divide-y divide-gray-100">
+                            @foreach($forms as $form)
+                                <tr class="group hover:bg-gray-50 transition duration-150 ease-in-out">
+                                    <td class="px-6 py-5 whitespace-nowrap">
+                                        <div class="flex items-start">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-4">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                             </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                            <div>
+                                                <div class="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                                    {{ $form->name }}
+                                                </div>
+                                                @if($form->description)
+                                                    <div class="text-sm text-gray-500 mt-1 max-w-md truncate">
+                                                        {{ Str::limit($form->description, 60) }}
+                                                    </div>
+                                                @else
+                                                    <div class="text-sm text-gray-400 mt-1 italic">Aucune description</div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
 
-                        <div class="mt-4">
-                            {{ $forms->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            @if(request()->hasAny(['search', 'status', 'date_from', 'date_to']))
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun résultat trouvé</h3>
-                                <p class="mt-2 text-sm text-gray-500">Essayez de modifier vos critères de recherche.</p>
-                                <div class="mt-6">
-                                    <a href="{{ route('forms.index') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                                        Réinitialiser les filtres
-                                    </a>
-                                </div>
-                            @else
-                                <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun formulaire</h3>
-                                <p class="mt-2 text-sm text-gray-500">Commencez par créer votre premier formulaire.</p>
-                                <div class="mt-6">
-                                    <a href="{{ route('forms.create') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                        </svg>
-                                        Créer mon premier formulaire
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
+                                    <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex justify-end items-center gap-2">
+                                            @php $cdc = $form->cdcs()->first(); @endphp
+                                            @if($cdc)
+                                                <a href="{{ route('cdcs.download', $cdc) }}" class="group/btn flex items-center justify-center w-9 h-9 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm" title="Télécharger Word">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('forms.show', $form) }}" class="group/btn flex items-center justify-center w-9 h-9 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-sm" title="Voir">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            </a>
+                                            <a href="{{ route('forms.edit', $form) }}" class="group/btn flex items-center justify-center w-9 h-9 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600 hover:shadow-sm" title="Modifier">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </a>
+                                            <form method="POST" action="{{ route('forms.destroy', $form) }}" onsubmit="return confirm('Supprimer ce formulaire ?');" class="inline">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="group/btn flex items-center justify-center w-9 h-9 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:shadow-sm" title="Supprimer">
+                                                    <svg class="w-4 h-4 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @if($forms->hasPages())
+                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">{{ $forms->links() }}</div>
                     @endif
-                </div>
+                @else
+                    <div class="text-center py-20 px-6">
+                        <div class="mx-auto h-24 w-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                            <svg class="h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        </div>
+                        @if(request('search'))
+                            <h3 class="text-lg font-medium text-gray-900">Aucun résultat</h3>
+                            <div class="mt-6"><a href="{{ route('forms.index') }}" class="text-indigo-600 hover:underline">Réinitialiser la recherche</a></div>
+                        @else
+                            <h3 class="text-lg font-medium text-gray-900">Aucun formulaire</h3>
+                            <div class="mt-8"><a href="{{ route('forms.create') }}" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium text-sm rounded-lg hover:bg-indigo-700 shadow-lg shadow-indigo-500/30">Créer un formulaire</a></div>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>

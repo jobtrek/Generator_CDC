@@ -12,33 +12,30 @@
                 </h2>
             </div>
 
-            <div class="flex gap-2">
+            <div class="flex items-center gap-3">
                 @php
                     $cdc = $form->cdcs()->first();
                 @endphp
 
+                {{-- Bouton Télécharger (Word) --}}
                 @if($cdc)
                     <a href="{{ route('cdcs.download', $cdc) }}"
-                       class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                       title="Télécharger Word" aria-label="Télécharger le document Word">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5.06 14.88c-.61.3-1.25.46-1.94.46-.71 0-1.39-.16-2.02-.49-.62-.31-1.13-.76-1.52-1.36-.39-.58-.59-1.28-.59-2.06 0-.79.2-1.48.59-2.06.39-.6.9-1.04 1.52-1.36.63-.33 1.31-.49 2.02-.49.69 0 1.33.16 1.94.46.61.3 1.13.75 1.52 1.36.39.58.59 1.28.59 2.06 0 .78-.2 1.48-.59 2.06-.39.6-.9 1.05-1.52 1.36z" fill="white"/>
-                        </svg>
-                    </a>
-                    <a href="{{ route('cdcs.downloadPdf', $cdc) }}"
-                       class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                       title="Télécharger PDF" aria-label="Télécharger le document PDF">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
-                            <path d="M8 15.5h1.5V17H8zm0-2h1.5v1.5H8zm6 0h1.5v1.5H14zm0 2h1.5V17H14zm-3-2h1.5v1.5H11zm0 2h1.5V17H11z"/>
+                       class="group flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-500 transition-all duration-200 ease-in-out hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                       title="Télécharger Word"
+                       aria-label="Télécharger le document Word">
+                        {{-- Icône Document Text (Style plus fin) --}}
+                        <svg class="w-5 h-5 transition-transform group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </a>
                 @endif
+
                 <a href="{{ route('forms.edit', $form) }}"
-                   class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                   title="Modifier le formulaire" aria-label="Modifier">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                   class="group flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-500 transition-all duration-200 ease-in-out hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                   title="Modifier le formulaire"
+                   aria-label="Modifier">
+                    <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </a>
 
@@ -48,10 +45,11 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                            class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                            title="Supprimer le formulaire" aria-label="Supprimer">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            class="group flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 ease-in-out hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                            title="Supprimer le formulaire"
+                            aria-label="Supprimer">
+                        <svg class="w-5 h-5 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>
                 </form>
