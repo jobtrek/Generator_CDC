@@ -1,4 +1,3 @@
-# --- Étape 1 : On fabrique les assets (remplace npm run dev) ---
 FROM node:20-alpine as build
 WORKDIR /app
 COPY package*.json ./

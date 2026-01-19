@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo " Démarrage..."
+echo " Logs..."
 
 echo " Migrations..."
 php artisan migrate --force
