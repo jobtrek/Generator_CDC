@@ -1,21 +1,23 @@
 #!/bin/sh
 set -e
 
-echo " Logs..."
+echo " Starting application..."
 
-echo " Migrations..."
+echo "Running migrations..."
 php artisan migrate --force
 
-echo " Cache..."
+php artisan octane:install --server=frankenphp --no-interaction || true
+
+echo "⚡ Optimizing cache..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-echo " Storage Link..."
+echo "🔗 Linking storage..."
 rm -rf public/storage
 php artisan storage:link
 
-chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-echo "Prêt Lancement de PHP."
+echo "✅ Ready to serve!"
 exec "$@"

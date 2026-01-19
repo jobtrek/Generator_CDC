@@ -5,31 +5,31 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM php:8.3-fpm-alpine
+FROM dunglas/frankenphp:1-php8.3
 
-RUN apk add --no-cache \
-    postgresql-dev \
-    libzip-dev \
-    libpng-dev \
-    libxml2-dev \
+RUN install-php-extensions \
+    pdo_pgsql \
+    gd \
+    intl \
     zip \
-    unzip \
-    icu-dev
+    opcache \
+    pcntl \
+    bcmath
 
-RUN docker-php-ext-install pdo_pgsql zip bcmath gd intl opcache
-
-WORKDIR /var/www
+ENV SERVER_NAME=:80
+WORKDIR /app
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
+COPY --from=build /app/public/build /app/public/build
 
-COPY --from=build /app/public/build /var/www/public/build
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-RUN composer install --no-dev --optimize-autoloader
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=80"]
