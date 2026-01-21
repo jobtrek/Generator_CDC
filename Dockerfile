@@ -1,11 +1,11 @@
-FROM node:20-alpine as build
+FROM node:24.13.0-trixie-slim as build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM dunglas/frankenphp:1-php8.3
+FROM dunglas/frankenphp:1.11.1-php8.5.2-trixie
 
 RUN install-php-extensions \
     pdo_pgsql \
@@ -14,7 +14,7 @@ RUN install-php-extensions \
     zip \
     opcache \
     pcntl \
-    bcmath
+    bcmath \
 
 ENV SERVER_NAME=:80
 WORKDIR /app
