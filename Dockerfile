@@ -1,4 +1,4 @@
-FROM node:24.13.0-trixie-slim as build
+FROM node:24.13.0-trixie-slim AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -14,22 +14,31 @@ RUN install-php-extensions \
     zip \
     opcache \
     pcntl \
-    bcmath \
+    bcmath
 
 ENV SERVER_NAME=:80
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 WORKDIR /app
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+COPY ./composer.* ./
+RUN composer install --no-cache --prefer-dist --no-autoloader --no-scripts --no-progress
+
 COPY . .
 COPY --from=build /app/public/build /app/public/build
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/framework/testing storage/logs bootstrap/cache
+RUN chmod -R a+rw storage
 
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+
+RUN composer dump-autoload --classmap-authoritative
+RUN php artisan storage:link
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=80", "--admin-port=2019"]

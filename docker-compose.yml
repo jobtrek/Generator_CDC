@@ -9,35 +9,39 @@ services:
         depends_on:
             - db
         ports:
-            - "8080:80"
+            - "8000:8000"
+        env_file:
+            - .env
         environment:
             APP_ENV: production
-            APP_DEBUG: "false"
-            APP_KEY: ${APP_KEY}
-            APP_URL: ${APP_URL}
-            DB_CONNECTION: pgsql
             DB_HOST: db
-            DB_PORT: 5432
-            DB_DATABASE: ${DB_DATABASE}
-            DB_USERNAME: ${DB_USERNAME}
-            DB_PASSWORD: ${DB_PASSWORD}
-            SESSION_DRIVER: database
-            QUEUE_CONNECTION: database
             OCTANE_SERVER: frankenphp
         volumes:
             - storage_data:/app/storage
+        networks:
+            - cdc_network
 
     db:
-        image: postgres:18.1-1trixie
+        image: postgres:18.1-trixie
         container_name: cdc_db
         restart: unless-stopped
         environment:
             POSTGRES_DB: ${DB_DATABASE}
             POSTGRES_USER: ${DB_USERNAME}
             POSTGRES_PASSWORD: ${DB_PASSWORD}
+        healthcheck:
+            test: [ "CMD", "pg_isready", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}" ]
+            timeout: 5s
+            retries: 5
+            start_period: 60s
         volumes:
-            - db_data:/var/lib/postgresql/data
+            - db_data:/var/lib/postgresql
+        networks:
+            - cdc_network
 
 volumes:
     db_data:
     storage_data:
+
+networks:
+    cdc_network:
