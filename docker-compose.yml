@@ -28,7 +28,7 @@ services:
             - storage_data:/app/storage
 
     db:
-        image: postgres:15-alpine
+        image: postgres:18.1-1trixie
         container_name: cdc_db
         restart: unless-stopped
         environment:
