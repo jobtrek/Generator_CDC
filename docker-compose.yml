@@ -3,8 +3,6 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        image: mon-app-cdc:latest
-        container_name: cdc_app
         restart: unless-stopped
         depends_on:
             - db
@@ -23,7 +21,6 @@ services:
 
     db:
         image: postgres:18.1-trixie
-        container_name: cdc_db
         restart: unless-stopped
         environment:
             POSTGRES_DB: ${DB_DATABASE}
