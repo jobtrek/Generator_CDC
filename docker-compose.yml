@@ -17,6 +17,8 @@ services:
             OCTANE_SERVER: frankenphp
         volumes:
             - storage_data:/app/storage
+            - caddy_data:/data
+            - caddy_config:/config
         networks:
             - cdc_network
         tmpfs:
