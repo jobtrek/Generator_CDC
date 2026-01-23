@@ -24,23 +24,20 @@ WORKDIR /app
 
 COPY --from=composer:2.9.4 /usr/bin/composer /usr/bin/composer
 
-COPY ./composer.* ./
+COPY ./composer.json ./composer.lock ./
 RUN composer install --no-cache --prefer-dist --no-autoloader --no-scripts --no-progress
 
-COPY . .
-COPY --from=build /app/public/build /app/public/build
+COPY --chown=www-data:www-data . .
+COPY --from=build --chown=www-data:www-data /app/public/build /app/public/build
 
-RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/framework/testing storage/logs bootstrap/cache
-
-RUN chmod -R 775 storage bootstrap/cache
-
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+RUN mkdir -p storage/framework/{sessions,views,cache,testing} storage/logs bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
 RUN composer dump-autoload --classmap-authoritative
 RUN php artisan storage:link
 
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
 
 USER www-data
 
