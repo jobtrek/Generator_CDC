@@ -5,7 +5,7 @@
 .idea
 .vscode
 .zed
-nodes_modules
+node_modules
 vendor
 storage/logs/*
 storage/framework/cache/*
