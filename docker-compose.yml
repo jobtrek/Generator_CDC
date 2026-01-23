@@ -19,6 +19,8 @@ services:
             - storage_data:/app/storage
         networks:
             - cdc_network
+        tmpfs:
+            - /tmp
 
     db:
         image: postgres:18.1-trixie
