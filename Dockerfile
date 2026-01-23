@@ -16,13 +16,13 @@ RUN install-php-extensions \
     pcntl \
     bcmath
 
-ENV SERVER_NAME=:80
+# ENV SERVER_NAME=:80
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 WORKDIR /app
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.9.4 /usr/bin/composer /usr/bin/composer
 
 COPY ./composer.* ./
 RUN composer install --no-cache --prefer-dist --no-autoloader --no-scripts --no-progress
@@ -31,7 +31,8 @@ COPY . .
 COPY --from=build /app/public/build /app/public/build
 
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/framework/testing storage/logs bootstrap/cache
-RUN chmod -R a+rw storage
+
+RUN chmod -R 775 storage bootstrap/cache
 
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
@@ -40,5 +41,7 @@ RUN php artisan storage:link
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER www-data
 
 ENTRYPOINT ["docker-entrypoint.sh"]
