@@ -16,6 +16,45 @@
     <div class="py-12 bg-gray-50/50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
+            {{-- POPUP DE VÉRIFICATION (S'affiche si non vérifié) --}}
+            @if (! Auth::user()->hasVerifiedEmail())
+                <div x-data="{ open: true }" x-show="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        {{-- Overlay sombre --}}
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full p-6">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 sm:mx-0 sm:h-10 sm:w-10">
+                                    <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                    <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Vérifiez votre adresse email</h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">
+                                            Pour accéder à vos projets et créer de nouveaux cahiers des charges, vous devez valider votre compte via le mail envoyé à <strong>{{ Auth::user()->email }}</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex flex-col gap-3">
+                                <form method="POST" action="{{ route('verification.send') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:text-sm">
+                                        Renvoyer le mail de vérification
+                                    </button>
+                                </form>
+                                <p class="text-xs text-center text-gray-400 italic">Vérifiez vos spams si vous ne trouvez pas le mail.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- 1. Section de Bienvenue & Actions Rapides --}}
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center gap-4">
@@ -23,28 +62,24 @@
                         {{ substr(Auth::user()->name, 0, 1) }}
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900">Bonjour, {{ Auth::user()->name }} !</h3>
-                        <div class="flex flex-wrap gap-2 mt-1">
-                            @foreach(Auth::user()->getRoleNames() as $role)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                                    {{ ucfirst($role) }}
-                                </span>
-                            @endforeach
-                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Ravi de vous revoir, {{ Auth::user()->name }} !</h3>
+                        <p class="text-sm text-gray-500 font-medium">Prêt à structurer votre prochain projet ?</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3 w-full md:w-auto">
-                    <a href="{{ route('forms.create') }}"
-                       class="flex-1 md:flex-none justify-center inline-flex items-center px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition shadow-lg shadow-gray-900/10 transform hover:-translate-y-0.5">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Nouveau Cahier des Charges
-                    </a>
+                    {{-- Bouton activé ou désactivé selon la vérification --}}
+                    @if(Auth::user()->hasVerifiedEmail())
+                        <a href="{{ route('forms.create') }}" class="flex-1 md:flex-none inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-all shadow-sm">
+                            Nouveau Cahier des Charges
+                        </a>
+                    @else
+                        <button disabled class="flex-1 md:flex-none opacity-50 cursor-not-allowed inline-flex items-center justify-center px-6 py-3 bg-gray-400 text-white text-sm font-medium rounded-xl">
+                            Compte non vérifié
+                        </button>
+                    @endif
                 </div>
             </div>
-
             {{-- 2. Indicateurs Clés (KPI) --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
