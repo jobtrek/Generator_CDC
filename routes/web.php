@@ -10,10 +10,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Groupe accessible à tous les utilisateurs connectés
 Route::middleware(['auth'])->group(function () {
 
-    // Le dashboard est accessible SANS 'verified' pour afficher le popup
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -37,17 +35,20 @@ Route::middleware(['auth'])->group(function () {
             Route::patch('/', [ProfileController::class, 'update'])->name('update');
             Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
         });
-
-        // Routes admin
-        Route::middleware(['role:admin|super-admin'])
-            ->prefix('admin')
-            ->name('admin.')
-            ->group(function () {
-                Route::resource('users', UserController::class);
-                Route::post('users/{user}/roles', [UserController::class, 'updateRoles'])
-                    ->name('users.roles.update');
-            });
     });
+
+    Route::middleware(['role:admin|super-admin'])
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::resource('users', UserController::class);
+
+            Route::post('users/{user}/roles', [UserController::class, 'updateRoles'])
+                ->name('users.roles.update');
+
+            Route::post('users/{user}/verify', [UserController::class, 'verifyEmail'])
+                ->name('users.verify');
+        });
 });
 
 require __DIR__.'/auth.php';
