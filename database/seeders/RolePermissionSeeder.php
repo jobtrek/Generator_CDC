@@ -13,126 +13,62 @@ class RolePermissionSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // ✅ Permissions CDC (sans cdcs.view car pas de vue liste)
-        $cdcPermissions = [
-            'cdcs.edit',
-            'cdcs.delete',
-            'cdcs.export',
-            'cdcs.duplicate',
-        ];
-
-        $formPermissions = [
-            'form.view',
-            'form.create',
-            'form.edit',
-            'form.delete',
-            'form.publish',
-        ];
-
-        $userPermissions = [
-            'user.view',
-            'user.create',
-            'user.edit',
-            'user.delete',
-            'user.roles',
-        ];
-
+        $cdcPermissions = ['cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate'];
+        $formPermissions = ['form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish'];
+        $userPermissions = ['user.view', 'user.create', 'user.edit', 'user.delete', 'user.roles'];
         $systemPermissions = [
-            'dashboard.view',
-            'settings.view',
-            'settings.edit',
-            'logs.view',
-            'backup.create',
-            'backup.download',
+            'dashboard.view', 'settings.view', 'settings.edit',
+            'logs.view', 'backup.create', 'backup.download'
         ];
 
-        $allPermissions = array_merge(
-            $cdcPermissions,
-            $formPermissions,
-            $userPermissions,
-            $systemPermissions
-        );
+        $allPermissions = array_merge($cdcPermissions, $formPermissions, $userPermissions, $systemPermissions);
 
         foreach ($allPermissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
+        $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
+        $superAdmin->syncPermissions(Permission::all());
 
-        $superAdmin = Role::create(['name' => 'super-admin']);
-        $superAdmin->givePermissionTo(Permission::all());
-
-        $admin = Role::create(['name' => 'admin']);
-        $admin->givePermissionTo([
+        $admin = Role::firstOrCreate(['name' => 'admin']);
+        $admin->syncPermissions([
             'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
             'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
             'user.view', 'user.create', 'user.edit',
             'dashboard.view', 'settings.view', 'logs.view',
         ]);
 
-        $formateur = Role::create(['name' => 'formateur']);
-        $formateur->givePermissionTo([
+        $formateur = Role::firstOrCreate(['name' => 'formateur']);
+        $formateur->syncPermissions([
             'cdcs.edit', 'cdcs.export', 'cdcs.duplicate',
             'form.view', 'form.create', 'form.edit', 'form.publish',
             'dashboard.view',
         ]);
 
-        $user = Role::create(['name' => 'user']);
-        $user->givePermissionTo([
-            'cdcs.export',
-            'form.view',
-            'dashboard.view',
+        $user = Role::firstOrCreate(['name' => 'user']);
+        $user->syncPermissions([
+            'cdcs.export', 'form.view', 'dashboard.view',
         ]);
 
-        // ✅ Créer les utilisateurs de test
-        $superAdminUser = User::firstOrCreate(
-            ['email' => 'superadmin@cdcs.com'],
-            [
-                'name' => 'Super Admin',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $superAdminUser->assignRole('super-admin');
+        $usersToCreate = [
+            ['email' => 'superadmin@cdcs.com', 'name' => 'Super Admin', 'role' => 'super-admin'],
+            ['email' => 'admin@cdcs.com', 'name' => 'Admin User', 'role' => 'admin'],
+            ['email' => 'formateur@cdcs.com', 'name' => 'Formateur User', 'role' => 'formateur'],
+            ['email' => 'user@cdcs.com', 'name' => 'Normal User', 'role' => 'user'],
+        ];
 
-        $adminUser = User::firstOrCreate(
-            ['email' => 'admin@cdcs.com'],
-            [
-                'name' => 'Admin User',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $adminUser->assignRole('admin');
+        foreach ($usersToCreate as $u) {
+            $userModel = User::firstOrCreate(
+                ['email' => $u['email']],
+                [
+                    'name' => $u['name'],
+                    'password' => bcrypt('password123'),
+                    'email_verified_at' => now(),
+                ]
+            );
+            $userModel->syncRoles($u['role']);
+        }
 
-        $formateurUser = User::firstOrCreate(
-            ['email' => 'formateur@cdcs.com'],
-            [
-                'name' => 'Formateur User',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $formateurUser->assignRole('formateur');
-
-        $normalUser = User::firstOrCreate(
-            ['email' => 'user@cdcs.com'],
-            [
-                'name' => 'Normal User',
-                'password' => bcrypt('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-        $normalUser->assignRole('user');
-
-        $this->command->info('✅ Rôles et permissions créés avec succès !');
-        $this->command->table(
-            ['Email', 'Rôle', 'Mot de passe'],
-            [
-                ['superadmin@cdcs.com', 'Super Admin', 'password123'],
-                ['admin@cdcs.com', 'Admin', 'password123'],
-                ['formateur@cdcs.com', 'Formateur', 'password123'],
-                ['user@cdcs.com', 'User', 'password123'],
-            ]
-        );
+        $this->command->info('✅ Rôles et permissions synchronisés avec succès !');
     }
 }
