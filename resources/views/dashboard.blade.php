@@ -16,39 +16,28 @@
     <div class="py-12 bg-gray-50/50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- POPUP DE VÉRIFICATION (S'affiche si non vérifié) --}}
             @if (! Auth::user()->hasVerifiedEmail())
-                <div x-data="{ open: true }" x-show="open" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        {{-- Overlay sombre --}}
-                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                        <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full p-6">
-                            <div class="sm:flex sm:items-start">
-                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 sm:mx-0 sm:h-10 sm:w-10">
-                                    <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                </div>
-                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                    <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Vérifiez votre adresse email</h3>
-                                    <div class="mt-2">
-                                        <p class="text-sm text-gray-500">
-                                            Pour accéder à vos projets et créer de nouveaux cahiers des charges, vous devez valider votre compte via le mail envoyé à <strong>{{ Auth::user()->email }}</strong>.
-                                        </p>
-                                    </div>
-                                </div>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4 rounded-r-lg shadow-sm">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3 w-full">
+                            <h3 class="text-sm font-medium text-amber-800">Action requise</h3>
+                            <div class="mt-1 text-sm text-amber-700">
+                                <p>
+                                    Votre adresse email n'est pas encore vérifiée. Vous ne pouvez pas créer de nouveaux cahiers des charges tant que votre compte n'est pas validé.
+                                </p>
                             </div>
-                            <div class="mt-6 flex flex-col gap-3">
+                            <div class="mt-4">
                                 <form method="POST" action="{{ route('verification.send') }}">
                                     @csrf
-                                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:text-sm">
+                                    <button type="submit" class="text-sm font-medium text-amber-800 underline hover:text-amber-900">
                                         Renvoyer le mail de vérification
                                     </button>
                                 </form>
-                                <p class="text-xs text-center text-gray-400 italic">Vérifiez vos spams si vous ne trouvez pas le mail.</p>
                             </div>
                         </div>
                     </div>
@@ -74,7 +63,7 @@
                             Nouveau Cahier des Charges
                         </a>
                     @else
-                        <button disabled class="flex-1 md:flex-none opacity-50 cursor-not-allowed inline-flex items-center justify-center px-6 py-3 bg-gray-400 text-white text-sm font-medium rounded-xl">
+                        <button disabled class="flex-1 md:flex-none opacity-50 cursor-not-allowed inline-flex items-center justify-center px-6 py-3 bg-gray-400 text-white text-sm font-medium rounded-xl" title="Vérifiez votre email pour débloquer">
                             Compte non vérifié
                         </button>
                     @endif

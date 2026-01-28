@@ -9,7 +9,7 @@
             </div>
             @can('user.create')
                 <a href="{{ route('admin.users.create') }}"
-                    class="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition shadow-lg shadow-gray-900/20">
+                   class="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition shadow-lg shadow-gray-900/20">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -22,7 +22,7 @@
     <div class="py-8 sm:py-12 bg-gray-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            {{-- Alertes (Style modernisé) --}}
+            {{-- Alertes --}}
             @if(session('success') || session('error'))
                 <div x-data="{ show: true }" x-show="show" x-transition.duration.300ms
                      class="rounded-lg p-4 shadow-sm border {{ session('error') ? 'bg-red-50 border-red-100 text-red-700' : 'bg-emerald-50 border-emerald-100 text-emerald-700' }} flex justify-between items-center">
@@ -43,7 +43,6 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-6">
 
-                    {{-- Table Desktop --}}
                     <div class="hidden lg:block">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-100">
@@ -72,20 +71,34 @@
                                                 </div>
                                             </div>
                                         </td>
+
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-600">{{ $user->email }}</div>
-                                            @if($user->email_verified_at)
-                                                <div class="flex items-center mt-1 text-emerald-600 text-xs font-medium">
+
+                                            @if($user->hasVerifiedEmail())
+                                                <div class="flex items-center mt-1 text-emerald-600 text-xs font-medium bg-emerald-50 px-2 py-1 rounded-md w-fit">
                                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                                     Vérifié
                                                 </div>
                                             @else
-                                                <div class="flex items-center mt-1 text-amber-600 text-xs font-medium">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                    Non vérifié
+                                                <div class="flex flex-col items-start gap-1 mt-1">
+                                                    <div class="flex items-center text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded-md">
+                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                        Non vérifié
+                                                    </div>
+
+                                                    <form action="{{ route('admin.users.verify', $user->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                                onclick="return confirm('Êtes-vous sûr de vouloir valider manuellement cet email ?')"
+                                                                class="text-xs text-indigo-600 hover:text-indigo-800 underline font-medium cursor-pointer">
+                                                            Valider maintenant
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             @endif
                                         </td>
+
                                         <td class="px-6 py-4">
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach($user->getRoleNames() as $role)
@@ -277,7 +290,6 @@
             const modal = document.getElementById('roleModal');
             modal.classList.remove('hidden');
 
-            // Animation fade-in simple
             setTimeout(() => {
                 modal.firstElementChild.classList.remove('opacity-0');
                 modal.lastElementChild.classList.remove('scale-95', 'opacity-0');

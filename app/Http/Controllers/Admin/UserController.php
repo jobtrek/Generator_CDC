@@ -1,11 +1,12 @@
 <?php
-// app/Http/Controllers/Admin/UserController.php
 
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password; // Nécessaire pour le lien d'invitation
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -31,7 +32,6 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8|confirmed',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,name'
         ]);
@@ -39,17 +39,21 @@ class UserController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'password' => Hash::make(Str::random(32)),
+            'email_verified_at' => now(),
         ]);
-
-        $user->sendEmailVerificationNotification();
 
         if (!empty($validated['roles'])) {
             $user->assignRole($validated['roles']);
         }
 
+
+        $token = Password::createToken($user);
+
+        $user->sendPasswordResetNotification($token);
+
         return redirect()->route('admin.users.index')
-            ->with('success', 'Utilisateur créé avec succès.');
+            ->with('success', "Invitation envoyée à {$user->email}. L'utilisateur a reçu un lien pour définir son mot de passe.");
     }
 
     public function show(User $user)
@@ -117,5 +121,16 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Rôles mis à jour avec succès.');
+    }
+
+    public function verifyEmail(User $user)
+    {
+        if ($user->hasVerifiedEmail()) {
+            return back()->with('error', 'Cet utilisateur a déjà validé son email.');
+        }
+
+        $user->markEmailAsVerified();
+
+        return back()->with('success', "L'email de l'utilisateur {$user->name} a été validé manuellement.");
     }
 }
