@@ -16,7 +16,7 @@
                     </x-nav-link>
 
                     <x-nav-link :href="route('forms.index')" :active="request()->routeIs('forms.*')">
-                        {{ __('Création cahier de charges') }}
+                        {{ __('Cahier des charges') }}
                     </x-nav-link>
 
                     @role('admin|super-admin')
@@ -78,7 +78,7 @@
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('forms.index')" :active="request()->routeIs('forms.*')">
-                {{ __('Création cahier de charges') }}
+                {{ __('Cahier des charges') }}
             </x-responsive-nav-link>
 
             @role('admin|super-admin')

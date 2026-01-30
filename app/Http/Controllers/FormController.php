@@ -193,7 +193,6 @@ class FormController extends Controller
                     'options' => null,
                     'order_index' => $orderIndex++,
                 ]);
-              //  dd($request->all());
             }
 
             $cdcData = [
