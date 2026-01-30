@@ -56,12 +56,6 @@ class UserController extends Controller
             ->with('success', "Invitation envoyée à {$user->email}. L'utilisateur a reçu un lien pour définir son mot de passe.");
     }
 
-    public function show(User $user)
-    {
-        $user->load('roles', 'forms', 'cdcs');
-        return view('admin.users.show', compact('user'));
-    }
-
     public function edit(User $user)
     {
         $roles = Role::all();

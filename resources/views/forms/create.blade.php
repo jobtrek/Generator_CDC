@@ -25,14 +25,14 @@
                 </div>
             @endif
 
-                @if(session('error'))
-                    <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ session('error') }}</span>
-                        </div>
+            @if(session('error'))
+                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>{{ session('error') }}</span>
                     </div>
-                @endif
+                </div>
+            @endif
 
             @if($errors->any())
                 <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
@@ -117,6 +117,7 @@
                                 </label>
                             </div>
                         </div>
+
                         <div class="border-t pt-4 mt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -143,11 +144,12 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="chef_projet_telephone" required
+                                    <input type="tel"
+                                           name="chef_projet_telephone"
+                                           required
                                            value="{{ old('chef_projet_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           maxlength="17"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -179,11 +181,12 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="expert1_telephone" required
+                                    <input type="tel"
+                                           name="expert1_telephone"
+                                           required
                                            value="{{ old('expert1_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           maxlength="17"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -215,15 +218,17 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="expert2_telephone" required
+                                    <input type="tel"
+                                           name="expert2_telephone"
+                                           required
                                            value="{{ old('expert2_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           maxlength="17"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
                         </div>
+
                         <div class="border-t pt-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{
                                 totalHours: {{ old('nombre_heures', '90') }}
@@ -478,7 +483,6 @@
                     </div>
                 </div>
 
-                {{-- Section 6: DESCRIPTIF DU PROJET --}}
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
@@ -563,6 +567,70 @@
     </div>
 
     <script>
+        function formatSwissPhone(input) {
+            let value = input.value.replace(/[^\d+]/g, '');
+
+            if (!value.startsWith('+41')) {
+                value = '+41';
+            }
+
+            let digits = value.substring(3);
+            digits = digits.substring(0, 9);
+
+            let formatted = '+41';
+            if (digits.length > 0) {
+                formatted += ' ' + digits.substring(0, 2);
+            }
+            if (digits.length > 2) {
+                formatted += ' ' + digits.substring(2, 5);
+            }
+            if (digits.length > 5) {
+                formatted += ' ' + digits.substring(5, 7);
+            }
+            if (digits.length > 7) {
+                formatted += ' ' + digits.substring(7, 9);
+            }
+
+            input.value = formatted;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInputs = document.querySelectorAll('input[type="tel"]');
+
+            phoneInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    formatSwissPhone(e.target);
+                });
+
+                input.addEventListener('blur', function(e) {
+                    formatSwissPhone(e.target);
+                });
+
+                input.addEventListener('keypress', function(e) {
+                    const char = e.key;
+                    const currentValue = e.target.value;
+
+                    if (e.keyCode === 8 || e.keyCode === 46 || e.keyCode === 37 || e.keyCode === 39) {
+                        return true;
+                    }
+
+                    if (!/^\d$/.test(char)) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    const digitsOnly = currentValue.replace(/[^\d]/g, '').substring(2);
+                    if (digitsOnly.length >= 9) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+
+                if (input.value) {
+                    formatSwissPhone(input);
+                }
+            });
+        });
         function planningCalculatorEdit() {
             const parseOldValue = (oldStr, defaultVal) => {
                 if (!oldStr || oldStr === '') return defaultVal;
