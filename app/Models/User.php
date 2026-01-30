@@ -8,7 +8,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Notifications\InvitationNotification;
 use App\Models\Form;
 
 
@@ -60,10 +59,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function cdcs(): HasMany
     {
         return $this->hasMany(Cdc::class);
-    }
-    public function sendPasswordResetNotification($token)
-    {
-        $this->notify(new InvitationNotification($token));
     }
 
 }
