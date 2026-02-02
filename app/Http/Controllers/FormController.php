@@ -23,14 +23,8 @@ class FormController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $q->where('name', 'ILIKE', '%' . $search . '%');
             });
-        }
-
-        if ($request->filled('status')) {
-            $isActive = $request->status === 'active';
-            $query->where('is_active', $isActive);
         }
 
         if ($request->filled('date_from')) {
@@ -41,10 +35,11 @@ class FormController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $forms = $query->latest()->paginate(10)->withQueryString();
+        $forms = $query->latest()->paginate(8)->withQueryString();
 
         return view('forms.index', compact('forms'));
     }
+
 
     public function create()
     {
@@ -52,14 +47,14 @@ class FormController extends Controller
         $duplicateData = session('duplicate_form', []);
         $prefilledFields = $duplicateData['fields'] ?? [];
 
-        return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields'));
+        $prefillData = [];
+
+        return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // ✅ Supprimé : name, description, is_active
-
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
             'lieu_travail' => 'required|string|max:255',
@@ -93,7 +88,7 @@ class FormController extends Controller
             'planning_tests' => 'nullable|string',
             'planning_documentation' => 'nullable|string',
 
-            'procedure' => ['nullable', 'string', 'max:5000'],
+            'procedure' => 'nullable|string|max:5000',
 
             'titre_projet' => 'required|string',
             'materiel_logiciel' => 'nullable|string',
@@ -118,70 +113,18 @@ class FormController extends Controller
 
         try {
             $form = Form::create([
-                'name' => $validated['titre_projet'], // ✅ Utilise le titre du projet comme nom
-                'description' => null,
-                'is_active' => true, // ✅ Toujours actif par défaut
+                'name' => $validated['titre_projet'],
                 'user_id' => Auth::id(),
             ]);
 
-            $fixedFieldsStructure = [
+            $essentialFields = [
                 ['name' => 'candidat_nom', 'label' => 'Nom du candidat', 'section' => 'section_1', 'field_type_id' => 1],
                 ['name' => 'candidat_prenom', 'label' => 'Prénom du candidat', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'lieu_travail', 'label' => 'Lieu de travail', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'orientation', 'label' => 'Orientation', 'section' => 'section_1', 'field_type_id' => 1],
-
-                ['name' => 'chef_projet_nom', 'label' => 'Chef de projet - Nom', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'chef_projet_prenom', 'label' => 'Chef de projet - Prénom', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'chef_projet_email', 'label' => 'Chef de projet - Email', 'section' => 'section_1', 'field_type_id' => 3],
-                ['name' => 'chef_projet_telephone', 'label' => 'Chef de projet - Téléphone', 'section' => 'section_1', 'field_type_id' => 6],
-
-                ['name' => 'expert1_nom', 'label' => 'Expert 1 - Nom', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'expert1_prenom', 'label' => 'Expert 1 - Prénom', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'expert1_email', 'label' => 'Expert 1 - Email', 'section' => 'section_1', 'field_type_id' => 3],
-                ['name' => 'expert1_telephone', 'label' => 'Expert 1 - Téléphone', 'section' => 'section_1', 'field_type_id' => 6],
-
-                ['name' => 'expert2_nom', 'label' => 'Expert 2 - Nom', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'expert2_prenom', 'label' => 'Expert 2 - Prénom', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'expert2_email', 'label' => 'Expert 2 - Email', 'section' => 'section_1', 'field_type_id' => 3],
-                ['name' => 'expert2_telephone', 'label' => 'Expert 2 - Téléphone', 'section' => 'section_1', 'field_type_id' => 6],
-
-                ['name' => 'periode_realisation', 'label' => 'Période de réalisation', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'horaire_travail', 'label' => 'Horaire de travail', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'nombre_heures', 'label' => 'Nombre d\'heures', 'section' => 'section_1', 'field_type_id' => 1],
-
-                ['name' => 'heure_matin_debut', 'label' => 'Heure matin début', 'section' => 'hidden', 'field_type_id' => 5],
-                ['name' => 'heure_matin_fin', 'label' => 'Heure matin fin', 'section' => 'hidden', 'field_type_id' => 5],
-                ['name' => 'heure_aprem_debut', 'label' => 'Heure après-midi début', 'section' => 'hidden', 'field_type_id' => 5],
-                ['name' => 'heure_aprem_fin', 'label' => 'Heure après-midi fin', 'section' => 'hidden', 'field_type_id' => 5],
-
-                ['name' => 'planning_analyse', 'label' => 'Planning - Analyse', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'planning_implementation', 'label' => 'Planning - Implémentation', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'planning_tests', 'label' => 'Planning - Tests', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'planning_documentation', 'label' => 'Planning - Documentation', 'section' => 'section_1', 'field_type_id' => 1],
-
                 ['name' => 'titre_projet', 'label' => 'Titre du projet', 'section' => 'section_3', 'field_type_id' => 1],
-                ['name' => 'materiel_logiciel', 'label' => 'Matériel et logiciel', 'section' => 'section_4', 'field_type_id' => 2],
-                ['name' => 'prerequis', 'label' => 'Prérequis', 'section' => 'section_5', 'field_type_id' => 2],
-                ['name' => 'descriptif_projet', 'label' => 'Descriptif du projet', 'section' => 'section_6', 'field_type_id' => 2],
-                ['name' => 'livrables', 'label' => 'Livrables', 'section' => 'section_7', 'field_type_id' => 2],
             ];
 
             $orderIndex = 0;
-            foreach ($fixedFieldsStructure as $fieldStructure) {
-                if (in_array($fieldStructure['name'], ['date_debut', 'date_fin', 'heure_debut', 'heure_fin'])) {
-                    $form->fields()->create([
-                        'name' => $fieldStructure['name'],
-                        'label' => $fieldStructure['label'],
-                        'field_type_id' => $fieldStructure['field_type_id'],
-                        'section' => 'hidden',
-                        'placeholder' => null,
-                        'is_required' => true,
-                        'options' => null,
-                        'order_index' => $orderIndex++,
-                    ]);
-                    continue;
-                }
-
+            foreach ($essentialFields as $fieldStructure) {
                 $form->fields()->create([
                     'name' => $fieldStructure['name'],
                     'label' => $fieldStructure['label'],
@@ -193,7 +136,6 @@ class FormController extends Controller
                     'order_index' => $orderIndex++,
                 ]);
             }
-
             $cdcData = [
                 'candidat_nom' => $validated['candidat_nom'],
                 'candidat_prenom' => $validated['candidat_prenom'],
@@ -306,11 +248,11 @@ class FormController extends Controller
         $prefillData = [
             'date_debut' => $cdcData['date_debut'] ?? null,
             'date_fin' => $cdcData['date_fin'] ?? null,
-            'heure_matin_debut' => $cdcData['heure_matin_debut'] ?? '08:30',
-            'heure_matin_fin' => $cdcData['heure_matin_fin'] ?? '12:30',
-            'heure_aprem_debut' => $cdcData['heure_aprem_debut'] ?? '13:30',
-            'heure_aprem_fin' => $cdcData['heure_aprem_fin'] ?? '17:30',
-            'nombre_heures' => $cdcData['nombre_heures'] ?? '90',
+            'heure_matin_debut' => $cdcData['heure_matin_debut'] ?? null,
+            'heure_matin_fin' => $cdcData['heure_matin_fin'] ?? null,
+            'heure_aprem_debut' => $cdcData['heure_aprem_debut'] ?? null,
+            'heure_aprem_fin' => $cdcData['heure_aprem_fin'] ?? null,
+            'nombre_heures' => $cdcData['nombre_heures'] ?? null,
             'planning_analyse' => $cdcData['planning_analyse'] ?? '',
             'planning_implementation' => $cdcData['planning_implementation'] ?? '',
             'planning_tests' => $cdcData['planning_tests'] ?? '',
@@ -325,8 +267,6 @@ class FormController extends Controller
         $this->authorize('update', $form);
 
         $validated = $request->validate([
-            // ✅ Supprimé : name, description, is_active
-
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
             'lieu_travail' => 'required|string|max:255',
@@ -347,7 +287,7 @@ class FormController extends Controller
             'expert2_email' => 'required|email',
             'expert2_telephone' => 'required|string',
 
-            'procedure' => ['nullable', 'string', 'max:5000'],
+            'procedure' => 'nullable|string|max:5000',
 
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
@@ -356,7 +296,7 @@ class FormController extends Controller
             'heure_aprem_debut' => 'required|date_format:H:i',
             'heure_aprem_fin' => 'required|date_format:H:i',
 
-            'nombre_heures' => 'required|integer|min:1',
+            'nombre_heures' => 'required|integer|min:1|max:90',
 
             'planning_analyse' => 'nullable|string',
             'planning_implementation' => 'nullable|string',
@@ -395,9 +335,8 @@ class FormController extends Controller
         DB::beginTransaction();
 
         try {
-            // ✅ Mise à jour simplifiée (pas de name, description, is_active)
             $form->update([
-                'name' => $validated['titre_projet'], // ✅ Met à jour avec le nouveau titre
+                'name' => $validated['titre_projet'],
             ]);
 
             $cdcData = [
@@ -438,7 +377,6 @@ class FormController extends Controller
                 'planning_documentation' => $validated['planning_documentation'] ?? '',
 
                 'procedure' => $request->procedure ?? '',
-
                 'titre_projet' => $validated['titre_projet'],
                 'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',
                 'prerequis' => $validated['prerequis'] ?? '',

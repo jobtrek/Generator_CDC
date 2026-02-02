@@ -78,25 +78,20 @@
                             @foreach($forms as $form)
                                 <tr class="group hover:bg-gray-50 transition duration-150 ease-in-out">
                                     <td class="px-6 py-5 whitespace-nowrap">
-                                        <div class="flex items-start">
-                                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-4">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <td class="px-1 py-5 whitespace-nowrap">
+                                        <div class="flex items-center justify-start">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
                                             </div>
                                             <div>
                                                 <div class="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
                                                     {{ $form->name }}
                                                 </div>
-                                                @if($form->description)
-                                                    <div class="text-sm text-gray-500 mt-1 max-w-md truncate">
-                                                        {{ Str::limit($form->description, 60) }}
-                                                    </div>
-                                                @else
-                                                    <div class="text-sm text-gray-400 mt-1 italic">Aucune description</div>
-                                                @endif
                                             </div>
                                         </div>
                                     </td>
-
                                     <td class="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end items-center gap-2">
                                             @php $cdc = $form->cdcs()->first(); @endphp

@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password; // Nécessaire pour le lien d'invitation
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -17,8 +18,9 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::with('roles')->paginate(15);
-        return view('admin.users.index', compact('users'));
+        $users = User::with('roles')->paginate(10);
+        $allRoles = Role::all();
+        return view('admin.users.index', compact('users', 'allRoles'));
     }
 
     public function create()
@@ -36,6 +38,8 @@ class UserController extends Controller
             'roles.*' => 'exists:roles,name'
         ]);
 
+        $this->checkSuperAdminEscalation($validated['roles'] ?? []);
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -45,15 +49,14 @@ class UserController extends Controller
 
         if (!empty($validated['roles'])) {
             $user->assignRole($validated['roles']);
+        } else {
+            $user->assignRole('user');
         }
-
 
         $token = Password::createToken($user);
 
-        $user->sendPasswordResetNotification($token);
-
         return redirect()->route('admin.users.index')
-            ->with('success', "Invitation envoyée à {$user->email}. L'utilisateur a reçu un lien pour définir son mot de passe.");
+            ->with('success', "Utilisateur créé avec succès.");
     }
 
     public function edit(User $user)
@@ -71,6 +74,10 @@ class UserController extends Controller
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,name'
         ]);
+
+        if (isset($validated['roles'])) {
+            $this->checkSuperAdminEscalation($validated['roles']);
+        }
 
         $user->update([
             'name' => $validated['name'],
@@ -91,10 +98,29 @@ class UserController extends Controller
             ->with('success', 'Utilisateur mis à jour avec succès.');
     }
 
+    public function updateRoles(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'roles' => 'required|array',
+            'roles.*' => 'exists:roles,name'
+        ]);
+
+        $this->checkSuperAdminEscalation($validated['roles']);
+
+        $user->syncRoles($validated['roles']);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Rôles mis à jour avec succès.');
+    }
+
     public function destroy(User $user)
     {
         if (auth()->id() === $user->id) {
             return back()->with('error', 'Vous ne pouvez pas vous supprimer vous-même.');
+        }
+
+        if ($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin')) {
+            return back()->with('error', 'Vous n\'avez pas les droits pour supprimer un Super Administrateur.');
         }
 
         $userName = $user->name;
@@ -104,27 +130,25 @@ class UserController extends Controller
             ->with('success', "L'utilisateur \"{$userName}\" a été supprimé avec succès.");
     }
 
-    public function updateRoles(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'roles' => 'required|array',
-            'roles.*' => 'exists:roles,name'
-        ]);
-
-        $user->syncRoles($validated['roles']);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Rôles mis à jour avec succès.');
-    }
-
     public function verifyEmail(User $user)
     {
         if ($user->hasVerifiedEmail()) {
             return back()->with('error', 'Cet utilisateur a déjà validé son email.');
         }
-
         $user->markEmailAsVerified();
+        return back()->with('success', "Email validé manuellement.");
+    }
 
-        return back()->with('success', "L'email de l'utilisateur {$user->name} a été validé manuellement.");
+    /**
+     * Vérifie si l'utilisateur actuel a le droit d'assigner les rôles demandés.
+     * Si on essaie d'assigner 'super-admin' sans être 'super-admin', on bloque.
+     */
+    private function checkSuperAdminEscalation(array $roles)
+    {
+        if (in_array('super-admin', $roles)) {
+            if (!Auth::user()->hasRole('super-admin')) {
+                abort(403, 'ACTION NON AUTORISÉE : Seul un Super Admin peut nommer un autre Super Admin.');
+            }
+        }
     }
 }

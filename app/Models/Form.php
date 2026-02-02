@@ -13,20 +13,15 @@ class Form extends Model
 
     protected $fillable = [
         'name',
-        'description',
-        'is_active',
         'user_id'
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean'
-    ];
+    protected $casts = [];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-
     public function fields(): HasMany
     {
         return $this->hasMany(Field::class)->orderBy('order_index');

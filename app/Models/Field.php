@@ -18,7 +18,9 @@ class Field extends Model
         'order_index',
         'options',
         'form_id',
-        'field_type_id'
+        'field_type_id',
+        'section',
+        'subsection'
     ];
 
     protected $casts = [

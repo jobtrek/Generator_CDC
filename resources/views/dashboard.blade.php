@@ -36,9 +36,10 @@
                 </div>
             @endif
 
-            {{-- 2. KPI Cards --}}
+            {{-- 2. KPI Cards - TOUTES CLIQUABLES --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group">
+                {{-- Card 1: Total Dossiers --}}
+                <a href="{{ route('forms.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                     <div class="flex items-center justify-between mb-4">
                         <div class="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -49,10 +50,11 @@
                         <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->count() }}</div>
                         <div class="text-sm text-gray-500 mt-1">Dossiers créés</div>
                     </div>
-                </div>
+                </a>
 
+                {{-- Card 2: Utilisateurs (Admin) ou Projets actifs (User) --}}
                 @if(Auth::user()->hasAnyRole(['admin', 'super-admin']))
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group">
+                    <a href="{{ route('admin.users.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                         <div class="flex items-center justify-between mb-4">
                             <div class="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -63,9 +65,9 @@
                             <div class="text-3xl font-bold text-gray-900">{{ \App\Models\User::count() }}</div>
                             <div class="text-sm text-gray-500 mt-1">Utilisateurs inscrits</div>
                         </div>
-                    </div>
+                    </a>
                 @else
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group">
+                    <a href="{{ route('forms.index') }}?filter=active" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                         <div class="flex items-center justify-between mb-4">
                             <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -76,10 +78,11 @@
                             <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->where('is_active', true)->count() }}</div>
                             <div class="text-sm text-gray-500 mt-1">Projets actifs</div>
                         </div>
-                    </div>
+                    </a>
                 @endif
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group">
+                {{-- Card 3: Mon Compte --}}
+                <a href="{{ route('profile.edit') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                     <div class="flex items-center justify-between mb-4">
                         <div class="p-3 bg-gray-50 text-gray-600 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -90,7 +93,7 @@
                         <div class="text-lg font-bold text-gray-900">Mon Compte</div>
                         <div class="text-sm text-gray-500 mt-1">Gérer mes infos</div>
                     </div>
-                </div>
+                </a>
             </div>
 
             {{-- 3. Section Dossiers Récents --}}
@@ -107,7 +110,6 @@
                 @if($recentForms->count() > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @foreach($recentForms as $form)
-                            {{-- LA MODIFICATION : Toute la carte est entourée par une balise <a> --}}
                             <a href="{{ route('forms.show', $form) }}" class="group bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow-md transition-all flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     <div class="p-3 bg-gray-50 text-gray-400 rounded-xl group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
@@ -133,7 +135,7 @@
                         <p class="mt-1 text-sm text-gray-500">Commencez par créer votre premier cahier des charges.</p>
                         <div class="mt-6">
                             <a href="{{ route('forms.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/20">
-                                Créer un dossier
+                                Créer un cahier des charges
                             </a>
                         </div>
                     </div>
