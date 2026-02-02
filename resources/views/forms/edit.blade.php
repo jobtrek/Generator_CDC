@@ -295,6 +295,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <!-- Nombre d'heures (hidden input) -->
                                 <input type="hidden" name="nombre_heures" x-model="totalHours" value="90">
                             </div>
@@ -640,72 +641,6 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
             </form>
         </div>
     </div>
-    <script>
-        function formatSwissPhone(input) {
-            let value = input.value.replace(/[^\d+]/g, '');
-
-            if (!value.startsWith('+41')) {
-                value = '+41';
-            }
-
-            let digits = value.substring(3);
-            digits = digits.substring(0, 9);
-
-            let formatted = '+41';
-            if (digits.length > 0) {
-                formatted += ' ' + digits.substring(0, 2);
-            }
-            if (digits.length > 2) {
-                formatted += ' ' + digits.substring(2, 5);
-            }
-            if (digits.length > 5) {
-                formatted += ' ' + digits.substring(5, 7);
-            }
-            if (digits.length > 7) {
-                formatted += ' ' + digits.substring(7, 9);
-            }
-
-            input.value = formatted;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const phoneInputs = document.querySelectorAll('input[type="tel"]');
-
-            phoneInputs.forEach(input => {
-                input.addEventListener('input', function(e) {
-                    formatSwissPhone(e.target);
-                });
-
-                input.addEventListener('blur', function(e) {
-                    formatSwissPhone(e.target);
-                });
-
-                input.addEventListener('keypress', function(e) {
-                    const char = e.key;
-                    const currentValue = e.target.value;
-
-                    if (e.keyCode === 8 || e.keyCode === 46 || e.keyCode === 37 || e.keyCode === 39) {
-                        return true;
-                    }
-
-                    if (!/^\d$/.test(char)) {
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    const digitsOnly = currentValue.replace(/[^\d]/g, '').substring(2);
-                    if (digitsOnly.length >= 9) {
-                        e.preventDefault();
-                        return false;
-                    }
-                });
-
-                if (input.value) {
-                    formatSwissPhone(input);
-                }
-            });
-        });
-    </script>
 
     <script>
         function planningCalculatorEdit() {

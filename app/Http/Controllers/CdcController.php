@@ -39,7 +39,6 @@ class CdcController extends Controller
             session()->put('duplicate_form', [
                 'source_form_id' => $form->id,
                 'name' => $form->name . ' (Copie)',
-                'description' => $form->description,
                 'fields' => $form->fields->where('section', 'custom')->sortBy('order_index')->map(function($field) {
                     return [
                         'name' => $field->name,
@@ -93,10 +92,6 @@ class CdcController extends Controller
             return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
         }
     }
-    /**
-     * ✅ Télécharge le CDC au format PDF (conversion depuis Word généré)
-     */
-
     /**
      * ✅ Génère un nom de fichier Word sécurisé
      */
