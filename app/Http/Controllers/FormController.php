@@ -62,17 +62,17 @@ class FormController extends Controller
 
             'chef_projet_nom' => 'required|string|max:255',
             'chef_projet_prenom' => 'required|string|max:255',
-            'chef_projet_email' => 'required|email',
+            'chef_projet_email' => 'required|email:rfc,dns',
             'chef_projet_telephone' => 'required|string',
 
             'expert1_nom' => 'required|string|max:255',
             'expert1_prenom' => 'required|string|max:255',
-            'expert1_email' => 'required|email',
+            'expert1_email' => 'required|email:rfc,dns',
             'expert1_telephone' => 'required|string',
 
             'expert2_nom' => 'required|string|max:255',
             'expert2_prenom' => 'required|string|max:255',
-            'expert2_email' => 'required|email',
+            'expert2_email' => 'required|email:rfc,dns',
             'expert2_telephone' => 'required|string',
 
             'date_debut' => 'required|date',
@@ -274,17 +274,17 @@ class FormController extends Controller
 
             'chef_projet_nom' => 'required|string|max:255',
             'chef_projet_prenom' => 'required|string|max:255',
-            'chef_projet_email' => 'required|email',
+            'chef_projet_email' => 'required|email:rfc,dns',
             'chef_projet_telephone' => 'required|string',
 
             'expert1_nom' => 'required|string|max:255',
             'expert1_prenom' => 'required|string|max:255',
-            'expert1_email' => 'required|email',
+            'expert1_email' => 'required|email:rfc,dns',
             'expert1_telephone' => 'required|string',
 
             'expert2_nom' => 'required|string|max:255',
             'expert2_prenom' => 'required|string|max:255',
-            'expert2_email' => 'required|email',
+            'expert2_email' => 'required|email:rfc,dns',
             'expert2_telephone' => 'required|string',
 
             'procedure' => 'nullable|string|max:5000',
