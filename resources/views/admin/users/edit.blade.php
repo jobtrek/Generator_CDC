@@ -89,7 +89,7 @@
 
                             <div class="space-y-4">
                                 <div>
-                                    <label for="password" class="block text-sm font-medium text-gray-700">
+                                    <label for="password" class="block text-sm font-medium text-gray-700" >
                                         Nouveau mot de passe
                                     </label>
                                     <input type="password"
