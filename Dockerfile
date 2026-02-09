@@ -1,4 +1,4 @@
-FROM node:25.4.0-trixie-slim AS build
+FROM node:25.6.0-trixie-slim AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
