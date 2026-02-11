@@ -156,10 +156,12 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="chef_projet_telephone" required
-                                           value="{{ old('chef_projet_telephone', $getValue('chef_projet_telephone', '+41 ')) }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           value="{{ old('chef_projet_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -193,12 +195,15 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert1_telephone" required
-                                           value="{{ old('expert1_telephone', $getValue('expert1_telephone', '+41 ')) }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           value="{{ old('expert1_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
+
+                                           </div>
                             </div>
                         </div>
                         <!-- Expert 2 -->
@@ -229,12 +234,13 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert2_telephone" required
-                                           value="{{ old('expert2_telephone', $getValue('expert2_telephone', '+41 ')) }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           value="{{ old('expert2_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
                             </div>
                         </div>
 
@@ -636,6 +642,7 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                     </button>
                 </div>
                     </div>
+                </div>
                 </div>
 
             </form>
