@@ -44,9 +44,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('forms.store') }}" x-data="cdcFormBuilder()" class="space-y-6">
-                @csrf
-
+                <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">                @csrf
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">
@@ -142,11 +140,14 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="chef_projet_telephone" required
+                                    <input type="text"
+                                           name="chef_projet_telephone"
+                                           id="chef_projet_telephone"
+                                           required
                                            value="{{ old('chef_projet_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           placeholder="+41 79 123 45 67"
+                                           maxlength="16"
+                                           oninput="window.formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -180,9 +181,11 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert1_telephone" required
                                            value="{{ old('expert1_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -216,9 +219,11 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert2_telephone" required
                                            value="{{ old('expert2_telephone', '+41 ') }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -553,15 +558,20 @@
                         Annuler
                     </a>
                     <button type="submit"
-                            class="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow-lg">
-                        Créer et générer le CDC
+                            :disabled="submitting"
+                            :class="submitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'"
+                            class="px-6 py-3 bg-green-600 text-white rounded-md transition font-medium shadow-lg">
+                        <span x-show="!submitting">Créer le cahier des charges</span>
+                        <span x-show="submitting" x-cloak>Création en cours...</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
+
     @push('scripts')
+        <script src="{{ asset('js/phone-formatter.js') }}"></script>
         <script src="{{ asset('js/planning-calculator.js') }}"></script>
         <script src="{{ asset('js/form-builder.js') }}"></script>
     @endpush

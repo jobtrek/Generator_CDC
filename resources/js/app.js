@@ -2,8 +2,8 @@ import './bootstrap';
 import './markdown-editor';
 import Alpine from 'alpinejs';
 
-import { planningCalculatorEdit } from './planning-calculator';
-import { cdcFormBuilder } from './form-builder';
+import { planningCalculatorEdit } from '../../public/js/planning-calculator.js';
+import { cdcFormBuilder } from '../../public/js/form-builder.js';
 
 window.planningCalculatorEdit = planningCalculatorEdit;
 window.cdcFormBuilder = cdcFormBuilder;
