@@ -6,69 +6,58 @@ use App\Models\User;
 
 class RoleHelper
 {
-    /**
-     * Vérifier si l'utilisateur a un rôle spécifique
-     */
+    protected const ROLE_HIERARCHY = [
+        'super-admin' => 100,
+        'user'        => 10,
+    ];
+    public static function canAssignRole(User $actor, string $targetRoleName): bool
+    {
+        $actorRole = self::getPrimaryRole($actor);
+        if (!$actorRole) return false;
+
+        $actorWeight = self::getRoleWeight($actorRole);
+        $targetWeight = self::getRoleWeight($targetRoleName);
+
+        if ($actorRole === 'super-admin') {
+            return true;
+        }
+        return $actorWeight > $targetWeight;
+    }
+
+    public static function getRoleWeight(string $role): int
+    {
+        return self::ROLE_HIERARCHY[$role] ?? 0;
+    }
+
+
     public static function hasRole(User $user, string $role): bool
     {
         return $user->hasRole($role);
     }
 
-    /**
-     * Vérifier si l'utilisateur a une permission
-     */
-    public static function hasPermission(User $user, string $permission): bool
-    {
-        return $user->hasPermissionTo($permission);
-    }
-
-    /**
-     * Obtenir le rôle principal de l'utilisateur
-     */
     public static function getPrimaryRole(User $user): ?string
     {
         $roles = $user->getRoleNames();
+        $sortedRoles = $roles->sortByDesc(function ($role) {
+            return self::getRoleWeight($role);
+        });
 
-        // Priorité des rôles
-        $rolePriority = [
-            'super-admin',
-            'admin',
-            'formateur',
-            'user',
-        ];
-
-        foreach ($rolePriority as $role) {
-            if ($roles->contains($role)) {
-                return $role;
-            }
-        }
-
-        return $roles->first();
+        return $sortedRoles->first();
     }
 
-    /**
-     * Obtenir la couleur badge pour un rôle
-     */
     public static function getRoleBadgeColor(string $role): string
     {
         return match($role) {
             'super-admin' => 'red',
-            'admin' => 'orange',
-            'formateur' => 'blue',
             'user' => 'green',
             default => 'gray'
         };
     }
 
-    /**
-     * Obtenir le label traduit du rôle
-     */
     public static function getRoleLabel(string $role): string
     {
         return match($role) {
             'super-admin' => 'Super Administrateur',
-            'admin' => 'Administrateur',
-            'formateur' => 'Gestionnaire',
             'user' => 'Utilisateur',
             default => ucfirst($role)
         };

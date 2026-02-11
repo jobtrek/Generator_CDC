@@ -4,27 +4,41 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Helpers\RoleHelper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Affiche la liste des utilisateurs.
+     * Sécurisé ici car pas de constructeur middleware.
+     */
     public function index()
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            abort(403);
+        }
+
         $users = User::with('roles')->paginate(10);
-        $allRoles = Role::all();
-        return view('admin.users.index', compact('users', 'allRoles'));
+        return view('admin.users.index', compact('users'));
     }
 
+    /**
+     * Affiche le formulaire de création.
+     */
     public function create()
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            abort(403);
+        }
+
         $roles = Role::all();
         return view('admin.users.create', compact('roles'));
     }
@@ -34,11 +48,16 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name'
+            'role' => 'required|string|exists:roles,name',
         ]);
 
-        $this->checkSuperAdminEscalation($validated['roles'] ?? []);
+        $currentUser = Auth::user();
+        $targetRole = $validated['role'];
+
+        // La sécurité est gérée ici par le Helper
+        if (!RoleHelper::canAssignRole($currentUser, $targetRole)) {
+            abort(403);
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -47,20 +66,21 @@ class UserController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        if (!empty($validated['roles'])) {
-            $user->assignRole($validated['roles']);
-        } else {
-            $user->assignRole('user');
-        }
-
-        $token = Password::createToken($user);
+        $user->assignRole($targetRole);
 
         return redirect()->route('admin.users.index')
-            ->with('success', "Utilisateur créé avec succès.");
+            ->with('success', 'Utilisateur créé avec succès.');
     }
 
+    /**
+     * Affiche le formulaire d'édition.
+     */
     public function edit(User $user)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            abort(403);
+        }
+
         $roles = Role::all();
         return view('admin.users.edit', compact('user', 'roles'));
     }
@@ -70,64 +90,72 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:8|confirmed',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name'
+            'role' => 'required|string|exists:roles,name',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
-        if (isset($validated['roles'])) {
-            $this->checkSuperAdminEscalation($validated['roles']);
+        $currentUser = Auth::user();
+        $targetRole = $validated['role'];
+
+        if ($currentUser->id === $user->id) {
+            $currentRole = RoleHelper::getPrimaryRole($currentUser);
+            if ($currentRole !== $targetRole && !$currentUser->hasRole('super-admin')) {
+                return back()->with('error', 'Vous ne pouvez pas modifier votre propre rôle.');
+            }
         }
 
-        $user->update([
+        if (!RoleHelper::canAssignRole($currentUser, $targetRole)) {
+            abort(403);
+        }
+
+        $targetUserRole = RoleHelper::getPrimaryRole($user);
+        if ($targetUserRole) {
+            $myWeight = RoleHelper::getRoleWeight(RoleHelper::getPrimaryRole($currentUser));
+            $targetWeight = RoleHelper::getRoleWeight($targetUserRole);
+
+            if ($myWeight < $targetWeight) {
+                abort(403);
+            }
+        }
+
+        $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
-        ]);
+        ];
 
         if (!empty($validated['password'])) {
-            $user->update([
-                'password' => Hash::make($validated['password'])
-            ]);
+            $data['password'] = Hash::make($validated['password']);
         }
 
-        if (isset($validated['roles'])) {
-            $user->syncRoles($validated['roles']);
-        }
+        $user->update($data);
+        $user->syncRoles([$targetRole]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur mis à jour avec succès.');
     }
 
-    public function updateRoles(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'roles' => 'required|array',
-            'roles.*' => 'exists:roles,name'
-        ]);
-
-        $this->checkSuperAdminEscalation($validated['roles']);
-
-        $user->syncRoles($validated['roles']);
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Rôles mis à jour avec succès.');
-    }
-
     public function destroy(User $user)
     {
-        if (auth()->id() === $user->id) {
+        $currentUser = Auth::user();
+
+        if ($currentUser->id === $user->id) {
             return back()->with('error', 'Vous ne pouvez pas vous supprimer vous-même.');
         }
 
-        if ($user->hasRole('super-admin') && !auth()->user()->hasRole('super-admin')) {
-            return back()->with('error', 'Vous n\'avez pas les droits pour supprimer un Super Administrateur.');
+        $myRole = RoleHelper::getPrimaryRole($currentUser);
+        $targetRole = RoleHelper::getPrimaryRole($user);
+
+        $myWeight = RoleHelper::getRoleWeight($myRole);
+        $targetWeight = RoleHelper::getRoleWeight($targetRole);
+
+        if ($targetWeight >= $myWeight && !$currentUser->hasRole('super-admin')) {
+            return back()->with('error', 'Droits insuffisants.');
         }
 
-        $userName = $user->name;
         $user->delete();
 
         return redirect()->route('admin.users.index')
-            ->with('success', "L'utilisateur \"{$userName}\" a été supprimé avec succès.");
+            ->with('success', 'Utilisateur supprimé avec succès.');
     }
 
     public function verifyEmail(User $user)
@@ -136,19 +164,6 @@ class UserController extends Controller
             return back()->with('error', 'Cet utilisateur a déjà validé son email.');
         }
         $user->markEmailAsVerified();
-        return back()->with('success', "Email validé manuellement.");
-    }
-
-    /**
-     * Vérifie si l'utilisateur actuel a le droit d'assigner les rôles demandés.
-     * Si on essaie d'assigner 'super-admin' sans être 'super-admin', on bloque.
-     */
-    private function checkSuperAdminEscalation(array $roles)
-    {
-        if (in_array('super-admin', $roles)) {
-            if (!Auth::user()->hasRole('super-admin')) {
-                abort(403, 'ACTION NON AUTORISÉE : Seul un Super Admin peut nommer un autre Super Admin.');
-            }
-        }
+        return back()->with('success', 'Email validé manuellement.');
     }
 }
