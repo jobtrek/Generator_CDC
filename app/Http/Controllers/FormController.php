@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Form;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class FormController extends Controller
 {
@@ -21,9 +23,10 @@ class FormController extends Controller
             ->where('user_id', Auth::id());
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = Str::lower($request->search);
+
             $query->where(function($q) use ($search) {
-                $q->where('name', 'ILIKE', '%' . $search . '%');
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
             });
         }
 
@@ -39,7 +42,6 @@ class FormController extends Controller
 
         return view('forms.index', compact('forms'));
     }
-
 
     public function create()
     {
