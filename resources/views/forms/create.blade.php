@@ -569,10 +569,8 @@
         </div>
     </div>
 
+    <script src="{{ asset('js/phone-formatter.js') }}"></script>
+    <script src="{{ asset('js/form-builder.js') }}"></script>
+    <script src="{{ asset('js/planning-calculator.js') }}"></script>
 
-    @push('scripts')
-        <script src="{{ asset('js/phone-formatter.js') }}"></script>
-        <script src="{{ asset('js/planning-calculator.js') }}"></script>
-        <script src="{{ asset('js/form-builder.js') }}"></script>
-    @endpush
 </x-app-layout>
