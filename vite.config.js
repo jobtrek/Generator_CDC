@@ -7,6 +7,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/phone-formatter.js',
+                'resources/js/planning-calculator.js',
+                'resources/js/form-builder.js',
             ],
             refresh: true,
         }),
