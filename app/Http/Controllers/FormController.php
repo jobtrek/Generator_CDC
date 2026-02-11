@@ -64,17 +64,17 @@ class FormController extends Controller
             'chef_projet_nom' => 'required|string|max:255',
             'chef_projet_prenom' => 'required|string|max:255',
             'chef_projet_email' => 'required|email',
-            'chef_projet_telephone' => 'required|string',
+            'chef_projet_telephone' => ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'],
 
             'expert1_nom' => 'required|string|max:255',
             'expert1_prenom' => 'required|string|max:255',
             'expert1_email' => 'required|email',
-            'expert1_telephone' => 'required|string',
+            'expert1_telephone' => ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'],
 
             'expert2_nom' => 'required|string|max:255',
             'expert2_prenom' => 'required|string|max:255',
             'expert2_email' => 'required|email',
-            'expert2_telephone' => 'required|string',
+            'expert2_telephone' => ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'],
 
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
@@ -196,8 +196,8 @@ class FormController extends Controller
 
             session()->forget('duplicate_form');
 
-            return redirect()->route('cdcs.download', $cdc)
-                ->with('success', 'Formulaire créé et CDC généré avec succès ! Téléchargement en cours...');
+            return redirect()->route('forms.show', $form)
+                ->with('success', 'Cahier des charges créé avec succès !');
 
         } catch (\Exception $e) {
             DB::rollBack();

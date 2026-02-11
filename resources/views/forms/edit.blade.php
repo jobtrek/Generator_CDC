@@ -156,10 +156,22 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="chef_projet_telephone" required
-                                           value="{{ old('chef_projet_telephone', $getValue('chef_projet_telephone', '+41 ')) }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           value="{{ old('chef_projet_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="
+                                                   let v = this.value.replace(/[^0-9\+]/g, '');
+                                                   if (!v.startsWith('+41')) v = '+41';
+                                                   let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
+                                                   let formatted = '+41';
+                                                   if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
+                                                   if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
+                                                   if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
+                                                   if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
+                                                   this.value = formatted;
+                                               "
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -193,12 +205,25 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert1_telephone" required
-                                           value="{{ old('expert1_telephone', $getValue('expert1_telephone', '+41 ')) }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           value="{{ old('expert1_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="
+                                               let v = this.value.replace(/[^0-9\+]/g, '');
+                                               if (!v.startsWith('+41')) v = '+41';
+                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
+                                               let formatted = '+41';
+                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
+                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
+                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
+                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
+                                               this.value = formatted;
+                                           "
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
+                                 </div>
                             </div>
                         </div>
                         <!-- Expert 2 -->
@@ -229,12 +254,23 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
                                     <input type="tel" name="expert2_telephone" required
-                                           value="{{ old('expert2_telephone', $getValue('expert2_telephone', '+41 ')) }}"
-                                           pattern="[\+]?[0-9\s\-\(\)]+"
+                                           value="{{ old('expert2_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
                                            placeholder="+41 21 123 45 67"
-                                           title="Veuillez entrer un numéro de téléphone valide (ex: +41 21 123 45 67)"
+                                           title="Format suisse : +41 XX XXX XX XX"
+                                           maxlength="16"
+                                           oninput="
+                                               let v = this.value.replace(/[^0-9\+]/g, '');
+                                               if (!v.startsWith('+41')) v = '+41';
+                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
+                                               let formatted = '+41';
+                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
+                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
+                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
+                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
+                                               this.value = formatted;
+                                           "
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
                             </div>
                         </div>
 
@@ -623,7 +659,6 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         </div>
                     </div>
                 </div>
-
                 <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.show', $form) }}"
@@ -631,7 +666,7 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         Annuler
                     </a>
                     <button type="submit"
-                            class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg">
+                            class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg active:bg-indigo-800">
                         Mettre à jour le cahier de charge
                     </button>
                 </div>
