@@ -632,7 +632,7 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                     </a>
                     <button type="submit"
                             class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg">
-                        Mettre à jour le formulaire
+                        Mettre à jour le cahier de charge
                     </button>
                 </div>
                     </div>

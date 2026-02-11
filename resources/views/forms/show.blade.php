@@ -344,7 +344,7 @@
                         @endphp
                         @if($descriptif)
                             <div class="prose max-w-none text-gray-900">
-                                {!! nl2br(e($descriptif)) !!}
+                                {!! Str::markdown($descriptif) !!}
                             </div>
                         @else
                             <p class="text-gray-500 italic">Non renseigné</p>
