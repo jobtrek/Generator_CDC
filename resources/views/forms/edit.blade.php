@@ -649,9 +649,7 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
         </div>
     </div>
 
-    @push('scripts')
-        <script src="{{ asset('js/planning-calculator.js') }}"></script>
-        <script src="{{ asset('js/form-builder.js') }}"></script>
-    @endpush
-
+    <script src="{{ asset('js/phone-formatter.js') }}"></script>
+    <script src="{{ asset('js/form-builder.js') }}"></script>
+    <script src="{{ asset('js/planning-calculator.js') }}"></script>
 </x-app-layout>
