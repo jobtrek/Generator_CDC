@@ -26,9 +26,7 @@ class FormController extends Controller
         if ($request->filled('search')) {
             $search = Str::lower($request->search);
 
-            $query->where(function($q) use ($search) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
-            });
+            $query->whereFullText('name', $search);
         }
 
         if ($request->filled('date_from')) {
