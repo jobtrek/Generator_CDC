@@ -45,7 +45,6 @@
             @endif
 
                 <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">                @csrf
-
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">
@@ -141,23 +140,14 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="chef_projet_telephone" required
+                                    <input type="text"
+                                           name="chef_projet_telephone"
+                                           id="chef_projet_telephone"
+                                           required
                                            value="{{ old('chef_projet_telephone', '+41 ') }}"
-                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Format suisse : +41 XX XXX XX XX"
+                                           placeholder="+41 79 123 45 67"
                                            maxlength="16"
-                                           oninput="
-                                               let v = this.value.replace(/[^0-9\+]/g, '');
-                                               if (!v.startsWith('+41')) v = '+41';
-                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
-                                               let formatted = '+41';
-                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
-                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
-                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
-                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
-                                               this.value = formatted;
-                                           "
+                                           oninput="window.formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -195,17 +185,7 @@
                                            placeholder="+41 21 123 45 67"
                                            title="Format suisse : +41 XX XXX XX XX"
                                            maxlength="16"
-                                           oninput="
-                                               let v = this.value.replace(/[^0-9\+]/g, '');
-                                               if (!v.startsWith('+41')) v = '+41';
-                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
-                                               let formatted = '+41';
-                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
-                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
-                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
-                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
-                                               this.value = formatted;
-                                           "
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -243,17 +223,7 @@
                                            placeholder="+41 21 123 45 67"
                                            title="Format suisse : +41 XX XXX XX XX"
                                            maxlength="16"
-                                           oninput="
-                                               let v = this.value.replace(/[^0-9\+]/g, '');
-                                               if (!v.startsWith('+41')) v = '+41';
-                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
-                                               let formatted = '+41';
-                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
-                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
-                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
-                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
-                                               this.value = formatted;
-                                           "
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -599,7 +569,9 @@
         </div>
     </div>
 
+
     @push('scripts')
+        <script src="{{ asset('js/phone-formatter.js') }}"></script>
         <script src="{{ asset('js/planning-calculator.js') }}"></script>
         <script src="{{ asset('js/form-builder.js') }}"></script>
     @endpush

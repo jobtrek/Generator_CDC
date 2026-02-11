@@ -55,6 +55,7 @@ class FormController extends Controller
 
     public function store(Request $request)
     {
+        $phoneRule = ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'];
         $validated = $request->validate([
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
@@ -64,17 +65,17 @@ class FormController extends Controller
             'chef_projet_nom' => 'required|string|max:255',
             'chef_projet_prenom' => 'required|string|max:255',
             'chef_projet_email' => 'required|email',
-            'chef_projet_telephone' => ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'],
+            'chef_projet_telephone' => $phoneRule,
 
             'expert1_nom' => 'required|string|max:255',
             'expert1_prenom' => 'required|string|max:255',
             'expert1_email' => 'required|email',
-            'expert1_telephone' => ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'],
+            'expert1_telephone' => $phoneRule,
 
             'expert2_nom' => 'required|string|max:255',
             'expert2_prenom' => 'required|string|max:255',
             'expert2_email' => 'required|email',
-            'expert2_telephone' => ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'],
+            'expert2_telephone' => $phoneRule,
 
             'date_debut' => 'required|date',
             'date_fin' => 'required|date|after_or_equal:date_debut',
@@ -250,6 +251,7 @@ class FormController extends Controller
     public function update(Request $request, Form $form)
     {
         $this->authorize('update', $form);
+        $phoneRule = ['required', 'string', 'regex:/^\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}$/'];
 
         $validated = $request->validate([
             'candidat_nom' => 'required|string|max:255',
@@ -260,17 +262,17 @@ class FormController extends Controller
             'chef_projet_nom' => 'required|string|max:255',
             'chef_projet_prenom' => 'required|string|max:255',
             'chef_projet_email' => 'required|email',
-            'chef_projet_telephone' => 'required|string',
+            'chef_projet_telephone' => $phoneRule,
 
             'expert1_nom' => 'required|string|max:255',
             'expert1_prenom' => 'required|string|max:255',
             'expert1_email' => 'required|email',
-            'expert1_telephone' => 'required|string',
+            'expert1_telephone' => $phoneRule,
 
             'expert2_nom' => 'required|string|max:255',
             'expert2_prenom' => 'required|string|max:255',
             'expert2_email' => 'required|email',
-            'expert2_telephone' => 'required|string',
+            'expert2_telephone' => $phoneRule,
 
             'procedure' => 'nullable|string|max:5000',
 

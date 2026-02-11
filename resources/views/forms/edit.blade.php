@@ -161,17 +161,7 @@
                                            placeholder="+41 21 123 45 67"
                                            title="Format suisse : +41 XX XXX XX XX"
                                            maxlength="16"
-                                           oninput="
-                                                   let v = this.value.replace(/[^0-9\+]/g, '');
-                                                   if (!v.startsWith('+41')) v = '+41';
-                                                   let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
-                                                   let formatted = '+41';
-                                                   if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
-                                                   if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
-                                                   if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
-                                                   if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
-                                                   this.value = formatted;
-                                               "
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -210,20 +200,10 @@
                                            placeholder="+41 21 123 45 67"
                                            title="Format suisse : +41 XX XXX XX XX"
                                            maxlength="16"
-                                           oninput="
-                                               let v = this.value.replace(/[^0-9\+]/g, '');
-                                               if (!v.startsWith('+41')) v = '+41';
-                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
-                                               let formatted = '+41';
-                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
-                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
-                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
-                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
-                                               this.value = formatted;
-                                           "
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                </div>
-                                 </div>
+
+                                           </div>
                             </div>
                         </div>
                         <!-- Expert 2 -->
@@ -259,17 +239,7 @@
                                            placeholder="+41 21 123 45 67"
                                            title="Format suisse : +41 XX XXX XX XX"
                                            maxlength="16"
-                                           oninput="
-                                               let v = this.value.replace(/[^0-9\+]/g, '');
-                                               if (!v.startsWith('+41')) v = '+41';
-                                               let digits = v.substring(3).replace(/\D/g, '').substring(0, 9);
-                                               let formatted = '+41';
-                                               if (digits.length > 0) formatted += ' ' + digits.substring(0, 2);
-                                               if (digits.length > 2) formatted += ' ' + digits.substring(2, 5);
-                                               if (digits.length > 5) formatted += ' ' + digits.substring(5, 7);
-                                               if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
-                                               this.value = formatted;
-                                           "
+                                           oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
@@ -659,6 +629,7 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         </div>
                     </div>
                 </div>
+
                 <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.show', $form) }}"
@@ -666,11 +637,12 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         Annuler
                     </a>
                     <button type="submit"
-                            class="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg active:bg-indigo-800">
+                            class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg">
                         Mettre à jour le cahier de charge
                     </button>
                 </div>
                     </div>
+                </div>
                 </div>
 
             </form>
