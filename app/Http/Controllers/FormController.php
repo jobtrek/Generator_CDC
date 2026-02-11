@@ -1,15 +1,18 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Form;
 use App\Models\Field;
 use App\Models\FieldType;
 use App\Models\Cdc;
+use App\Services\FormFieldsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class FormController extends Controller
 {
@@ -21,10 +24,9 @@ class FormController extends Controller
             ->where('user_id', Auth::id());
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'ILIKE', '%' . $search . '%');
-            });
+            $search = Str::lower($request->search);
+
+            $query->whereFullText('name', $search);
         }
 
         if ($request->filled('date_from')) {
@@ -39,7 +41,6 @@ class FormController extends Controller
 
         return view('forms.index', compact('forms'));
     }
-
 
     public function create()
     {
@@ -106,8 +107,8 @@ class FormController extends Controller
         $dateDebut = Carbon::parse($validated['date_debut'])->locale('fr')->isoFormat('D MMMM YYYY');
         $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');
         $periodeRealisation = "Du {$dateDebut} au {$dateFin}";
-        $horaireTravail = $validated['heure_matin_debut'] . ' – ' . $validated['heure_matin_fin'] .
-            ', ' . $validated['heure_aprem_debut'] . ' – ' . $validated['heure_aprem_fin'];
+        $horaireTravail = $validated['heure_matin_debut'] . ' — ' . $validated['heure_matin_fin'] .
+            ', ' . $validated['heure_aprem_debut'] . ' — ' . $validated['heure_aprem_fin'];
 
         DB::beginTransaction();
 
@@ -117,25 +118,6 @@ class FormController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
-            $essentialFields = [
-                ['name' => 'candidat_nom', 'label' => 'Nom du candidat', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'candidat_prenom', 'label' => 'Prénom du candidat', 'section' => 'section_1', 'field_type_id' => 1],
-                ['name' => 'titre_projet', 'label' => 'Titre du projet', 'section' => 'section_3', 'field_type_id' => 1],
-            ];
-
-            $orderIndex = 0;
-            foreach ($essentialFields as $fieldStructure) {
-                $form->fields()->create([
-                    'name' => $fieldStructure['name'],
-                    'label' => $fieldStructure['label'],
-                    'field_type_id' => $fieldStructure['field_type_id'],
-                    'section' => $fieldStructure['section'],
-                    'placeholder' => null,
-                    'is_required' => true,
-                    'options' => null,
-                    'order_index' => $orderIndex++,
-                ]);
-            }
             $cdcData = [
                 'candidat_nom' => $validated['candidat_nom'],
                 'candidat_prenom' => $validated['candidat_prenom'],
@@ -181,21 +163,24 @@ class FormController extends Controller
                 'livrables' => $validated['livrables'] ?? '',
             ];
 
+            $orderIndex = 0;
             if (isset($validated['fields']) && count($validated['fields']) > 0) {
                 foreach ($validated['fields'] as $fieldData) {
-                    $field = $form->fields()->create([
-                        'name' => $fieldData['name'],
-                        'label' => $fieldData['label'],
-                        'field_type_id' => $fieldData['field_type_id'],
-                        'placeholder' => null,
-                        'is_required' => false,
-                        'options' => null,
-                        'section' => 'custom',
-                        'order_index' => $orderIndex++,
-                    ]);
+                    if (!FormFieldsService::isStandardField($fieldData['name'])) {
+                        $form->fields()->create([
+                            'name' => $fieldData['name'],
+                            'label' => $fieldData['label'],
+                            'field_type_id' => $fieldData['field_type_id'],
+                            'placeholder' => null,
+                            'is_required' => false,
+                            'options' => null,
+                            'section' => 'custom',
+                            'order_index' => $orderIndex++,
+                        ]);
 
-                    if (isset($fieldData['value']) && !empty($fieldData['value'])) {
-                        $cdcData[$fieldData['name']] = $fieldData['value'];
+                        if (isset($fieldData['value']) && !empty($fieldData['value'])) {
+                            $cdcData[$fieldData['name']] = $fieldData['value'];
+                        }
                     }
                 }
             }
@@ -329,8 +314,8 @@ class FormController extends Controller
         $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');
         $periodeRealisation = "Du {$dateDebut} au {$dateFin}";
 
-        $horaireTravail = $validated['heure_matin_debut'] . ' – ' . $validated['heure_matin_fin'] .
-            ', ' . $validated['heure_aprem_debut'] . ' – ' . $validated['heure_aprem_fin'];
+        $horaireTravail = $validated['heure_matin_debut'] . ' — ' . $validated['heure_matin_fin'] .
+            ', ' . $validated['heure_aprem_debut'] . ' — ' . $validated['heure_aprem_fin'];
 
         DB::beginTransaction();
 
@@ -388,7 +373,7 @@ class FormController extends Controller
                 foreach ($validated['fields'] as $fieldData) {
                     if (isset($fieldData['id'])) {
                         $field = Field::find($fieldData['id']);
-                        if ($field && $field->form_id === $form->id) {
+                        if ($field && $field->form_id === $form->id && !FormFieldsService::isStandardField($fieldData['name'])) {
                             $field->update([
                                 'name' => $fieldData['name'],
                                 'label' => $fieldData['label'],
@@ -406,19 +391,21 @@ class FormController extends Controller
                 $maxOrderIndex = $form->fields()->max('order_index') ?? 0;
 
                 foreach ($validated['new_fields'] as $newFieldData) {
-                    $field = $form->fields()->create([
-                        'name' => $newFieldData['name'],
-                        'label' => $newFieldData['label'],
-                        'field_type_id' => $newFieldData['field_type_id'],
-                        'section' => 'custom',
-                        'placeholder' => null,
-                        'is_required' => false,
-                        'options' => null,
-                        'order_index' => ++$maxOrderIndex,
-                    ]);
+                    if (!FormFieldsService::isStandardField($newFieldData['name'])) {
+                        $form->fields()->create([
+                            'name' => $newFieldData['name'],
+                            'label' => $newFieldData['label'],
+                            'field_type_id' => $newFieldData['field_type_id'],
+                            'section' => 'custom',
+                            'placeholder' => null,
+                            'is_required' => false,
+                            'options' => null,
+                            'order_index' => ++$maxOrderIndex,
+                        ]);
 
-                    if (isset($newFieldData['value']) && !empty($newFieldData['value'])) {
-                        $cdcData[$newFieldData['name']] = $newFieldData['value'];
+                        if (isset($newFieldData['value']) && !empty($newFieldData['value'])) {
+                            $cdcData[$newFieldData['name']] = $newFieldData['value'];
+                        }
                     }
                 }
             }
