@@ -71,28 +71,26 @@
                                                 </div>
                                             </div>
                                         </td>
-
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-600">{{ $user->email }}</div>
+                                            <div class="text-sm text-gray-600 mb-1">{{ $user->email }}</div>
 
-                                            @if($user->hasVerifiedEmail())
-                                                <div class="flex items-center mt-1 text-emerald-600 text-xs font-medium bg-emerald-50 px-2 py-1 rounded-md w-fit">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                    Vérifié
-                                                </div>
+                                            @if($user->email_verified_at)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    Validé
+                                                </span>
                                             @else
-                                                <div class="flex flex-col items-start gap-1 mt-1">
-                                                    <div class="flex items-center text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded-md">
-                                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                        Non vérifié
-                                                    </div>
+                                                                                    <div class="flex flex-col items-start gap-1">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    En attente
+                                                </span>
 
-                                                    <form action="{{ route('admin.users.verify', $user->id) }}" method="POST">
+                                                    <form action="{{ route('password.email') }}" method="POST" class="mt-1">
                                                         @csrf
-                                                        <button type="submit"
-                                                                onclick="return confirm('Êtes-vous sûr de vouloir valider manuellement cet email ?')"
-                                                                class="text-xs text-indigo-600 hover:text-indigo-800 underline font-medium cursor-pointer">
-                                                            Valider maintenant
+                                                        <input type="hidden" name="email" value="{{ $user->email }}">
+                                                        <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-900 underline">
+                                                            Renvoyer l'invitation
                                                         </button>
                                                     </form>
                                                 </div>
