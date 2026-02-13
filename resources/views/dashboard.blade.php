@@ -36,7 +36,7 @@
                 </div>
             @endif
 
-            {{-- 2. KPI Cards - TOUTES CLIQUABLES --}}
+            {{-- 2. KPI Cards --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {{-- Card 1: Total Dossiers --}}
                 <a href="{{ route('forms.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
@@ -52,8 +52,8 @@
                     </div>
                 </a>
 
-                {{-- Card 2: Utilisateurs (Admin) ou Projets actifs (User) --}}
-                @if(Auth::user()->hasAnyRole(['admin', 'super-admin']))
+                {{-- Card 2: Utilisateurs (Admin) ou Projets (User) --}}
+                @if(Auth::user()->hasRole('super-admin'))
                     <a href="{{ route('admin.users.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                         <div class="flex items-center justify-between mb-4">
                             <div class="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
@@ -67,16 +67,16 @@
                         </div>
                     </a>
                 @else
-                    <a href="{{ route('forms.index') }}?filter=active" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
+                    <a href="{{ route('forms.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                         <div class="flex items-center justify-between mb-4">
                             <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
-                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Statut</span>
+                            <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Vos Projets</span>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->where('is_active', true)->count() }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Projets actifs</div>
+                            <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->count() }}</div>
+                            <div class="text-sm text-gray-500 mt-1">Projets créés</div>
                         </div>
                     </a>
                 @endif

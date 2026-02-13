@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -13,62 +14,49 @@ class RolePermissionSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $cdcPermissions = ['cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate'];
-        $formPermissions = ['form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish'];
-        $userPermissions = ['user.view', 'user.create', 'user.edit', 'user.delete', 'user.roles'];
-        $systemPermissions = [
-            'dashboard.view', 'settings.view', 'settings.edit',
-            'logs.view', 'backup.create', 'backup.download'
+        $permissions = [
+            'cdcs.view', 'cdcs.create', 'cdcs.edit', 'cdcs.delete', 'cdcs.export',
+            'users.view', 'users.create', 'users.edit', 'users.delete', 'users.manage_roles',
+            'settings.view', 'settings.edit'
         ];
 
-        $allPermissions = array_merge($cdcPermissions, $formPermissions, $userPermissions, $systemPermissions);
-
-        foreach ($allPermissions as $permission) {
+        foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        $superAdmin = Role::firstOrCreate(['name' => 'super-admin']);
-        $superAdmin->syncPermissions(Permission::all());
+        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        $superAdminRole->syncPermissions(Permission::all());
 
-        $admin = Role::firstOrCreate(['name' => 'admin']);
-        $admin->syncPermissions([
-            'cdcs.edit', 'cdcs.delete', 'cdcs.export', 'cdcs.duplicate',
-            'form.view', 'form.create', 'form.edit', 'form.delete', 'form.publish',
-            'user.view', 'user.create', 'user.edit',
-            'dashboard.view', 'settings.view', 'logs.view',
-        ]);
-
-        $formateur = Role::firstOrCreate(['name' => 'formateur']);
-        $formateur->syncPermissions([
-            'cdcs.edit', 'cdcs.export', 'cdcs.duplicate',
-            'form.view', 'form.create', 'form.edit', 'form.publish',
-            'dashboard.view',
-        ]);
-
-        $user = Role::firstOrCreate(['name' => 'user']);
-        $user->syncPermissions([
-            'cdcs.export', 'form.view', 'dashboard.view',
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->syncPermissions([
+            'cdcs.view',
+            'cdcs.create',
         ]);
 
         $usersToCreate = [
-            ['email' => 'superadmin@cdcs.com', 'name' => 'Super Admin', 'role' => 'super-admin'],
-            ['email' => 'admin@cdcs.com', 'name' => 'Admin User', 'role' => 'admin'],
-            ['email' => 'formateur@cdcs.com', 'name' => 'Formateur User', 'role' => 'formateur'],
-            ['email' => 'user@cdcs.com', 'name' => 'Normal User', 'role' => 'user'],
+            [
+                'email' => 'superadmin@cdcs.com',
+                'name' => 'Super Admin',
+                'role' => 'super-admin',
+                'password' => 'password123'
+            ],
         ];
 
         foreach ($usersToCreate as $u) {
-            $userModel = User::firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $u['email']],
                 [
                     'name' => $u['name'],
-                    'password' => bcrypt('password123'),
+                    'password' => Hash::make($u['password']),
                     'email_verified_at' => now(),
                 ]
             );
-            $userModel->syncRoles($u['role']);
+
+            if ($user->wasRecentlyCreated) {
+                $user->assignRole($u['role']);
+            }
         }
 
-        $this->command->info('✅ Rôles et permissions synchronisés avec succès !');
+        $this->command->info('✅ Rôles et permissions synchronisés (les utilisateurs existants n\'ont pas été modifiés).');
     }
 }
