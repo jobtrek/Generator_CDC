@@ -105,8 +105,6 @@
                                                     @php
                                                         $colors = [
                                                             'super-admin' => 'bg-purple-50 text-purple-700 ring-purple-600/20',
-                                                            'admin' => 'bg-orange-50 text-orange-700 ring-orange-600/20',
-                                                            'formateur' => 'bg-blue-50 text-blue-700 ring-blue-600/20',
                                                             'user' => 'bg-green-50 text-green-700 ring-green-600/20',
                                                         ];
                                                         $color = $colors[$role] ?? 'bg-gray-50 text-gray-600 ring-gray-500/10';
