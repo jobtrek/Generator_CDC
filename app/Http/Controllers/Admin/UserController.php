@@ -11,34 +11,37 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class UserController extends Controller
+class UserController extends Controller implements HasMiddleware
 {
     use AuthorizesRequests;
 
     /**
-     * Affiche la liste des utilisateurs.
-     * Sécurisé ici car pas de constructeur middleware.
+     * Définition des middlewares pour ce contrôleur (Laravel 11+)
      */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(function ($request, $next) {
+                $user = Auth::user();
+                if (!$user || !$user->hasRole('super-admin')) {
+                    abort(403, 'Accès réservé aux super-administrateurs.');
+                }
+                return $next($request);
+            }),
+        ];
+    }
+
     public function index()
     {
-        if (!Auth::user()->hasRole('super-admin')) {
-            abort(403);
-        }
-
         $users = User::with('roles')->paginate(10);
         return view('admin.users.index', compact('users'));
     }
 
-    /**
-     * Affiche le formulaire de création.
-     */
     public function create()
     {
-        if (!Auth::user()->hasRole('super-admin')) {
-            abort(403);
-        }
-
         $roles = Role::all();
         return view('admin.users.create', compact('roles'));
     }
@@ -54,9 +57,8 @@ class UserController extends Controller
         $currentUser = Auth::user();
         $targetRole = $validated['role'];
 
-        // La sécurité est gérée ici par le Helper
         if (!RoleHelper::canAssignRole($currentUser, $targetRole)) {
-            abort(403);
+            abort(403, 'Vous ne pouvez pas assigner ce rôle.');
         }
 
         $user = User::create([
@@ -72,15 +74,8 @@ class UserController extends Controller
             ->with('success', 'Utilisateur créé avec succès.');
     }
 
-    /**
-     * Affiche le formulaire d'édition.
-     */
     public function edit(User $user)
     {
-        if (!Auth::user()->hasRole('super-admin')) {
-            abort(403);
-        }
-
         $roles = Role::all();
         return view('admin.users.edit', compact('user', 'roles'));
     }
@@ -105,7 +100,7 @@ class UserController extends Controller
         }
 
         if (!RoleHelper::canAssignRole($currentUser, $targetRole)) {
-            abort(403);
+            abort(403, 'Vous ne pouvez pas assigner ce rôle.');
         }
 
         $targetUserRole = RoleHelper::getPrimaryRole($user);
@@ -113,8 +108,8 @@ class UserController extends Controller
             $myWeight = RoleHelper::getRoleWeight(RoleHelper::getPrimaryRole($currentUser));
             $targetWeight = RoleHelper::getRoleWeight($targetUserRole);
 
-            if ($myWeight < $targetWeight) {
-                abort(403);
+            if ($targetWeight >= $myWeight && !$currentUser->hasRole('super-admin')) {
+                abort(403, 'Vous ne pouvez pas modifier un utilisateur avec un rôle égal ou supérieur au vôtre.');
             }
         }
 
@@ -149,7 +144,7 @@ class UserController extends Controller
         $targetWeight = RoleHelper::getRoleWeight($targetRole);
 
         if ($targetWeight >= $myWeight && !$currentUser->hasRole('super-admin')) {
-            return back()->with('error', 'Droits insuffisants.');
+            return back()->with('error', 'Droits insuffisants pour supprimer cet utilisateur.');
         }
 
         $user->delete();

@@ -40,12 +40,6 @@ class RolePermissionSeeder extends Seeder
                 'role' => 'super-admin',
                 'password' => 'password123'
             ],
-            [
-                'email' => 'user@cdcs.com',
-                'name' => 'Normal User',
-                'role' => 'user',
-                'password' => 'password123'
-            ],
         ];
 
         foreach ($usersToCreate as $u) {
