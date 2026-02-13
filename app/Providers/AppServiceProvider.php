@@ -9,6 +9,8 @@ use App\Policies\FormPolicy;
 use App\Policies\CdcPolicy;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,8 +29,14 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Form::class, FormPolicy::class);
         Gate::policy(Cdc::class, CdcPolicy::class);
+
         if ($this->app->environment('production') || env('APP_ENV') === 'production') {
             URL::forceScheme('https');
         }
+        Event::listen(PasswordReset::class, function ($event) {
+            if (!$event->user->hasVerifiedEmail()) {
+                $event->user->markEmailAsVerified();
+            }
+        });
     }
 }
