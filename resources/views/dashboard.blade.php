@@ -52,8 +52,8 @@
                     </div>
                 </a>
 
-                {{-- Card 2: Utilisateurs (Admin) ou Projets actifs (User) --}}
-                @if(Auth::user()->hasAnyRole(['admin', 'super-admin']))
+                {{-- Card 2: Utilisateurs (Admin) ou Projets (User) --}}
+                @if(Auth::user()->hasRole('super-admin'))
                     <a href="{{ route('admin.users.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                         <div class="flex items-center justify-between mb-4">
                             <div class="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
@@ -67,7 +67,6 @@
                         </div>
                     </a>
                 @else
-                    {{-- CORRECTION ICI : Suppression de .where('is_active', true) qui causait l'erreur --}}
                     <a href="{{ route('forms.index') }}" class="block bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition group cursor-pointer">
                         <div class="flex items-center justify-between mb-4">
                             <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -76,9 +75,8 @@
                             <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Vos Projets</span>
                         </div>
                         <div>
-                            {{-- On affiche le total pour l'instant pour éviter le crash --}}
                             <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->count() }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Projets existants</div>
+                            <div class="text-sm text-gray-500 mt-1">Projets créés</div>
                         </div>
                     </a>
                 @endif

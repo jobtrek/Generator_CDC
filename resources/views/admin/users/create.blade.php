@@ -2,7 +2,8 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Inviter un nouvel utilisateur') }}            </h2>
+                {{ __('Inviter un nouvel utilisateur') }}
+            </h2>
             <a href="{{ route('admin.users.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition">
                 Retour
             </a>
@@ -43,18 +44,16 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($roles as $role)
-                                    @if($role->name === 'super-admin' || $role->name === 'user')
-                                        <div class="relative flex items-start py-3 px-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition {{ old('role') == $role->name ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
-                                            <div class="min-w-0 flex-1 text-sm">
-                                                <label for="role_{{ $role->id }}" class="font-medium text-gray-700 cursor-pointer">
-                                                    {{ $role->name === 'super-admin' ? 'Super Administrateur' : 'Utilisateur' }}
-                                                </label>
-                                            </div>
-                                            <div class="ml-3 flex items-center h-5">
-                                                <input id="role_{{ $role->id }}" name="role" type="radio" value="{{ $role->name }}" required {{ old('role') == $role->name ? 'checked' : '' }} class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
-                                            </div>
+                                    <div class="relative flex items-start py-3 px-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition {{ old('role') == $role->name ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
+                                        <div class="min-w-0 flex-1 text-sm">
+                                            <label for="role_{{ $role->id }}" class="font-medium text-gray-700 cursor-pointer">
+                                                {{ \App\Helpers\RoleHelper::getRoleLabel($role->name) }}
+                                            </label>
                                         </div>
-                                    @endif
+                                        <div class="ml-3 flex items-center h-5">
+                                            <input id="role_{{ $role->id }}" name="role" type="radio" value="{{ $role->name }}" required {{ old('role') == $role->name ? 'checked' : '' }} class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                        </div>
+                                    </div>
                                 @endforeach
                             </div>
                         </div>

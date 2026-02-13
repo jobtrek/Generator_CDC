@@ -6,29 +6,16 @@ use App\Models\User;
 
 class RoleHelper
 {
-    protected const ROLE_HIERARCHY = [
-        'super-admin' => 100,
-        'user'        => 10,
-    ];
-    public static function canAssignRole(User $actor, string $targetRoleName): bool
+    public const ROLE_SUPER_ADMIN = 'super-admin';
+    public const ROLE_USER = 'user';
+
+    public static function getAvailableRoles(): array
     {
-        $actorRole = self::getPrimaryRole($actor);
-        if (!$actorRole) return false;
-
-        $actorWeight = self::getRoleWeight($actorRole);
-        $targetWeight = self::getRoleWeight($targetRoleName);
-
-        if ($actorRole === 'super-admin') {
-            return true;
-        }
-        return $actorWeight > $targetWeight;
+        return [
+            self::ROLE_SUPER_ADMIN,
+            self::ROLE_USER,
+        ];
     }
-
-    public static function getRoleWeight(string $role): int
-    {
-        return self::ROLE_HIERARCHY[$role] ?? 0;
-    }
-
 
     public static function hasRole(User $user, string $role): bool
     {
@@ -37,29 +24,24 @@ class RoleHelper
 
     public static function getPrimaryRole(User $user): ?string
     {
-        $roles = $user->getRoleNames();
-        $sortedRoles = $roles->sortByDesc(function ($role) {
-            return self::getRoleWeight($role);
-        });
-
-        return $sortedRoles->first();
+        return $user->getRoleNames()->first();
     }
 
-    public static function getRoleBadgeColor(string $role): string
+    public static function getRoleBadgeColor(?string $role): string
     {
         return match($role) {
-            'super-admin' => 'red',
-            'user' => 'green',
+            self::ROLE_SUPER_ADMIN => 'red',
+            self::ROLE_USER => 'green',
             default => 'gray'
         };
     }
 
-    public static function getRoleLabel(string $role): string
+    public static function getRoleLabel(?string $role): string
     {
         return match($role) {
-            'super-admin' => 'Super Administrateur',
-            'user' => 'Utilisateur',
-            default => ucfirst($role)
+            self::ROLE_SUPER_ADMIN => 'Super Administrateur',
+            self::ROLE_USER => 'Utilisateur',
+            default => ucfirst((string) $role)
         };
     }
 }
