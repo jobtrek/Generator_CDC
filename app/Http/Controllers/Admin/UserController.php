@@ -12,7 +12,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-
+use Illuminate\Support\Facades\Password;
 class UserController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
@@ -56,9 +56,10 @@ class UserController extends Controller implements HasMiddleware
         ]);
 
         $user->assignRole($validated['role']);
+        $status = Password::sendResetLink(['email' => $user->email]);
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'Utilisateur créé avec succès.');
+            ->with('success', 'Utilisateur invité ! Un email lui a été envoyé.');
     }
 
     public function edit(User $user)
