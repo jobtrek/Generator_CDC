@@ -25,7 +25,7 @@ services:
             - /tmp
 
     db:
-        image: postgres:18.1-trixie
+        image: postgres:18.2-trixie
         restart: unless-stopped
         environment:
             POSTGRES_DB: ${DB_DATABASE}
