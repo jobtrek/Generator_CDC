@@ -24,14 +24,14 @@
                 </div>
             @endif
 
-                @if(session('error'))
-                    <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
-                        <div class="flex items-center">
-                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>{{ session('error') }}</span>
-                        </div>
+            @if(session('error'))
+                <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>{{ session('error') }}</span>
                     </div>
-                @endif
+                </div>
+            @endif
 
             @if($errors->any())
                 <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded">
@@ -44,7 +44,10 @@
                 </div>
             @endif
 
-                <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">                @csrf
+            <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
+                @csrf
+                
+                <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">
@@ -114,6 +117,8 @@
                                 </label>
                             </div>
                         </div>
+
+                        <!-- Chef de projet -->
                         <div class="border-t pt-4 mt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Chef de projet</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -153,6 +158,7 @@
                             </div>
                         </div>
 
+                        <!-- Expert 1 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 1</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -191,6 +197,7 @@
                             </div>
                         </div>
 
+                        <!-- Expert 2 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,6 +235,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Période et horaire -->
                         <div class="border-t pt-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{
                                 totalHours: {{ old('nombre_heures', '90') }}
@@ -263,7 +272,7 @@
                                                 <input type="time" name="heure_matin_debut" required
                                                        value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <span class="text-xs">–</span>
+                                                <span class="text-xs">—</span>
                                                 <input type="time" name="heure_matin_fin" required
                                                        value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
@@ -275,7 +284,7 @@
                                                 <input type="time" name="heure_aprem_debut" required
                                                        value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <span class="text-xs">–</span>
+                                                <span class="text-xs">—</span>
                                                 <input type="time" name="heure_aprem_fin" required
                                                        value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
@@ -288,6 +297,7 @@
                             </div>
                         </div>
 
+                        <!-- Planning -->
                         <div class="border-t pt-4" x-data="planningCalculatorEdit()">
                             <h4 class="font-semibold text-gray-800 mb-3 flex items-center justify-between">
                                 <span>Planning (total : <span x-text="totalHeures + 'h'"></span>)</span>
@@ -313,18 +323,10 @@
                                         Analyse
                                         <span class="text-xs text-indigo-600 font-semibold" x-text="'(' + analyse + (mode === 'heures' ? 'h' : '%') + ')'"></span>
                                     </label>
-                                    <input type="range"
-                                           x-model.number="analyse"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
+                                    <input type="range" x-model.number="analyse" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
                                     <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="analyse"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
+                                        <input type="number" x-model.number="analyse" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
                                         <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
                                     </div>
                                     <input type="hidden" name="planning_analyse" :value="formatValue(analyse)">
@@ -335,18 +337,10 @@
                                         Implémentation
                                         <span class="text-xs text-green-600 font-semibold" x-text="'(' + implementation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
                                     </label>
-                                    <input type="range"
-                                           x-model.number="implementation"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
+                                    <input type="range" x-model.number="implementation" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
                                     <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="implementation"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
+                                        <input type="number" x-model.number="implementation" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
                                         <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
                                     </div>
                                     <input type="hidden" name="planning_implementation" :value="formatValue(implementation)">
@@ -357,18 +351,10 @@
                                         Tests
                                         <span class="text-xs text-orange-600 font-semibold" x-text="'(' + tests + (mode === 'heures' ? 'h' : '%') + ')'"></span>
                                     </label>
-                                    <input type="range"
-                                           x-model.number="tests"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
+                                    <input type="range" x-model.number="tests" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
                                     <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="tests"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
+                                        <input type="number" x-model.number="tests" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
                                         <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
                                     </div>
                                     <input type="hidden" name="planning_tests" :value="formatValue(tests)">
@@ -379,18 +365,10 @@
                                         Documentation
                                         <span class="text-xs text-purple-600 font-semibold" x-text="'(' + documentation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
                                     </label>
-                                    <input type="range"
-                                           x-model.number="documentation"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
+                                    <input type="range" x-model.number="documentation" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
                                            class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
                                     <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="documentation"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
+                                        <input type="number" x-model.number="documentation" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
                                         <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
                                     </div>
                                     <input type="hidden" name="planning_documentation" :value="formatValue(documentation)">
@@ -405,39 +383,48 @@
                                           x-text="total + (mode === 'heures' ? 'h' : '%')"></span>
                                 </div>
                                 <div class="mt-2 text-xs text-gray-600">
-                                <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
-                                    ⚠️ Le total devrait être 100%
-                                </span>
+                                    <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
+                                        ⚠️ Le total devrait être 100%
+                                    </span>
                                     <span x-show="mode === 'heures' && total > totalHeures" class="text-red-600">
-                                    ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
-                                </span>
+                                        ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Section 2: PROCÉDURE (Markdown) -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Description de la procédure
-                        </label>
-                        <textarea name="procedure" rows="15"
-                                  placeholder="Points de la procédure (un par ligne)"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ old('procedure', 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.
+                        <x-markdown-editor
+                            name="procedure"
+                            :value="old('procedure', 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.
+
                             Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.
+
                             Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.
+
                             Le candidat est entièrement responsable de la sécurité de ses données.
+
                             En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.
+
                             Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.
-                            A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Séparez chaque point par une nouvelle ligne</p>
+
+                            A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet.')"
+                            label="Description de la procédure"
+                            placeholder="Points de la procédure..."
+                            help="Utilisez Markdown pour formater votre texte"
+                            :rows="12"
+                        />
                     </div>
                 </div>
 
+                <!-- Section 3: TITRE -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
@@ -453,36 +440,44 @@
                     </div>
                 </div>
 
+                <!-- Section 4: MATÉRIEL ET LOGICIEL (Markdown) -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Matériel et logiciels (un par ligne)
-                        </label>
-                        <textarea name="materiel_logiciel" rows="6"
-                                  placeholder="1 PC en configuration standard&#10;Environnement de développement Visual Studio&#10;1 lecteur code-barres USB"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('materiel_logiciel') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Séparez chaque élément par une nouvelle ligne</p>
+                        <x-markdown-editor
+                            name="materiel_logiciel"
+                            :value="old('materiel_logiciel', '')"
+                            label="Matériel et logiciels"
+                            placeholder="- 1 PC en configuration standard
+                        - Environnement de développement Visual Studio
+                        - 1 lecteur code-barres USB"
+                            help="Utilisez des listes Markdown pour organiser le matériel"
+                            :rows="6"
+                        />
                     </div>
                 </div>
 
+                <!-- Section 5: PRÉREQUIS (Markdown) -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Prérequis (un par ligne)
-                        </label>
-                        <textarea name="prerequis" rows="4"
-                                  placeholder="Connaissances du développement orienté objet&#10;Connaissance de C# et du framework .NET"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('prerequis') }}</textarea>
+                        <x-markdown-editor
+                            name="prerequis"
+                            :value="old('prerequis', '')"
+                            label="Prérequis"
+                            placeholder="- Connaissances du développement orienté objet
+                            - Connaissance de C# et du framework .NET"
+                            help="Utilisez des listes Markdown pour organiser les prérequis"
+                            :rows="4"
+                        />
                     </div>
                 </div>
 
-                {{-- Section 6: DESCRIPTIF DU PROJET --}}
+                <!-- Section 6: DESCRIPTIF DU PROJET (Markdown) -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
@@ -494,25 +489,34 @@
                             label="Description complète du projet"
                             placeholder="Le projet consiste à réaliser une application..."
                             help="Utilisez Markdown pour structurer et formater votre texte"
+                            :rows="15"
                             required
                         />
                     </div>
                 </div>
 
+                <!-- Section 7: LIVRABLES (Markdown) -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Livrables attendus (un par ligne)
-                        </label>
-                        <textarea name="livrables" rows="6"
-                                  placeholder="Rapport de projet&#10;Journal de travail&#10;Planification initiale&#10;Code source complet&#10;Manuel utilisateur"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('livrables') }}</textarea>
+                        <x-markdown-editor
+                            name="livrables"
+                            :value="old('livrables', '')"
+                            label="Livrables attendus"
+                            placeholder="- Rapport de projet
+                            - Journal de travail
+                            - Planification initiale
+                            - Code source complet
+                            - Manuel utilisateur"
+                            help="Utilisez des listes Markdown pour organiser les livrables"
+                            :rows="6"
+                        />
                     </div>
                 </div>
 
+                <!-- Champs personnalisés -->
                 <div class="bg-white shadow-sm rounded-lg" x-show="fields.length > 0">
                     <div class="p-6 border-b border-gray-200 bg-gray-50">
                         <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
@@ -552,6 +556,8 @@
                         </template>
                     </div>
                 </div>
+
+                <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.index') }}"
                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
@@ -572,5 +578,4 @@
     <script src="{{ asset('js/phone-formatter.js') }}"></script>
     <script src="{{ asset('js/form-builder.js') }}"></script>
     <script src="{{ asset('js/planning-calculator.js') }}"></script>
-
 </x-app-layout>
