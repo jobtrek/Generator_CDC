@@ -120,7 +120,6 @@
                  'grid-cols-1': previewMode !== 'split'
              }">
 
-            <!-- Textarea -->
             <div x-show="previewMode === 'edit' || previewMode === 'split'">
                 <textarea
                     x-ref="textarea"
@@ -131,7 +130,7 @@
                     :style="'min-height: ' + minHeight + 'px'"
                     placeholder="{{ $placeholder }}"
                     {{ $required ? 'required' : '' }}
-                >{!! old($name, $value) !!}</textarea>
+                >{{ old($name, $value) }}</textarea>
             </div>
 
             <!-- Preview -->
@@ -152,97 +151,23 @@
 @once
     @push('styles')
         <style>
-            .markdown-editor-wrapper .prose {
-                max-width: none;
-            }
-            .markdown-editor-wrapper .prose h1 {
-                font-size: 1.5rem;
-                font-weight: bold;
-                margin-top: 1.5rem;
-                margin-bottom: 1rem;
-                color: #1f2937;
-            }
-            .markdown-editor-wrapper .prose h2 {
-                font-size: 1.25rem;
-                font-weight: bold;
-                margin-top: 1.25rem;
-                margin-bottom: 0.75rem;
-                color: #1f2937;
-            }
-            .markdown-editor-wrapper .prose h3 {
-                font-size: 1.125rem;
-                font-weight: 600;
-                margin-top: 1rem;
-                margin-bottom: 0.5rem;
-                color: #1f2937;
-            }
-            .markdown-editor-wrapper .prose p {
-                margin-bottom: 1rem;
-                color: #374151;
-                line-height: 1.625;
-            }
-            .markdown-editor-wrapper .prose ul {
-                list-style-type: disc;
-                list-style-position: inside;
-                margin-bottom: 1rem;
-                margin-top: 0.5rem;
-            }
-            .markdown-editor-wrapper .prose ol {
-                list-style-type: decimal;
-                list-style-position: inside;
-                margin-bottom: 1rem;
-                margin-top: 0.5rem;
-            }
-            .markdown-editor-wrapper .prose li {
-                color: #374151;
-                margin-bottom: 0.5rem;
-            }
-            .markdown-editor-wrapper .prose blockquote {
-                border-left: 4px solid #6366f1;
-                padding-left: 1rem;
-                font-style: italic;
-                color: #6b7280;
-                margin: 1rem 0;
-            }
-            .markdown-editor-wrapper .prose code {
-                background-color: #f3f4f6;
-                padding: 0.125rem 0.5rem;
-                border-radius: 0.25rem;
-                font-size: 0.875rem;
-                font-family: monospace;
-                color: #dc2626;
-            }
-            .markdown-editor-wrapper .prose pre {
-                background-color: #1f2937;
-                color: #f3f4f6;
-                padding: 1rem;
-                border-radius: 0.5rem;
-                overflow-x: auto;
-                margin-bottom: 1rem;
-            }
-            .markdown-editor-wrapper .prose pre code {
-                background-color: transparent;
-                color: #f3f4f6;
-                padding: 0;
-            }
-            .markdown-editor-wrapper .prose a {
-                color: #4f46e5;
-                text-decoration: underline;
-            }
-            .markdown-editor-wrapper .prose a:hover {
-                color: #3730a3;
-            }
-            .markdown-editor-wrapper .prose strong {
-                font-weight: bold;
-                color: #1f2937;
-            }
-            .markdown-editor-wrapper .prose em {
-                font-style: italic;
-            }
-            .markdown-editor-wrapper .prose hr {
-                margin: 2rem 0;
-                border-color: #d1d5db;
-            }
+            .markdown-editor-wrapper .prose { max-width: none; }
+            .markdown-editor-wrapper .prose h1 { font-size: 1.5rem; font-weight: bold; margin-top: 1.5rem; margin-bottom: 1rem; color: #1f2937; }
+            .markdown-editor-wrapper .prose h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1.25rem; margin-bottom: 0.75rem; color: #1f2937; }
+            .markdown-editor-wrapper .prose h3 { font-size: 1.125rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; color: #1f2937; }
+            .markdown-editor-wrapper .prose p { margin-bottom: 1rem; color: #374151; line-height: 1.625; }
+            .markdown-editor-wrapper .prose ul { list-style-type: disc; list-style-position: inside; margin-bottom: 1rem; margin-top: 0.5rem; }
+            .markdown-editor-wrapper .prose ol { list-style-type: decimal; list-style-position: inside; margin-bottom: 1rem; margin-top: 0.5rem; }
+            .markdown-editor-wrapper .prose li { color: #374151; margin-bottom: 0.5rem; }
+            .markdown-editor-wrapper .prose blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; font-style: italic; color: #6b7280; margin: 1rem 0; }
+            .markdown-editor-wrapper .prose code { background-color: #f3f4f6; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem; font-family: monospace; color: #dc2626; }
+            .markdown-editor-wrapper .prose pre { background-color: #1f2937; color: #f3f4f6; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+            .markdown-editor-wrapper .prose pre code { background-color: transparent; color: #f3f4f6; padding: 0; }
+            .markdown-editor-wrapper .prose a { color: #4f46e5; text-decoration: underline; }
+            .markdown-editor-wrapper .prose a:hover { color: #3730a3; }
+            .markdown-editor-wrapper .prose strong { font-weight: bold; color: #1f2937; }
+            .markdown-editor-wrapper .prose em { font-style: italic; }
+            .markdown-editor-wrapper .prose hr { margin: 2rem 0; border-color: #d1d5db; }
         </style>
     @endpush
 @endonce
@@ -276,7 +201,6 @@
                 if (!this.content || !this.content.trim()) {
                     return '<p class="text-gray-400 italic">Aucun contenu à prévisualiser...</p>';
                 }
-
                 try {
                     if (typeof marked === 'undefined') {
                         return '<p class="text-red-500">Chargement de Markdown...</p>';
@@ -302,81 +226,46 @@
                 const selectedText = this.content.substring(start, end);
 
                 let newText = '';
-                let cursorOffset = 0;
                 let selectStart = 0;
                 let selectEnd = 0;
 
                 switch(syntax) {
                     case 'bold':
                         newText = `**${selectedText || 'texte en gras'}**`;
-                        if (selectedText) {
-                            selectStart = start;
-                            selectEnd = start + newText.length;
-                        } else {
-                            selectStart = start + 2;
-                            selectEnd = start + newText.length - 2;
-                        }
+                        if (selectedText) { selectStart = start; selectEnd = start + newText.length; }
+                        else { selectStart = start + 2; selectEnd = start + newText.length - 2; }
                         break;
                     case 'italic':
                         newText = `*${selectedText || 'texte en italique'}*`;
-                        if (selectedText) {
-                            selectStart = start;
-                            selectEnd = start + newText.length;
-                        } else {
-                            selectStart = start + 1;
-                            selectEnd = start + newText.length - 1;
-                        }
+                        if (selectedText) { selectStart = start; selectEnd = start + newText.length; }
+                        else { selectStart = start + 1; selectEnd = start + newText.length - 1; }
                         break;
                     case 'heading':
                         newText = `## ${selectedText || 'Titre'}`;
-                        if (selectedText) {
-                            selectStart = start;
-                            selectEnd = start + newText.length;
-                        } else {
-                            selectStart = start + 3;
-                            selectEnd = start + newText.length;
-                        }
+                        if (selectedText) { selectStart = start; selectEnd = start + newText.length; }
+                        else { selectStart = start + 3; selectEnd = start + newText.length; }
                         break;
                     case 'list':
-                        newText = selectedText
-                            ? selectedText.split('\n').map(line => `- ${line}`).join('\n')
-                            : '- Élément de liste';
-                        selectStart = start;
-                        selectEnd = start + newText.length;
+                        newText = selectedText ? selectedText.split('\n').map(line => `- ${line}`).join('\n') : '- Élément de liste';
+                        selectStart = start; selectEnd = start + newText.length;
                         break;
                     case 'ordered-list':
-                        newText = selectedText
-                            ? selectedText.split('\n').map((line, i) => `${i+1}. ${line}`).join('\n')
-                            : '1. Premier élément';
-                        selectStart = start;
-                        selectEnd = start + newText.length;
+                        newText = selectedText ? selectedText.split('\n').map((line, i) => `${i+1}. ${line}`).join('\n') : '1. Premier élément';
+                        selectStart = start; selectEnd = start + newText.length;
                         break;
                     case 'link':
                         newText = `[${selectedText || 'texte du lien'}](url)`;
-                        if (selectedText) {
-                            selectStart = start + newText.length - 4;
-                            selectEnd = start + newText.length - 1;
-                        } else {
-                            selectStart = start + 1;
-                            selectEnd = start + 14;
-                        }
+                        if (selectedText) { selectStart = start + newText.length - 4; selectEnd = start + newText.length - 1; }
+                        else { selectStart = start + 1; selectEnd = start + 14; }
                         break;
                     case 'code':
                         newText = '```\n' + (selectedText || 'code') + '\n```';
-                        if (selectedText) {
-                            selectStart = start;
-                            selectEnd = start + newText.length;
-                        } else {
-                            selectStart = start + 4;
-                            selectEnd = start + 8;
-                        }
+                        if (selectedText) { selectStart = start; selectEnd = start + newText.length; }
+                        else { selectStart = start + 4; selectEnd = start + 8; }
                         break;
                     case 'quote':
-                        newText = selectedText
-                            ? selectedText.split('\n').map(line => `> ${line}`).join('\n')
-                            : '> Citation';
-                        selectStart = start;
-                        selectEnd = start + newText.length;
+                        newText = selectedText ? selectedText.split('\n').map(line => `> ${line}`).join('\n') : '> Citation';
+                        selectStart = start; selectEnd = start + newText.length;
                         break;
                 }
 
