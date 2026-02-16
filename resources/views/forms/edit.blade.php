@@ -6,9 +6,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Modifier le cahier des charges
-            </h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Modifier le cahier des charges</h2>
         </div>
     </x-slot>
 
@@ -39,7 +37,6 @@
             @php
                 $cdc = $form->cdcs()->first();
                 $cdcData = $cdc ? $cdc->data : [];
-
                 $getValue = function($key, $default = '') use ($cdcData) {
                     return old($key, $cdcData[$key] ?? $default);
                 };
@@ -49,7 +46,6 @@
                 @csrf
                 @method('PUT')
 
-                <!-- Champs cachés requis pour le formulaire -->
                 <input type="hidden" name="name" value="{{ old('name', $form->name) }}">
                 <input type="hidden" name="description" value="{{ old('description', $form->description) }}">
                 <input type="hidden" name="is_active" value="{{ old('is_active', $form->is_active ? '1' : '0') }}">
@@ -57,74 +53,44 @@
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                        <h3 class="text-lg font-bold text-indigo-900">
-                            1. INFORMATIONS GÉNÉRALES
-                        </h3>
+                        <h3 class="text-lg font-bold text-indigo-900">1. INFORMATIONS GÉNÉRALES</h3>
                     </div>
                     <div class="p-6 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Nom du candidat *
-                                </label>
-                                <input type="text" name="candidat_nom" required
-                                       value="{{ $getValue('candidat_nom') }}"
-                                       placeholder="Dupont"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nom du candidat *</label>
+                                <input type="text" name="candidat_nom" required value="{{ $getValue('candidat_nom') }}" placeholder="Dupont"
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Prénom du candidat *
-                                </label>
-                                <input type="text" name="candidat_prenom" required
-                                       value="{{ $getValue('candidat_prenom') }}"
-                                       placeholder="Jean"
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Prénom du candidat *</label>
+                                <input type="text" name="candidat_prenom" required value="{{ $getValue('candidat_prenom') }}" placeholder="Jean"
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Lieu de travail *
-                            </label>
-                            <input type="text" name="lieu_travail" required
-                                   value="{{ $getValue('lieu_travail') }}"
-                                   placeholder="Ex: ETML, Lausanne"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Lieu de travail *</label>
+                            <input type="text" name="lieu_travail" required value="{{ $getValue('lieu_travail') }}" placeholder="Ex: ETML, Lausanne"
                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Orientation *
-                            </label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Orientation *</label>
                             <div class="space-y-2">
-                                @php
-                                    $currentOrientation = $getValue('orientation');
-                                @endphp
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88601 Développement d'applications"
-                                           {{ $currentOrientation == '88601 Développement d\'applications' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88601 Développement d'applications</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88602 Informatique d'entreprise"
-                                           {{ $currentOrientation == '88602 Informatique d\'entreprise' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88602 Informatique d'entreprise</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88603 Technique des systèmes"
-                                           {{ $currentOrientation == '88603 Technique des systèmes' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88603 Technique des systèmes</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="orientation" value="88614 Informaticienne d'entreprise CFC"
-                                           {{ $currentOrientation == '88614 Informaticienne d\'entreprise CFC' ? 'checked' : '' }}
-                                           class="text-indigo-600">
-                                    <span class="ml-2 text-sm">88614 Informaticienne d'entreprise CFC</span>
-                                </label>
+                                @php $currentOrientation = $getValue('orientation'); @endphp
+                                @foreach([
+                                    '88601 Développement d\'applications',
+                                    '88602 Informatique d\'entreprise',
+                                    '88603 Technique des systèmes',
+                                    '88614 Informaticienne d\'entreprise CFC'
+                                ] as $orientation)
+                                    <label class="flex items-center">
+                                        <input type="radio" name="orientation" value="{{ $orientation }}"
+                                               {{ $currentOrientation == $orientation ? 'checked' : '' }} class="text-indigo-600">
+                                        <span class="ml-2 text-sm">{{ $orientation }}</span>
+                                    </label>
+                                @endforeach
                             </div>
                         </div>
 
@@ -134,34 +100,24 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input type="text" name="chef_projet_nom" required
-                                           value="{{ $getValue('chef_projet_nom') }}"
-                                           placeholder="Martin"
+                                    <input type="text" name="chef_projet_nom" required value="{{ $getValue('chef_projet_nom') }}" placeholder="Martin"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input type="text" name="chef_projet_prenom" required
-                                           value="{{ $getValue('chef_projet_prenom') }}"
-                                           placeholder="Sophie"
+                                    <input type="text" name="chef_projet_prenom" required value="{{ $getValue('chef_projet_prenom') }}" placeholder="Sophie"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" name="chef_projet_email" required
-                                           value="{{ $getValue('chef_projet_email') }}"
-                                           placeholder="sophie.martin@example.com"
+                                    <input type="email" name="chef_projet_email" required value="{{ $getValue('chef_projet_email') }}" placeholder="sophie.martin@example.com"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="chef_projet_telephone" required
-                                           value="{{ old('chef_projet_telephone', '+41 ') }}"
-                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Format suisse : +41 XX XXX XX XX"
-                                           maxlength="16"
-                                           oninput="formatSwissPhone(this)"
+                                    <input type="tel" name="chef_projet_telephone" required value="{{ $getValue('chef_projet_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}" placeholder="+41 21 123 45 67"
+                                           title="Format suisse : +41 XX XXX XX XX" maxlength="16" oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                             </div>
@@ -173,256 +129,129 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input type="text" name="expert1_nom" required
-                                           value="{{ $getValue('expert1_nom') }}"
-                                           placeholder="Durand"
+                                    <input type="text" name="expert1_nom" required value="{{ $getValue('expert1_nom') }}" placeholder="Durand"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input type="text" name="expert1_prenom" required
-                                           value="{{ $getValue('expert1_prenom') }}"
-                                           placeholder="Pierre"
+                                    <input type="text" name="expert1_prenom" required value="{{ $getValue('expert1_prenom') }}" placeholder="Pierre"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" name="expert1_email" required
-                                           value="{{ $getValue('expert1_email') }}"
-                                           placeholder="pierre.durand@example.com"
+                                    <input type="email" name="expert1_email" required value="{{ $getValue('expert1_email') }}" placeholder="pierre.durand@example.com"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="expert1_telephone" required
-                                           value="{{ old('expert1_telephone', '+41 ') }}"
-                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Format suisse : +41 XX XXX XX XX"
-                                           maxlength="16"
-                                           oninput="formatSwissPhone(this)"
+                                    <input type="tel" name="expert1_telephone" required value="{{ $getValue('expert1_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}" placeholder="+41 21 123 45 67"
+                                           title="Format suisse : +41 XX XXX XX XX" maxlength="16" oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-
-                                           </div>
+                                </div>
                             </div>
                         </div>
+
                         <!-- Expert 2 -->
                         <div class="border-t pt-4">
                             <h4 class="font-semibold text-gray-800 mb-3">Expert 2</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input type="text" name="expert2_nom" required
-                                           value="{{ $getValue('expert2_nom') }}"
-                                           placeholder="Blanc"
+                                    <input type="text" name="expert2_nom" required value="{{ $getValue('expert2_nom') }}" placeholder="Blanc"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input type="text" name="expert2_prenom" required
-                                           value="{{ $getValue('expert2_prenom') }}"
-                                           placeholder="Marie"
+                                    <input type="text" name="expert2_prenom" required value="{{ $getValue('expert2_prenom') }}" placeholder="Marie"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input type="email" name="expert2_email" required
-                                           value="{{ $getValue('expert2_email') }}"
-                                           placeholder="marie.blanc@example.com"
+                                    <input type="email" name="expert2_email" required value="{{ $getValue('expert2_email') }}" placeholder="marie.blanc@example.com"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
-                                    <input type="tel" name="expert2_telephone" required
-                                           value="{{ old('expert2_telephone', '+41 ') }}"
-                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}"
-                                           placeholder="+41 21 123 45 67"
-                                           title="Format suisse : +41 XX XXX XX XX"
-                                           maxlength="16"
-                                           oninput="formatSwissPhone(this)"
+                                    <input type="tel" name="expert2_telephone" required value="{{ $getValue('expert2_telephone', '+41 ') }}"
+                                           pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}" placeholder="+41 21 123 45 67"
+                                           title="Format suisse : +41 XX XXX XX XX" maxlength="16" oninput="formatSwissPhone(this)"
                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Période, horaire, heures -->
                         <div class="border-t pt-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{
-                            totalHours: {{ old('nombre_heures', $getValue('nombre_heures', '90')) }}
-                        }">
+                                totalHours: @json((int) old('nombre_heures', $getValue('nombre_heures', '90')))
+                            }">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Période de réalisation *
-                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Période de réalisation *</label>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
                                             <label class="text-xs text-gray-500">Du</label>
-                                            <input type="date" name="date_debut" required
-                                                   value="{{ old('date_debut', $prefillData['date_debut'] ?? '') }}"
+                                            <input type="date" name="date_debut" required value="{{ $getValue('date_debut', $prefillData['date_debut'] ?? '') }}"
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                         <div>
                                             <label class="text-xs text-gray-500">Au</label>
-                                            <input type="date" name="date_fin" required
-                                                   value="{{ old('date_fin', $prefillData['date_fin'] ?? '') }}"
+                                            <input type="date" name="date_fin" required value="{{ $getValue('date_fin', $prefillData['date_fin'] ?? '') }}"
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Horaire de travail -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Horaire de travail *
-                                    </label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Horaire de travail *</label>
                                     <div class="space-y-1">
                                         <div>
                                             <label class="text-xs text-gray-500">Matin</label>
                                             <div class="flex gap-1 items-center">
-                                                <input type="time" name="heure_matin_debut" required
-                                                       value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
+                                                <input type="time" name="heure_matin_debut" required value="{{ $getValue('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <span class="text-xs">–</span>
-                                                <input type="time" name="heure_matin_fin" required
-                                                       value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
+                                                <span class="text-xs">—</span>
+                                                <input type="time" name="heure_matin_fin" required value="{{ $getValue('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                             </div>
                                         </div>
                                         <div>
                                             <label class="text-xs text-gray-500">Après-midi</label>
                                             <div class="flex gap-1 items-center">
-                                                <input type="time" name="heure_aprem_debut" required
-                                                       value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
+                                                <input type="time" name="heure_aprem_debut" required value="{{ $getValue('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <span class="text-xs">–</span>
-                                                <input type="time" name="heure_aprem_fin" required
-                                                       value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
+                                                <span class="text-xs">—</span>
+                                                <input type="time" name="heure_aprem_fin" required value="{{ $getValue('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Nombre d'heures (hidden input) -->
                                 <input type="hidden" name="nombre_heures" x-model="totalHours" value="90">
                             </div>
                         </div>
 
-                        <!-- Planning avec sliders PLEINE LARGEUR -->
+                        <!-- Planning avec composants réutilisables -->
                         <div class="border-t pt-4" x-data="planningCalculatorEdit()">
                             <h4 class="font-semibold text-gray-800 mb-3 flex items-center justify-between">
                                 <span>Planning (total : <span x-text="totalHeures + 'h'"></span>)</span>
                                 <div class="flex gap-2">
-                                    <button type="button"
-                                            @click="mode = 'heures'"
+                                    <button type="button" @click="mode = 'heures'"
                                             :class="mode === 'heures' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
-                                            class="px-3 py-1 rounded-md text-xs font-medium transition">
-                                        Heures
-                                    </button>
-                                    <button type="button"
-                                            @click="mode = 'pourcentage'"
+                                            class="px-3 py-1 rounded-md text-xs font-medium transition">Heures</button>
+                                    <button type="button" @click="mode = 'pourcentage'"
                                             :class="mode === 'pourcentage' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
-                                            class="px-3 py-1 rounded-md text-xs font-medium transition">
-                                        %
-                                    </button>
+                                            class="px-3 py-1 rounded-md text-xs font-medium transition">%</button>
                                 </div>
                             </h4>
 
-                            <!-- GRILLE 4 COLONNES PLEINE LARGEUR -->
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <!-- Analyse -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Analyse
-                                        <span class="text-xs text-indigo-600 font-semibold" x-text="'(' + analyse + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range"
-                                           x-model.number="analyse"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="analyse"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_analyse" :value="formatValue(analyse)">
-                                </div>
-
-                                <!-- Implémentation -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Implémentation
-                                        <span class="text-xs text-green-600 font-semibold" x-text="'(' + implementation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range"
-                                           x-model.number="implementation"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="implementation"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_implementation" :value="formatValue(implementation)">
-                                </div>
-
-                                <!-- Tests -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Tests
-                                        <span class="text-xs text-orange-600 font-semibold" x-text="'(' + tests + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range"
-                                           x-model.number="tests"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="tests"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_tests" :value="formatValue(tests)">
-                                </div>
-
-                                <!-- Documentation -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Documentation
-                                        <span class="text-xs text-purple-600 font-semibold" x-text="'(' + documentation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range"
-                                           x-model.number="documentation"
-                                           :min="0"
-                                           :max="mode === 'heures' ? totalHeures : 100"
-                                           :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number"
-                                               x-model.number="documentation"
-                                               :min="0"
-                                               :max="mode === 'heures' ? totalHeures : 100"
-                                               class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_documentation" :value="formatValue(documentation)">
-                                </div>
+                                <x-planning-slider model="analyse" label="Analyse" color="indigo" name="planning_analyse" />
+                                <x-planning-slider model="implementation" label="Implémentation" color="green" name="planning_implementation" />
+                                <x-planning-slider model="tests" label="Tests" color="orange" name="planning_tests" />
+                                <x-planning-slider model="documentation" label="Documentation" color="purple" name="planning_documentation" />
                             </div>
 
-                            <!-- Résumé du planning -->
                             <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-indigo-200">
                                 <div class="flex justify-between items-center">
                                     <span class="font-semibold text-gray-800">Total planifié :</span>
@@ -431,15 +260,13 @@
                                           x-text="total + (mode === 'heures' ? 'h' : '%')"></span>
                                 </div>
                                 <div class="mt-2 text-xs text-gray-600">
-                                    <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
-                                        ⚠️ Le total devrait être 100%
-                                    </span>
-                                    <span x-show="mode === 'heures' && total > totalHeures" class="text-red-600">
-                                ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
-                                </span>
+                                    <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">⚠️ Le total devrait être 100%</span>
+                                    <span x-show="mode === 'heures' && total > totalHeures" class="text-red-600">⚠️ Le total dépasse le nombre d'heures disponibles</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
 
                 <!-- Section 2: PROCÉDURE -->
                 <div class="bg-white shadow-sm rounded-lg">
@@ -447,19 +274,8 @@
                         <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Description de la procédure
-                        </label>
-                        <textarea name="procedure" rows="15"
-                                  placeholder="Points de la procédure (un par ligne)"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ $getValue('procedure', 'Le candidat réalise un travail personnel sur la base d\'un cahier des charges reçu le 1er jour.
-                            Le cahier des charges est approuvé par les deux experts. Il est en outre présenté, commenté et discuté avec le candidat. Par sa signature, le candidat accepte le travail proposé.
-                            Le candidat a connaissance de la feuille d\'évaluation avant de débuter le travail.
-                            Le candidat est entièrement responsable de la sécurité de ses données.
-                            En cas de problèmes graves, le candidat avertit au plus vite les deux experts et son CdP.
-                            Le candidat a la possibilité d\'obtenir de l\'aide, mais doit le mentionner dans son dossier.
-A la fin du délai imparti pour la réalisation du TPI, le candidat doit transmettre par courrier électronique le dossier de projet aux deux experts et au chef de projet. En parallèle, une copie papier du rapport doit être fournie sans délai en trois exemplaires (L\'un des deux experts peut demander à ne recevoir que la version électronique du dossier). Cette dernière doit être en tout point identique à la version électronique.') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Séparez chaque point par une nouvelle ligne</p>
+                        <x-markdown-editor name="procedure" :value="$getValue('procedure', '')" label="Description de la procédure"
+                                           placeholder="Points de la procédure..." help="Utilisez Markdown pour formater votre texte" :rows="12" />
                     </div>
                 </div>
 
@@ -469,11 +285,8 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Titre du projet *
-                        </label>
-                        <input type="text" name="titre_projet" required
-                               value="{{ $getValue('titre_projet') }}"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Titre du projet *</label>
+                        <input type="text" name="titre_projet" required value="{{ $getValue('titre_projet') }}"
                                placeholder="Ex: Skoob - Logiciel pour l'exploitation des librairies"
                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     </div>
@@ -485,13 +298,8 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Matériel et logiciels (un par ligne)
-                        </label>
-                        <textarea name="materiel_logiciel" rows="6"
-                                  placeholder="1 PC en configuration standard&#10;Environnement de développement Visual Studio&#10;1 lecteur code-barres USB"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $getValue('materiel_logiciel') }}</textarea>
-                        <p class="mt-1 text-sm text-gray-500">Séparez chaque élément par une nouvelle ligne</p>
+                        <x-markdown-editor name="materiel_logiciel" :value="$getValue('materiel_logiciel', '')" label="Matériel et logiciels"
+                                           placeholder="- 1 PC en configuration standard..." help="Utilisez des listes Markdown" :rows="6" />
                     </div>
                 </div>
 
@@ -501,31 +309,21 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Prérequis (un par ligne)
-                        </label>
-                        <textarea name="prerequis" rows="4"
-                                  placeholder="Connaissances du développement orienté objet&#10;Connaissance de C# et du framework .NET"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $getValue('prerequis') }}</textarea>
+                        <x-markdown-editor name="prerequis" :value="$getValue('prerequis', '')" label="Prérequis"
+                                           placeholder="- Connaissances du développement orienté objet..." help="Utilisez des listes Markdown" :rows="4" />
                     </div>
                 </div>
 
-                        {{-- Section 6: DESCRIPTIF DU PROJET --}}
-                        <div class="bg-white shadow-sm rounded-lg">
-                            <div class="p-6 border-b border-gray-200 bg-indigo-50">
-                                <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
-                            </div>
-                            <div class="p-6">
-                                <x-markdown-editor
-                                    name="descriptif_projet"
-                                    :value="$getValue('descriptif_projet', '')"
-                                    label="Description complète du projet"
-                                    placeholder="Le projet consiste à réaliser une application..."
-                                    help="Utilisez Markdown pour structurer et formater votre texte"
-                                    required
-                                />
-                            </div>
-                        </div>
+                <!-- Section 6: DESCRIPTIF DU PROJET -->
+                <div class="bg-white shadow-sm rounded-lg">
+                    <div class="p-6 border-b border-gray-200 bg-indigo-50">
+                        <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
+                    </div>
+                    <div class="p-6">
+                        <x-markdown-editor name="descriptif_projet" :value="$getValue('descriptif_projet', '')" label="Description complète du projet"
+                                           placeholder="Le projet consiste à réaliser une application..." help="Utilisez Markdown pour structurer votre texte" :rows="15" required />
+                    </div>
+                </div>
 
                 <!-- Section 7: LIVRABLES -->
                 <div class="bg-white shadow-sm rounded-lg">
@@ -533,118 +331,18 @@ A la fin du délai imparti pour la réalisation du TPI, le candidat doit transme
                         <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
                     </div>
                     <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Livrables attendus (un par ligne)
-                        </label>
-                        <textarea name="livrables" rows="6"
-                                  placeholder="Rapport de projet&#10;Journal de travail&#10;Planification initiale&#10;Code source complet&#10;Manuel utilisateur"
-                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $getValue('livrables') }}</textarea>
-                    </div>
-                </div>
-
-                <!-- Champs personnalisés existants -->
-                @php
-                    $customFields = $form->fields->where('section', 'custom');
-                @endphp
-
-                @if($customFields->count() > 0)
-                    <div class="bg-white shadow-sm rounded-lg">
-                        <div class="p-6 border-b border-gray-200 bg-gray-50">
-                            <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
-                        </div>
-                        <div class="p-6 space-y-4">
-                            @foreach($customFields as $index => $field)
-                                <div class="border rounded-lg p-4 bg-gray-50 relative" id="field-{{ $field->id }}">
-                                    <button type="button" @click="removeCustomField({{ $field->id }})"
-                                            class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-
-                                    <div class="grid grid-cols-2 gap-4 pr-12">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
-                                            <input type="text" name="fields[{{ $index }}][name]" value="{{ $field->name }}" required
-                                                   placeholder="nom_du_champ"
-                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            <input type="hidden" name="fields[{{ $index }}][id]" value="{{ $field->id }}">
-                                            <input type="hidden" name="fields[{{ $index }}][field_type_id]" value="{{ $field->field_type_id }}">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
-                                            <input type="text" name="fields[{{ $index }}][label]" value="{{ $field->label }}" required
-                                                   placeholder="Libellé du champ"
-                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        </div>
-                                        <div class="col-span-2">
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
-                                            <textarea name="fields[{{ $index }}][value]" rows="3"
-                                                      placeholder="Contenu du champ personnalisé"
-                                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ $getValue($field->name) }}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Nouveaux champs personnalisés -->
-                <div class="bg-white shadow-sm rounded-lg" x-data="{ newFields: [] }">
-                    <div class="p-6">
-
-                        <div class="mt-4 space-y-4" x-show="newFields.length > 0">
-                            <template x-for="(field, index) in newFields" :key="field.tempId">
-                                <div class="border rounded-lg p-4 bg-gray-50 relative">
-                                    <button type="button" @click="newFields.splice(index, 1)"
-                                            class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                        </svg>
-                                    </button>
-                                    <div class="grid grid-cols-2 gap-4 pr-12">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
-                                            <input type="text" :name="'new_fields[' + index + '][name]'" x-model="field.name" required
-                                                   placeholder="nom_du_champ"
-                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
-                                            <input type="text" :name="'new_fields[' + index + '][label]'" x-model="field.label" required
-                                                   placeholder="Libellé du champ"
-                                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                        </div>
-                                        <div class="col-span-2">
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
-                                            <textarea :name="'new_fields[' + index + '][value]'" x-model="field.value" rows="3"
-                                                      placeholder="Contenu du champ personnalisé"
-                                                      class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
-                                        </div>
-                                        <input type="hidden" :name="'new_fields[' + index + '][field_type_id]'" value="1">
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
+                        <x-markdown-editor name="livrables" :value="$getValue('livrables', '')" label="Livrables attendus"
+                                           placeholder="- Rapport de projet..." help="Utilisez des listes Markdown" :rows="6" />
                     </div>
                 </div>
 
                 <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
-                    <a href="{{ route('forms.show', $form) }}"
-                       class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-                        Annuler
-                    </a>
-                    <button type="submit"
-                            class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg">
-                        Mettre à jour le cahier de charge
+                    <a href="{{ route('forms.show', $form) }}" class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">Annuler</a>
+                    <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition font-medium shadow-lg">
+                        Mettre à jour le cahier des charges
                     </button>
                 </div>
-                    </div>
-                </div>
-                </div>
-
             </form>
         </div>
     </div>
