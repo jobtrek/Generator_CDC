@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Helpers\RoleHelper;
+use App\Notifications\UserInvitationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -12,7 +13,6 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Support\Facades\Password;
 class UserController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
@@ -56,7 +56,8 @@ class UserController extends Controller implements HasMiddleware
         ]);
 
         $user->assignRole($validated['role']);
-        $status = Password::sendResetLink(['email' => $user->email]);
+
+        $user->notify(new UserInvitationNotification());
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur invité ! Un email lui a été envoyé.');
