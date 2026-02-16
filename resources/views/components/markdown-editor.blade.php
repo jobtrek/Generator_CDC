@@ -120,6 +120,7 @@
                  'grid-cols-1': previewMode !== 'split'
              }">
 
+            <!-- Textarea -->
             <div x-show="previewMode === 'edit' || previewMode === 'split'">
                 <textarea
                     x-ref="textarea"
