@@ -17,6 +17,15 @@ export function cdcFormBuilder() {
             if (confirm('Êtes-vous sûr de vouloir supprimer ce champ ?')) {
                 this.fields.splice(index, 1);
             }
+        },
+
+        removeCustomField(fieldId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce champ ?')) {
+                const element = document.getElementById('field-' + fieldId);
+                if (element) {
+                    element.remove();
+                }
+            }
         }
     };
 }

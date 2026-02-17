@@ -1,90 +1,166 @@
 export function planningCalculatorEdit(oldData = {}) {
     const parseOldValue = (oldStr, defaultVal) => {
         if (!oldStr || oldStr === '') return defaultVal;
-        const cleaned = String(oldStr).replace(/[H%]/g, '').trim();
+        const cleaned = String(oldStr).replace(/[Hh%]/g, '').trim();
         const parsed = parseInt(cleaned);
         return isNaN(parsed) ? defaultVal : parsed;
     };
 
-    const defaultMode = oldData.planning_analyse?.includes('H') ? 'heures' : 'pourcentage';
+    const detectMode = () => {
+        if (oldData.planning_analyse) {
+            return String(oldData.planning_analyse).toUpperCase().includes('H') ? 'heures' : 'pourcentage';
+        }
+        return 'pourcentage';
+    };
 
     return {
-        mode: defaultMode,
-        analyse: parseOldValue(oldData.planning_analyse, defaultMode === 'heures' ? 14 : 15),
-        implementation: parseOldValue(oldData.planning_implementation, defaultMode === 'heures' ? 45 : 50),
-        tests: parseOldValue(oldData.planning_tests, defaultMode === 'heures' ? 18 : 20),
-        documentation: parseOldValue(oldData.planning_documentation, defaultMode === 'heures' ? 13 : 15),
+        mode: detectMode(),
+        totalHeures: parseInt(oldData.total_heures) || 90,
 
-        get totalHeures() {
-            const input = document.querySelector('input[name="nombre_heures"]');
-            return parseInt(input?.value || 90);
-        },
+        analyse: 15,
+        implementation: 50,
+        tests: 20,
+        documentation: 15,
 
         get total() {
-            return parseInt(this.analyse || 0) +
-                parseInt(this.implementation || 0) +
-                parseInt(this.tests || 0) +
-                parseInt(this.documentation || 0);
+            return (parseInt(this.analyse) || 0) +
+                (parseInt(this.implementation) || 0) +
+                (parseInt(this.tests) || 0) +
+                (parseInt(this.documentation) || 0);
         },
 
-        heuresToPercent(heures) {
-            return Math.round((heures / this.totalHeures) * 100);
+        get totalPercent() {
+            if (this.totalHeures === 0) return 0;
+            return this.mode === 'heures'
+                ? Math.round((this.total / this.totalHeures) * 100)
+                : this.total;
         },
 
-        percentToHeures(percent) {
-            return Math.round((percent * this.totalHeures) / 100);
+        get isValid() {
+            if (this.mode === 'pourcentage') {
+                return this.total === 100;
+            } else {
+                return this.total <= this.totalHeures;
+            }
+        },
+
+        get validationMessage() {
+            if (this.isValid) return '✓ Planning valide';
+
+            if (this.mode === 'pourcentage') {
+                return `⚠ Le total doit être 100% (actuellement ${this.total}%)`;
+            } else {
+                return `⚠ Le total ne doit pas dépasser ${this.totalHeures}h (actuellement ${this.total}h)`;
+            }
         },
 
         formatValue(val) {
             return val + (this.mode === 'heures' ? 'H' : '%');
         },
 
+        percentToHeures(percent) {
+            return Math.round((percent * this.totalHeures) / 100);
+        },
+
+        normalizeSum(targetTotal) {
+            let currentSum = (parseInt(this.analyse) || 0) +
+                (parseInt(this.implementation) || 0) +
+                (parseInt(this.tests) || 0) +
+                (parseInt(this.documentation) || 0);
+
+            let diff = targetTotal - currentSum;
+
+            if (diff !== 0) {
+                const fields = [
+                    { key: 'analyse', val: parseInt(this.analyse) || 0 },
+                    { key: 'implementation', val: parseInt(this.implementation) || 0 },
+                    { key: 'tests', val: parseInt(this.tests) || 0 },
+                    { key: 'documentation', val: parseInt(this.documentation) || 0 }
+                ];
+
+                fields.sort((a, b) => b.val - a.val);
+                const largestField = fields[0].key;
+                this[largestField] = (parseInt(this[largestField]) || 0) + diff;
+            }
+        },
+
+        switchMode(newMode) {
+            if (newMode === this.mode) return;
+
+            const oldMax = this.mode === 'heures' ? this.totalHeures : 100;
+            const newMax = newMode === 'heures' ? this.totalHeures : 100;
+
+            if (oldMax === 0) {
+                this.mode = newMode;
+                return;
+            }
+
+            const wasComplete = (this.total === oldMax);
+
+            this.analyse = Math.round((this.analyse / oldMax) * newMax);
+            this.implementation = Math.round((this.implementation / oldMax) * newMax);
+            this.tests = Math.round((this.tests / oldMax) * newMax);
+            this.documentation = Math.round((this.documentation / oldMax) * newMax);
+
+            if (wasComplete) {
+                this.normalizeSum(newMax);
+            }
+
+            this.mode = newMode;
+        },
+
+        getMax() {
+            return this.mode === 'heures' ? this.totalHeures : 100;
+        },
+
+        clampValue(val) {
+            const max = this.getMax();
+            const num = parseInt(val) || 0;
+            if (num < 0) return 0;
+            if (num > max) return max;
+            return num;
+        },
+
+        autoAdjustForPercent() {
+            if (this.mode !== 'pourcentage' || this.total <= 100) return;
+            let excess = this.total - 100;
+            const keys = ['documentation', 'tests', 'implementation', 'analyse'];
+            for (let key of keys) {
+                if (this[key] > 0 && excess > 0) {
+                    const reduction = Math.min(this[key], excess);
+                    this[key] -= reduction;
+                    excess -= reduction;
+                }
+            }
+        },
+
         init() {
-            this.$watch('mode', (newMode, oldMode) => {
-                if (newMode === 'pourcentage' && oldMode === 'heures') {
-                    this.analyse = this.heuresToPercent(this.analyse);
-                    this.implementation = this.heuresToPercent(this.implementation);
-                    this.tests = this.heuresToPercent(this.tests);
-                    this.documentation = this.heuresToPercent(this.documentation);
-                } else if (newMode === 'heures' && oldMode === 'pourcentage') {
-                    this.analyse = this.percentToHeures(this.analyse);
-                    this.implementation = this.percentToHeures(this.implementation);
-                    this.tests = this.percentToHeures(this.tests);
-                    this.documentation = this.percentToHeures(this.documentation);
-                }
-            });
+            if (oldData.planning_analyse) {
+                this.analyse = parseOldValue(oldData.planning_analyse, 15);
+                this.implementation = parseOldValue(oldData.planning_implementation, 50);
+                this.tests = parseOldValue(oldData.planning_tests, 20);
+                this.documentation = parseOldValue(oldData.planning_documentation, 15);
+            }
 
-            this.$watch('analyse', (val) => {
-                if (this.mode === 'heures' && val > this.totalHeures) {
-                    this.analyse = this.totalHeures;
-                } else if (this.mode === 'pourcentage' && val > 100) {
-                    this.analyse = 100;
-                }
-            });
+            const hoursInput = document.querySelector('input[name="nombre_heures"]');
+            if (hoursInput) {
 
-            this.$watch('implementation', (val) => {
-                if (this.mode === 'heures' && val > this.totalHeures) {
-                    this.implementation = this.totalHeures;
-                } else if (this.mode === 'pourcentage' && val > 100) {
-                    this.implementation = 100;
-                }
-            });
+                hoursInput.addEventListener('change', (e) => {
+                    const newTotal = parseInt(e.target.value) || 90;
+                    const oldTotal = this.totalHeures;
 
-            this.$watch('tests', (val) => {
-                if (this.mode === 'heures' && val > this.totalHeures) {
-                    this.tests = this.totalHeures;
-                } else if (this.mode === 'pourcentage' && val > 100) {
-                    this.tests = 100;
-                }
-            });
+                    if (this.mode === 'heures' && oldTotal > 0) {
+                        const wasComplete = (this.total === oldTotal);
+                        this.analyse = Math.round((this.analyse / oldTotal) * newTotal);
+                        this.implementation = Math.round((this.implementation / oldTotal) * newTotal);
+                        this.tests = Math.round((this.tests / oldTotal) * newTotal);
+                        this.documentation = Math.round((this.documentation / oldTotal) * newTotal);
 
-            this.$watch('documentation', (val) => {
-                if (this.mode === 'heures' && val > this.totalHeures) {
-                    this.documentation = this.totalHeures;
-                } else if (this.mode === 'pourcentage' && val > 100) {
-                    this.documentation = 100;
-                }
-            });
+                        if (wasComplete) this.normalizeSum(newTotal);
+                    }
+                    this.totalHeures = newTotal;
+                });
+            }
         }
     };
 }
