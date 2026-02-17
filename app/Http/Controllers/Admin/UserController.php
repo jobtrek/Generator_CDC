@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+
 class UserController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
@@ -56,7 +57,6 @@ class UserController extends Controller implements HasMiddleware
         ]);
 
         $user->assignRole($validated['role']);
-
         $user->notify(new UserInvitationNotification());
 
         return redirect()->route('admin.users.index')

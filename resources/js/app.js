@@ -8,7 +8,6 @@ import { cdcFormBuilder } from '../../public/js/form-builder.js';
 window.planningCalculatorEdit = planningCalculatorEdit;
 window.cdcFormBuilder = cdcFormBuilder;
 
-
 window.Alpine = Alpine;
 
 Alpine.start();

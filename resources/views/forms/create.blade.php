@@ -11,6 +11,7 @@
             </h2>
         </div>
     </x-slot>
+
     <div class="py-12">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
@@ -46,7 +47,7 @@
 
             <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
                 @csrf
-                
+
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
@@ -272,7 +273,7 @@
                                                 <input type="time" name="heure_matin_debut" required
                                                        value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <span class="text-xs">—</span>
+                                                <span class="text-xs">–</span>
                                                 <input type="time" name="heure_matin_fin" required
                                                        value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
@@ -284,7 +285,7 @@
                                                 <input type="time" name="heure_aprem_debut" required
                                                        value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                <span class="text-xs">—</span>
+                                                <span class="text-xs">–</span>
                                                 <input type="time" name="heure_aprem_fin" required
                                                        value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
@@ -297,98 +298,172 @@
                             </div>
                         </div>
 
-                        <!-- Planning -->
-                        <div class="border-t pt-4" x-data="planningCalculatorEdit()">
-                            <h4 class="font-semibold text-gray-800 mb-3 flex items-center justify-between">
-                                <span>Planning (total : <span x-text="totalHeures + 'h'"></span>)</span>
+                        <!-- Planning Section -->
+                        <div class="border-t pt-4" x-data="planningCalculatorEdit({
+                            total_heures: '{{ old('nombre_heures', '90') }}',
+                            planning_analyse: '{{ old('planning_analyse', '15%') }}',
+                            planning_implementation: '{{ old('planning_implementation', '50%') }}',
+                            planning_tests: '{{ old('planning_tests', '20%') }}',
+                            planning_documentation: '{{ old('planning_documentation', '15%') }}'
+                        })" @init="init()">
+
+                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                                <span>Répartition du planning</span>
                                 <div class="flex gap-2">
                                     <button type="button"
-                                            @click="mode = 'heures'"
-                                            :class="mode === 'heures' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
-                                            class="px-3 py-1 rounded-md text-xs font-medium transition">
-                                        Heures
+                                            @click="switchMode('pourcentage')"
+                                            :class="mode === 'pourcentage' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                            class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md">
+                                        % (100%)
                                     </button>
                                     <button type="button"
-                                            @click="mode = 'pourcentage'"
-                                            :class="mode === 'pourcentage' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
-                                            class="px-3 py-1 rounded-md text-xs font-medium transition">
-                                        %
+                                            @click="switchMode('heures')"
+                                            :class="mode === 'heures' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                            class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md">
+                                        Heures (<span x-text="totalHeures"></span>h)
                                     </button>
                                 </div>
                             </h4>
 
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Analyse
-                                        <span class="text-xs text-indigo-600 font-semibold" x-text="'(' + analyse + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range" x-model.number="analyse" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number" x-model.number="analyse" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                            <!-- Affichage du total et du mode -->
+                            <div class="mb-6 p-4 rounded-lg"
+                                 :class="isValid ? 'bg-green-50 border-l-4 border-green-500' : 'bg-orange-50 border-l-4 border-orange-500'">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-800">Total:</span>
+                                    <div class="text-right">
+                                        <span class="text-2xl font-bold"
+                                              :class="isValid ? 'text-green-600' : 'text-orange-600'"
+                                              x-text="total + (mode === 'heures' ? 'h' : '%')"></span>
+                                        <span class="text-xs text-gray-500 ml-2"
+                                              x-show="mode === 'heures'"
+                                              x-text="'= ' + totalPercent + '%'"></span>
+                                        <span class="text-xs text-gray-500 ml-2"
+                                              x-show="mode === 'pourcentage'"
+                                              x-text="'= ' + percentToHeures(total) + 'h'"></span>
                                     </div>
-                                    <input type="hidden" name="planning_analyse" :value="formatValue(analyse)">
                                 </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Implémentation
-                                        <span class="text-xs text-green-600 font-semibold" x-text="'(' + implementation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range" x-model.number="implementation" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number" x-model.number="implementation" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_implementation" :value="formatValue(implementation)">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Tests
-                                        <span class="text-xs text-orange-600 font-semibold" x-text="'(' + tests + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range" x-model.number="tests" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number" x-model.number="tests" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_tests" :value="formatValue(tests)">
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                                        Documentation
-                                        <span class="text-xs text-purple-600 font-semibold" x-text="'(' + documentation + (mode === 'heures' ? 'h' : '%') + ')'"></span>
-                                    </label>
-                                    <input type="range" x-model.number="documentation" :min="0" :max="mode === 'heures' ? totalHeures : 100" :step="mode === 'heures' ? 1 : 5"
-                                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
-                                    <div class="flex justify-between items-center mt-2">
-                                        <input type="number" x-model.number="documentation" :min="0" :max="mode === 'heures' ? totalHeures : 100" class="w-20 text-sm rounded border-gray-300">
-                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
-                                    </div>
-                                    <input type="hidden" name="planning_documentation" :value="formatValue(documentation)">
+                                <div class="mt-3 text-sm font-medium"
+                                     :class="isValid ? 'text-green-700' : 'text-orange-700'"
+                                     x-text="validationMessage">
                                 </div>
                             </div>
 
-                            <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-indigo-200">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-semibold text-gray-800">Total planifié :</span>
-                                    <span class="text-lg font-bold"
-                                          :class="total > (mode === 'heures' ? totalHeures : 100) ? 'text-red-600' : 'text-green-600'"
-                                          x-text="total + (mode === 'heures' ? 'h' : '%')"></span>
+                            <!-- Grille des sliders -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <!-- Analyse -->
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 transition">
+                                    <div class="flex items-baseline justify-between mb-3">
+                                        <label class="block text-sm font-semibold text-gray-700">Analyse</label>
+                                        <span class="text-sm font-bold text-indigo-600"
+                                              x-text="analyse + (mode === 'heures' ? 'h' : '%')"></span>
+                                    </div>
+
+                                    <input type="range"
+                                           x-model.number="analyse"
+                                           :min="0"
+                                           :max="getMax()"
+                                           :step="mode === 'heures' ? 1 : 1"
+                                           @input="analyse = clampValue($event.target.value); autoAdjustForPercent()"
+                                           class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <input type="number"
+                                               x-model.number="analyse"
+                                               :min="0"
+                                               :max="getMax()"
+                                               @change="analyse = clampValue($event.target.value); autoAdjustForPercent()"
+                                               class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+
+                                    <input type="hidden" name="planning_analyse" :value="formatValue(analyse)">
                                 </div>
-                                <div class="mt-2 text-xs text-gray-600">
-                                    <span x-show="mode === 'pourcentage' && total !== 100" class="text-orange-600">
-                                        ⚠️ Le total devrait être 100%
-                                    </span>
-                                    <span x-show="mode === 'heures' && total > totalHeures" class="text-red-600">
-                                        ⚠️ Le total dépasse le nombre d'heures disponibles (max <span x-text="totalHeures"></span>h)
-                                    </span>
+
+                                <!-- Implémentation -->
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-green-300 transition">
+                                    <div class="flex items-baseline justify-between mb-3">
+                                        <label class="block text-sm font-semibold text-gray-700">Implémentation</label>
+                                        <span class="text-sm font-bold text-green-600"
+                                              x-text="implementation + (mode === 'heures' ? 'h' : '%')"></span>
+                                    </div>
+
+                                    <input type="range"
+                                           x-model.number="implementation"
+                                           :min="0"
+                                           :max="getMax()"
+                                           :step="mode === 'heures' ? 1 : 1"
+                                           @input="implementation = clampValue($event.target.value); autoAdjustForPercent()"
+                                           class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-green-600">
+
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <input type="number"
+                                               x-model.number="implementation"
+                                               :min="0"
+                                               :max="getMax()"
+                                               @change="implementation = clampValue($event.target.value); autoAdjustForPercent()"
+                                               class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+
+                                    <input type="hidden" name="planning_implementation" :value="formatValue(implementation)">
+                                </div>
+
+                                <!-- Tests -->
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-orange-300 transition">
+                                    <div class="flex items-baseline justify-between mb-3">
+                                        <label class="block text-sm font-semibold text-gray-700">Tests</label>
+                                        <span class="text-sm font-bold text-orange-600"
+                                              x-text="tests + (mode === 'heures' ? 'h' : '%')"></span>
+                                    </div>
+
+                                    <input type="range"
+                                           x-model.number="tests"
+                                           :min="0"
+                                           :max="getMax()"
+                                           :step="mode === 'heures' ? 1 : 1"
+                                           @input="tests = clampValue($event.target.value); autoAdjustForPercent()"
+                                           class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-orange-600">
+
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <input type="number"
+                                               x-model.number="tests"
+                                               :min="0"
+                                               :max="getMax()"
+                                               @change="tests = clampValue($event.target.value); autoAdjustForPercent()"
+                                               class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-orange-500 focus:ring-1 focus:ring-orange-500">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+
+                                    <input type="hidden" name="planning_tests" :value="formatValue(tests)">
+                                </div>
+
+                                <!-- Documentation -->
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-purple-300 transition">
+                                    <div class="flex items-baseline justify-between mb-3">
+                                        <label class="block text-sm font-semibold text-gray-700">Documentation</label>
+                                        <span class="text-sm font-bold text-purple-600"
+                                              x-text="documentation + (mode === 'heures' ? 'h' : '%')"></span>
+                                    </div>
+
+                                    <input type="range"
+                                           x-model.number="documentation"
+                                           :min="0"
+                                           :max="getMax()"
+                                           :step="mode === 'heures' ? 1 : 1"
+                                           @input="documentation = clampValue($event.target.value); autoAdjustForPercent()"
+                                           class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-purple-600">
+
+                                    <div class="flex items-center gap-2 mt-3">
+                                        <input type="number"
+                                               x-model.number="documentation"
+                                               :min="0"
+                                               :max="getMax()"
+                                               @change="documentation = clampValue($event.target.value); autoAdjustForPercent()"
+                                               class="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-purple-500 focus:ring-1 focus:ring-purple-500">
+                                        <span class="text-xs text-gray-500" x-text="mode === 'heures' ? 'heures' : '%'"></span>
+                                    </div>
+
+                                    <input type="hidden" name="planning_documentation" :value="formatValue(documentation)">
                                 </div>
                             </div>
                         </div>
@@ -516,47 +591,6 @@
                     </div>
                 </div>
 
-                <!-- Champs personnalisés -->
-                <div class="bg-white shadow-sm rounded-lg" x-show="fields.length > 0">
-                    <div class="p-6 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-bold text-gray-900">Champs personnalisés supplémentaires</h3>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <template x-for="(field, index) in fields" :key="field.tempId">
-                            <div class="border rounded-lg p-4 bg-gray-50 relative">
-                                <button type="button" @click="removeField(index)"
-                                        class="absolute top-2 right-2 p-2 text-red-600 hover:bg-red-100 rounded">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-
-                                <div class="grid grid-cols-2 gap-4 pr-12">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Nom du champ *</label>
-                                        <input type="text" :name="'fields[' + index + '][name]'" x-model="field.name" required
-                                               placeholder="nom_du_champ"
-                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Label *</label>
-                                        <input type="text" :name="'fields[' + index + '][label]'" x-model="field.label" required
-                                               placeholder="Libellé du champ"
-                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    </div>
-                                    <div class="col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Valeur</label>
-                                        <textarea :name="'fields[' + index + '][value]'" x-model="field.value" rows="3"
-                                                  placeholder="Contenu du champ personnalisé"
-                                                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"></textarea>
-                                    </div>
-                                    <input type="hidden" :name="'fields[' + index + '][field_type_id]'" value="1">
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
                 <!-- Boutons d'action -->
                 <div class="flex justify-end gap-4">
                     <a href="{{ route('forms.index') }}"
@@ -576,6 +610,4 @@
     </div>
 
     <script src="{{ asset('js/phone-formatter.js') }}"></script>
-    <script src="{{ asset('js/form-builder.js') }}"></script>
-    <script src="{{ asset('js/planning-calculator.js') }}"></script>
 </x-app-layout>
