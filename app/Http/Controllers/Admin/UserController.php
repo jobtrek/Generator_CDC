@@ -57,7 +57,6 @@ class UserController extends Controller implements HasMiddleware
         ]);
 
         $user->assignRole($validated['role']);
-        $user->sendEmailVerificationNotification();
         $user->notify(new UserInvitationNotification());
 
         return redirect()->route('admin.users.index')
