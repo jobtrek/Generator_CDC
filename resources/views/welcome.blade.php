@@ -160,7 +160,7 @@
 <footer class="border-t border-gray-200 dark:border-slate-800 px-6 py-8 bg-gray-50 dark:bg-slate-900">
     <div class="max-w-6xl mx-auto flex justify-between items-center flex-col sm:flex-row gap-4">
         <p class="text-gray-600 dark:text-gray-400 text-sm">
-            © 2024 CDC Generator.
+            © 2026 CDC Generator.
         </p>
     </div>
 </footer>
