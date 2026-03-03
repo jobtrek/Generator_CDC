@@ -14,10 +14,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class CdcController extends Controller
 {
     use AuthorizesRequests;
-
-    /**
-     * ✅ Prépare la duplication d'un formulaire pour générer un nouveau CDC
-     */
     public function create(Request $request)
     {
         $formId = $request->query('form_id');
