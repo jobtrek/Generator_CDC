@@ -5,7 +5,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM dunglas/frankenphp:1.11.1-php8.5.2-trixie
+FROM dunglas/frankenphp:1.11.2-php8.5.2-trixie
 
 RUN install-php-extensions \
     pdo_pgsql \
