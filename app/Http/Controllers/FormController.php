@@ -362,7 +362,7 @@ class FormController extends Controller
                 'planning_tests' => $validated['planning_tests'] ?? '',
                 'planning_documentation' => $validated['planning_documentation'] ?? '',
 
-                'procedure' => $request->procedure ?? '',
+                'procedure' => $validated['procedure'] ?? '',
                 'titre_projet' => $validated['titre_projet'],
                 'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',
                 'prerequis' => $validated['prerequis'] ?? '',
