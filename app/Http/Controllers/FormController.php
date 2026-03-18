@@ -190,7 +190,6 @@ class FormController extends Controller
                 'title' => $validated['titre_projet'],
                 'data' => $cdcData,
                 'form_id' => $form->id,
-                'user_id' => Auth::id(),
             ]);
 
             DB::commit();

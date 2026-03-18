@@ -15,7 +15,6 @@ class Cdc extends Model
         'title',
         'data',
         'form_id',
-        'user_id',
     ];
 
     protected $casts = [
