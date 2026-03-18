@@ -16,14 +16,11 @@
                 @php
                     $cdc = $form->cdcs()->first();
                 @endphp
-
-                {{-- Bouton Télécharger (Word) --}}
                 @if($cdc)
                     <a href="{{ route('cdcs.download', $cdc) }}"
                        class="group flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-500 transition-all duration-200 ease-in-out hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                        title="Télécharger Word"
                        aria-label="Télécharger le document Word">
-                        {{-- Icône Document Text (Style plus fin) --}}
                         <svg class="w-5 h-5 transition-transform group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -344,7 +341,10 @@
                         @endphp
                         @if($descriptif)
                             <div class="prose max-w-none text-gray-900">
-                                {!! Str::markdown($descriptif) !!}
+                                {!! Str::markdown($descriptif, [
+                                    'html_input'=> 'strip',
+                                    'allow_unsafe_links' => false,
+                                ]) !!}
                             </div>
                         @else
                             <p class="text-gray-500 italic">Non renseigné</p>
