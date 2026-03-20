@@ -20,7 +20,7 @@ class FormController extends Controller
 
     public function index(Request $request)
     {
-        $query = Form::with(['user', 'fields'])
+        $query = Form::with(['user', 'fields', 'cdcs'])
             ->where('user_id', Auth::id());
 
         if ($request->filled('search')) {
@@ -217,7 +217,7 @@ class FormController extends Controller
     public function show(Form $form)
     {
         $this->authorize('view', $form);
-        $form->load(['fields.fieldType', 'user']);
+        $form->load(['fields.fieldType', 'user', 'cdcs']);
         return view('forms.show', compact('form'));
     }
 
