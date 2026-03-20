@@ -8,7 +8,6 @@
                 <p class="mt-1 text-sm text-gray-500">Gérez et organisez vos documents administratifs.</p>
             </div>
 
-
             <a href="{{ route('forms.create') }}"
                class="inline-flex items-center px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 transition shadow-lg shadow-gray-900/20">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +77,6 @@
                             @foreach($forms as $form)
                                 <tr class="group hover:bg-gray-50 transition duration-150 ease-in-out">
                                     <td class="px-6 py-5 whitespace-nowrap">
-                                    <td class="px-1 py-5 whitespace-nowrap">
                                         <div class="flex items-center justify-start">
                                             <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mr-3">
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
