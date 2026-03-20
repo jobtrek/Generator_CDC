@@ -9,7 +9,7 @@ class CdcPolicy
 {
     public function view(User $user, Cdc $cdc): bool
     {
-        return $user->id === $cdc->user_id;
+        return $cdc->form->user_id === $user->id;
     }
 
     public function update(User $user, Cdc $cdc): bool

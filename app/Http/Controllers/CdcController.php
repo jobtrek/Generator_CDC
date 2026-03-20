@@ -53,21 +53,16 @@ class CdcController extends Controller
                 ->with('info', 'Remplissez les données pour générer un nouveau CDC basé sur "' . $form->name . '"');
         }
     }
-
-    /**
-     * ✅ Store n'est plus utilisé (CDC créé via FormController)
-     */
     public function store(Request $request)
     {
         return redirect()->route('forms.create')
             ->with('error', 'Veuillez utiliser le formulaire de création pour générer un CDC.');
     }
 
-    /**
-     * ✅ Télécharge le CDC au format Word (.docx)
-     */
     public function download(Cdc $cdc)
     {
+        $this->authorize('view', $cdc);
+
         try {
             $generator = new \App\Services\CdcPhpWordGenerator();
             $filePath = $generator->generate($cdc);
@@ -88,19 +83,12 @@ class CdcController extends Controller
             return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
         }
     }
-    /**
-     * ✅ Génère un nom de fichier Word sécurisé
-     */
     private function generateFileName(Cdc $cdc): string
     {
         $slug = Str::slug($cdc->title);
         $timestamp = now()->format('Y-m-d');
         return "{$slug}_{$timestamp}.docx";
     }
-
-    /**
-     * ✅ Génère un nom de fichier PDF sécurisé
-     */
     private function generatePdfFileName(Cdc $cdc): string
     {
         $slug = Str::slug($cdc->title);
