@@ -47,9 +47,6 @@
                 @method('PUT')
 
                 <input type="hidden" name="name" value="{{ old('name', $form->name) }}">
-                <input type="hidden" name="description" value="{{ old('description', $form->description) }}">
-                <input type="hidden" name="is_active" value="{{ old('is_active', $form->is_active ? '1' : '0') }}">
-
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
                 <div class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">

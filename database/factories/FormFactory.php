@@ -14,8 +14,6 @@ class FormFactory extends Factory
     {
         return [
             'name' => fake()->sentence(3),
-            'description' => fake()->paragraph(),
-            'is_active' => fake()->boolean(80),
             'user_id' => User::factory(),
         ];
     }
