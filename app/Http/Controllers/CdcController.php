@@ -76,22 +76,10 @@ class CdcController extends Controller
                 $fullPath,
                 'cdc-' . Str::slug($cdc->title) . '.docx',
                 ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-            );
+            )->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
         }
-    }
-private function generateFileName(Cdc $cdc): string
-    {
-        $slug = Str::slug($cdc->title);
-        $timestamp = now()->format('Y-m-d');
-        return "{$slug}_{$timestamp}.docx";
-    }
-    private function generatePdfFileName(Cdc $cdc): string
-    {
-        $slug = Str::slug($cdc->title);
-        $timestamp = now()->format('Y-m-d');
-        return "{$slug}_{$timestamp}.pdf";
     }
 }
