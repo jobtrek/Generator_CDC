@@ -30,9 +30,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Form::class, FormPolicy::class);
         Gate::policy(Cdc::class, CdcPolicy::class);
 
-        if ($this->app->environment('production') || env('APP_ENV') === 'production') {
+        if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
         Event::listen(PasswordReset::class, function ($event) {
             if (!$event->user->hasVerifiedEmail()) {
                 $event->user->markEmailAsVerified();
