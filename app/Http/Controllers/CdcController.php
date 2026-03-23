@@ -72,27 +72,14 @@ class CdcController extends Controller
             if (!File::exists($fullPath)) {
                 return back()->with('error', 'Le fichier n\'a pas pu être généré.');
             }
-
             return response()->download(
                 $fullPath,
                 'cdc-' . Str::slug($cdc->title) . '.docx',
                 ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-            );
+            )->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
             return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
         }
-    }
-    private function generateFileName(Cdc $cdc): string
-    {
-        $slug = Str::slug($cdc->title);
-        $timestamp = now()->format('Y-m-d');
-        return "{$slug}_{$timestamp}.docx";
-    }
-    private function generatePdfFileName(Cdc $cdc): string
-    {
-        $slug = Str::slug($cdc->title);
-        $timestamp = now()->format('Y-m-d');
-        return "{$slug}_{$timestamp}.pdf";
     }
 }

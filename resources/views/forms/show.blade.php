@@ -14,9 +14,9 @@
 
             <div class="flex items-center gap-3">
                 @php
-                    $cdc = $form->cdcs()->first();
+                    $cdc = $form->cdcs->first();
                 @endphp
-                @if($cdc)
+            @if($cdc)
                     <a href="{{ route('cdcs.download', $cdc) }}"
                        class="group flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-500 transition-all duration-200 ease-in-out hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                        title="Télécharger Word"
