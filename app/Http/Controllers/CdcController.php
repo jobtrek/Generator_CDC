@@ -53,12 +53,6 @@ class CdcController extends Controller
                 ->with('info', 'Remplissez les données pour générer un nouveau CDC basé sur "' . $form->name . '"');
         }
     }
-    public function store(Request $request)
-    {
-        return redirect()->route('forms.create')
-            ->with('error', 'Veuillez utiliser le formulaire de création pour générer un CDC.');
-    }
-
     public function download(Cdc $cdc)
     {
         $this->authorize('view', $cdc);
@@ -79,7 +73,14 @@ class CdcController extends Controller
             )->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
+            Log::error('Erreur génération/téléchargement CDC', [
+                'cdc_id' => $cdc->id,
+                'user_id' => Auth::id(),
+                'error'  => $e->getMessage(),
+                'line'   => $e->getLine(),
+            ]);
+
+            return back()->with('error', 'Une erreur est survenue lors du téléchargement.');
         }
     }
 }
