@@ -715,17 +715,10 @@ class CdcPhpWordGenerator
 
     private function addPointsTechniques(Cdc $cdc)
     {
-        $customFields = collect($cdc->data)->filter(function($value, $key) {
-            return !in_array($key, [
-                    'candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
-                    'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
-                    'expert1_nom', 'expert1_prenom', 'expert1_email', 'expert1_telephone',
-                    'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',
-                    'periode_realisation', 'horaire_travail', 'nombre_heures',
-                    'planning_analyse', 'planning_implementation', 'planning_tests', 'planning_documentation',
-                    'procedure', 'titre_projet', 'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables',
-                    'date_debut', 'date_fin', 'heure_matin_debut', 'heure_matin_fin', 'heure_aprem_debut', 'heure_aprem_fin'
-                ]) && !empty($value);
+        $standardFields = FormFieldsService::getStandardFields();
+
+        $customFields = collect($cdc->data)->filter(function($value, $key) use ($standardFields) {
+            return !in_array($key, $standardFields) && !empty($value);
         });
 
         if ($customFields->count() > 0) {
@@ -762,7 +755,6 @@ class CdcPhpWordGenerator
             $this->addSectionSeparator();
         }
     }
-
     private function addValidation()
     {
         $this->addSectionTitle('9 VALIDATION');

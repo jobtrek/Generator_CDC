@@ -1,13 +1,9 @@
 <?php
 
-
 namespace App\Services;
 
 class FormFieldsService
 {
-    /**
-     * Champs standards qui ne doivent PAS être stockés dans la table fields
-     */
     private static array $standardFields = [
         'candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
         'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
@@ -19,6 +15,10 @@ class FormFieldsService
         'planning_tests', 'planning_documentation', 'procedure', 'titre_projet',
         'materiel_logiciel', 'prerequis', 'descriptif_projet', 'livrables',
     ];
+    public static function getStandardFields(): array
+    {
+        return self::$standardFields;
+    }
 
     public static function isStandardField(string $fieldName): bool
     {
