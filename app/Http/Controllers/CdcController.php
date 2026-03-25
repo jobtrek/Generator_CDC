@@ -79,7 +79,14 @@ class CdcController extends Controller
             )->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Erreur : ' . $e->getMessage() . ' | Ligne : ' . $e->getLine());
+            Log::error('Erreur génération/téléchargement CDC', [
+                'cdc_id' => $cdc->id,
+                'user_id' => Auth::id(),
+                'error'  => $e->getMessage(),
+                'line'   => $e->getLine(),
+            ]);
+
+            return back()->with('error', 'Une erreur est survenue lors du téléchargement.');
         }
     }
 }

@@ -10,6 +10,7 @@ use App\Services\FormFieldsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -25,7 +26,6 @@ class FormController extends Controller
 
         if ($request->filled('search')) {
             $search = Str::lower($request->search);
-
             $query->whereFullText('name', $search);
         }
 
@@ -47,7 +47,6 @@ class FormController extends Controller
         $fieldTypes = FieldType::all();
         $duplicateData = session('duplicate_form', []);
         $prefilledFields = $duplicateData['fields'] ?? [];
-
         $prefillData = [];
 
         return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData'));
@@ -186,10 +185,11 @@ class FormController extends Controller
                 }
             }
 
-            $cdc = Cdc::create([
+            Cdc::create([
                 'title' => $validated['titre_projet'],
                 'data' => $cdcData,
                 'form_id' => $form->id,
+                'user_id' => Auth::id(),
             ]);
 
             DB::commit();
@@ -202,15 +202,15 @@ class FormController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Erreur création formulaire/CDC', [
+            Log::error('Erreur création formulaire/CDC', [
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Erreur lors de la création : ' . $e->getMessage());
+                ->with('error', 'Une erreur est survenue lors de la création.');
         }
     }
 
@@ -314,7 +314,6 @@ class FormController extends Controller
         $dateDebut = Carbon::parse($validated['date_debut'])->locale('fr')->isoFormat('D MMMM YYYY');
         $dateFin = Carbon::parse($validated['date_fin'])->locale('fr')->isoFormat('D MMMM YYYY');
         $periodeRealisation = "Du {$dateDebut} au {$dateFin}";
-
         $horaireTravail = $validated['heure_matin_debut'] . ' — ' . $validated['heure_matin_fin'] .
             ', ' . $validated['heure_aprem_debut'] . ' — ' . $validated['heure_aprem_fin'];
 
@@ -440,16 +439,16 @@ class FormController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Erreur mise à jour formulaire', [
+            Log::error('Erreur mise à jour formulaire', [
                 'form_id' => $form->id,
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Erreur lors de la mise à jour : ' . $e->getMessage());
+                ->with('error', 'Une erreur est survenue lors de la mise à jour.');
         }
     }
 
@@ -466,13 +465,14 @@ class FormController extends Controller
                 ->with('success', "Le formulaire \"{$formName}\" a été supprimé avec succès !");
 
         } catch (\Exception $e) {
-            \Log::error('Erreur suppression formulaire', [
+            Log::error('Erreur suppression formulaire', [
                 'form_id' => $form->id,
-                'error' => $e->getMessage()
+                'user_id' => Auth::id(),
+                'error'   => $e->getMessage(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur lors de la suppression : ' . $e->getMessage());
+                ->with('error', "Une erreur est survenue lors de la suppression du formulaire \"{$formName}\".");
         }
     }
 }
