@@ -8,8 +8,10 @@ class DateTimeFormatter
 {
     public function buildPeriodeRealisation(string $dateDebut, string $dateFin): string
     {
-        $start = Carbon::parse($dateDebut)->locale('fr')->isoFormat('D MMMM YYYY');
-        $end = Carbon::parse($dateFin)->locale('fr')->isoFormat('D MMMM YYYY');
+        $locale = config('app.locale');
+
+        $start = Carbon::parse($dateDebut)->locale($locale)->isoFormat('D MMMM YYYY');
+        $end = Carbon::parse($dateFin)->locale($locale)->isoFormat('D MMMM YYYY');
 
         return "Du {$start} au {$end}";
     }

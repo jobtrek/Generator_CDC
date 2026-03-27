@@ -38,7 +38,6 @@ class FieldsManager
             if (!isset($fieldData['id']) || !$this->isCustomField($fieldData['name'])) {
                 continue;
             }
-
             $field = $form->fields()->find($fieldData['id']);
             if ($field) {
                 $field->update([
