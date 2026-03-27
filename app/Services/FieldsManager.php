@@ -7,6 +7,10 @@ use App\Models\Field;
 
 class FieldsManager
 {
+    public function __construct(
+        private FormFieldsService $formFieldsService,
+    ) {}
+
     public function createCustomFields(Form $form, array $fieldsData, array $cdcData): array
     {
         if (empty($fieldsData)) {
@@ -38,7 +42,9 @@ class FieldsManager
             if (!isset($fieldData['id']) || !$this->isCustomField($fieldData['name'])) {
                 continue;
             }
+
             $field = $form->fields()->find($fieldData['id']);
+
             if ($field) {
                 $field->update([
                     'name' => $fieldData['name'],
@@ -56,9 +62,7 @@ class FieldsManager
 
     public function deleteFields(Form $form, array $fieldIds): void
     {
-        Field::whereIn('id', $fieldIds)
-            ->where('form_id', $form->id)
-            ->delete();
+        $form->fields()->whereIn('id', $fieldIds)->delete();
     }
 
     private function createField(Form $form, array $fieldData, int $orderIndex): Field
@@ -77,6 +81,6 @@ class FieldsManager
 
     private function isCustomField(string $fieldName): bool
     {
-        return !FormFieldsService::isStandardField($fieldName);
+        return !$this->formFieldsService->isStandardField($fieldName);
     }
 }
