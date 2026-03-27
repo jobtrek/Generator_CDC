@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Services\CdcDataBuilder;
+use App\Services\DateTimeFormatter;
+use App\Services\FieldsManager;
+use App\Services\FormService;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Form;
 use App\Models\Cdc;
@@ -19,7 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(DateTimeFormatter::class);
+        $this->app->singleton(FieldsManager::class);
+        $this->app->singleton(CdcDataBuilder::class);
+        $this->app->singleton(FormService::class);
     }
 
     /**
