@@ -60,20 +60,13 @@ class FormService
                     $this->fieldsManager->deleteFields($form, $validated['deleted_fields']);
                 }
 
-                $cdc = $form->cdcs()->first();
-                if ($cdc) {
-                    $cdc->update([
+                $form->cdcs()->updateOrCreate(
+                    ['form_id' => $form->id],
+                    [
                         'title' => $validated['titre_projet'],
                         'data' => $cdcData,
-                    ]);
-                } else {
-                    Cdc::create([
-                        'title' => $validated['titre_projet'],
-                        'data' => $cdcData,
-                        'form_id' => $form->id,
                         'user_id' => $userId,
                     ]);
-                }
             } catch (\Exception $e) {
                 Log::error('Erreur mise à jour formulaire dans FormService', [
                     'form_id' => $form->id,
