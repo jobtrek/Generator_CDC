@@ -23,10 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(DateTimeFormatter::class);
-        $this->app->singleton(FieldsManager::class);
-        $this->app->singleton(CdcDataBuilder::class);
-        $this->app->singleton(FormService::class);
+        // mnt larravel fais cette travail automatiquement
     }
 
     /**
