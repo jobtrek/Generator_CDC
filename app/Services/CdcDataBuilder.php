@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
-
 class CdcDataBuilder
 {
     public function __construct(private DateTimeFormatter $dateTimeFormatter) {}

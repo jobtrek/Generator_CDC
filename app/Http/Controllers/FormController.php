@@ -66,6 +66,12 @@ class FormController extends Controller
                 ->with('success', 'Cahier des charges créé avec succès !');
 
         } catch (\Exception $e) {
+            Log::error('Erreur création formulaire/CDC', [
+                'user_id' => Auth::id(),
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Une erreur est survenue lors de la création.');
@@ -100,6 +106,13 @@ class FormController extends Controller
                 ->with('success', 'Formulaire et CDC mis à jour avec succès !');
 
         } catch (\Exception $e) {
+            Log::error('Erreur mise à jour formulaire', [
+                'form_id' => $form->id,
+                'user_id' => Auth::id(),
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Une erreur est survenue lors de la mise à jour.');
