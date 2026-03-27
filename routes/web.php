@@ -30,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware(['role:super-admin'])
-        ->prefix('admin')
+            ->prefix('admin')
         ->name('admin.')
         ->group(function () {
             Route::resource('users', UserController::class);
