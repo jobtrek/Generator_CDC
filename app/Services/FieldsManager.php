@@ -7,10 +7,10 @@ use App\Models\Field;
 
 class FieldsManager
 {
-    public function createCustomFields(Form $form, array $fieldsData, array &$cdcData): void
+    public function createCustomFields(Form $form, array $fieldsData, array $cdcData): array
     {
         if (empty($fieldsData)) {
-            return;
+            return $cdcData;
         }
 
         $orderIndex = $form->fields()->max('order_index') ?? 0;
@@ -24,12 +24,14 @@ class FieldsManager
                 }
             }
         }
+
+        return $cdcData;
     }
 
-    public function updateCustomFields(Form $form, array $fieldsData, array &$cdcData): void
+    public function updateCustomFields(Form $form, array $fieldsData, array $cdcData): array
     {
         if (empty($fieldsData)) {
-            return;
+            return $cdcData;
         }
 
         foreach ($fieldsData as $fieldData) {
@@ -50,6 +52,8 @@ class FieldsManager
                 }
             }
         }
+
+        return $cdcData;
     }
 
     public function deleteFields(Form $form, array $fieldIds): void

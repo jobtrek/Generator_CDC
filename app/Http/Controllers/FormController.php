@@ -9,6 +9,7 @@ use App\Http\Requests\StoreCdcRequest;
 use App\Http\Requests\UpdateCdcRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -118,6 +119,12 @@ class FormController extends Controller
                 ->with('success', "Le formulaire \"{$formName}\" a été supprimé avec succès !");
 
         } catch (\Exception $e) {
+            Log::error('Erreur suppression formulaire', [
+                'form_id' => $form->id,
+                'user_id' => Auth::id(),
+                'error'   => $e->getMessage(),
+            ]);
+
             return redirect()->back()
                 ->with('error', "Une erreur est survenue lors de la suppression du formulaire \"{$formName}\".");
         }
