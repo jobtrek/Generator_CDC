@@ -39,9 +39,8 @@ class FieldsManager
                 continue;
             }
 
-            $field = Field::find($fieldData['id']);
-
-            if ($field && $field->form_id === $form->id) {
+            $field = $form->fields()->find($fieldData['id']);
+            if ($field) {
                 $field->update([
                     'name' => $fieldData['name'],
                     'label' => $fieldData['label'],
