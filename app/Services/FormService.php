@@ -48,7 +48,7 @@ class FormService
                 $this->fieldsManager->deleteFields($form, $validated['deleted_fields']);
             }
 
-            $form->cdcs()->updateOrCreate(
+            $form->cdc()->updateOrCreate(
                 ['form_id' => $form->id],
                 [
                     'title' => $validated['titre_projet'],
@@ -61,7 +61,7 @@ class FormService
 
     public function getPrefillDataForEdit(Form $form): array
     {
-        $cdc = $form->cdcs()->first();
+    $cdc = $form->cdc;
         $cdcData = $cdc?->data ?? [];
 
         return [
