@@ -24,17 +24,17 @@ class FormService
             $cdcData = $this->cdcDataBuilder->build($validated);
             $cdcData = $this->fieldsManager->createCustomFields($form, $validated['fields'] ?? [], $cdcData);
 
-            Cdc::create([
+            $cdc = Cdc::create([
                 'title' => $validated['titre_projet'],
                 'data' => $cdcData,
                 'form_id' => $form->id,
-                'user_id' => $userId,
             ]);
+            $cdc->user_id = $userId;
+            $cdc->save();
 
             return $form;
-        });
+            });
     }
-
     public function updateFormWithCdc(Form $form, array $validated, int $userId): void
     {
         DB::transaction(function () use ($form, $validated, $userId) {
@@ -47,21 +47,18 @@ class FormService
             if (!empty($validated['deleted_fields'])) {
                 $this->fieldsManager->deleteFields($form, $validated['deleted_fields']);
             }
-
             $form->cdc()->updateOrCreate(
                 ['form_id' => $form->id],
                 [
                     'title' => $validated['titre_projet'],
                     'data' => $cdcData,
-                    'user_id' => $userId,
                 ]
             );
         });
     }
-
     public function getPrefillDataForEdit(Form $form): array
     {
-    $cdc = $form->cdc;
+        $cdc = $form->cdc;
         $cdcData = $cdc?->data ?? [];
 
         return [
