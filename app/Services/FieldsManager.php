@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Form;
 use App\Models\Field;
+use App\Models\Form;
 
 class FieldsManager
 {
@@ -23,7 +23,7 @@ class FieldsManager
             if ($this->isCustomField($fieldData['name'])) {
                 $this->createField($form, $fieldData, ++$orderIndex);
 
-                if (isset($fieldData['value']) && !empty($fieldData['value'])) {
+                if (isset($fieldData['value']) && ! empty($fieldData['value'])) {
                     $cdcData[$fieldData['name']] = $fieldData['value'];
                 }
             }
@@ -39,7 +39,7 @@ class FieldsManager
         }
 
         foreach ($fieldsData as $fieldData) {
-            if (!isset($fieldData['id']) || !$this->isCustomField($fieldData['name'])) {
+            if (! isset($fieldData['id']) || ! $this->isCustomField($fieldData['name'])) {
                 continue;
             }
 
@@ -51,7 +51,7 @@ class FieldsManager
                     'label' => $fieldData['label'],
                 ]);
 
-                if (isset($fieldData['value']) && !empty($fieldData['value'])) {
+                if (isset($fieldData['value']) && ! empty($fieldData['value'])) {
                     $cdcData[$fieldData['name']] = $fieldData['value'];
                 }
             }
@@ -81,6 +81,6 @@ class FieldsManager
 
     private function isCustomField(string $fieldName): bool
     {
-        return !$this->formFieldsService->isStandardField($fieldName);
+        return ! FormFieldsService::isStandardField($fieldName);
     }
 }

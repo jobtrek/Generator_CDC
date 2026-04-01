@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Form;
 use App\Models\Cdc;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class FormService
@@ -16,51 +17,52 @@ class FormService
     public function createFormWithCdc(array $validated, int $userId): Form
     {
         return DB::transaction(function () use ($validated, $userId) {
-            $form = Form::create([
+            $user = User::findOrFail($userId);
+            $form = new Form([
                 'name' => $validated['titre_projet'],
-                'user_id' => $userId,
             ]);
-
+            $user->forms()->save($form);
             $cdcData = $this->cdcDataBuilder->build($validated);
             $cdcData = $this->fieldsManager->createCustomFields($form, $validated['fields'] ?? [], $cdcData);
-
-            $cdc = Cdc::create([
+            $cdc = new Cdc([
                 'title' => $validated['titre_projet'],
                 'data' => $cdcData,
-                'form_id' => $form->id,
             ]);
-            $cdc->user_id = $userId;
-            $cdc->save();
+            $cdc->user()->associate($user);
+            $form->cdc()->save($cdc);
 
             return $form;
-            });
+        });
     }
     public function updateFormWithCdc(Form $form, array $validated, int $userId): void
     {
         DB::transaction(function () use ($form, $validated, $userId) {
-            $form->update(['name' => $validated['titre_projet']]);
+            $user = User::findOrFail($userId);
+            $form->name = $validated['titre_projet'];
+            $form->save();
 
             $cdcData = $this->cdcDataBuilder->build($validated);
             $cdcData = $this->fieldsManager->updateCustomFields($form, $validated['fields'] ?? [], $cdcData);
             $cdcData = $this->fieldsManager->createCustomFields($form, $validated['new_fields'] ?? [], $cdcData);
-
-            if (!empty($validated['deleted_fields'])) {
+            if (! empty($validated['deleted_fields'])) {
                 $this->fieldsManager->deleteFields($form, $validated['deleted_fields']);
             }
-            $form->cdc()->updateOrCreate(
-                ['form_id' => $form->id],
-                [
-                    'title' => $validated['titre_projet'],
-                    'data' => $cdcData,
-                ]
-            );
+            $cdc = $form->cdc ?? new Cdc;
+            $cdc->fill([
+                'title' => $validated['titre_projet'],
+                'data' => $cdcData,
+            ]);
+
+            if (! $cdc->exists) {
+                $cdc->user()->associate($user);
+            }
+            $form->cdc()->save($cdc);
         });
     }
     public function getPrefillDataForEdit(Form $form): array
     {
         $cdc = $form->cdc;
         $cdcData = $cdc?->data ?? [];
-
         return [
             'date_debut' => $cdcData['date_debut'] ?? null,
             'date_fin' => $cdcData['date_fin'] ?? null,
