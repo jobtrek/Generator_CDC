@@ -1,6 +1,4 @@
 <?php
-// app/Models/Cdc.php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +16,7 @@ class Cdc extends Model
     ];
 
     protected $casts = [
-        'data' => 'array'
+        'data' => 'array',
     ];
 
     public function form(): BelongsTo

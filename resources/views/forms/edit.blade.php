@@ -35,7 +35,7 @@
             @endif
 
             @php
-                $cdc = $form->cdcs()->first();
+                $cdc = $form->cdc;
                 $cdcData = $cdc ? $cdc->data : [];
                 $getValue = function($key, $default = '') use ($cdcData) {
                     return old($key, $cdcData[$key] ?? $default);

@@ -2,10 +2,6 @@
 
 namespace App\Providers;
 
-use App\Services\CdcDataBuilder;
-use App\Services\DateTimeFormatter;
-use App\Services\FieldsManager;
-use App\Services\FormService;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Form;
 use App\Models\Cdc;
@@ -25,7 +21,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // mnt larravel fais cette travail automatiquement
     }
-
     /**
      * Bootstrap any application services.
      */

@@ -14,7 +14,7 @@
 
             <div class="flex items-center gap-3">
                 @php
-                    $cdc = $form->cdcs->first();
+                    $cdc = $form->cdc;
                 @endphp
             @if($cdc)
                     <a href="{{ route('cdcs.download', $cdc) }}"
@@ -75,7 +75,7 @@
             @endif
 
             @php
-                $cdc = $form->cdcs()->first();
+                $cdc = $form->cdc;
                 $cdcData = $cdc ? $cdc->data : [];
 
                 $getValue = function($key, $default = 'Non renseigné') use ($cdcData) {
