@@ -5,16 +5,18 @@ namespace App\Services;
 use App\Models\Cdc;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use League\CommonMark\CommonMarkConverter;
+use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\SimpleType\TblWidth;
-use PhpOffice\PhpWord\IOFactory;
-use League\CommonMark\CommonMarkConverter;
 
 class CdcPhpWordGenerator
 {
     private $phpWord;
+
     private $section;
+
     private $markdownConverter;
 
     public function __construct()
@@ -28,7 +30,7 @@ class CdcPhpWordGenerator
     public function generate(Cdc $cdc): string
     {
         try {
-            $this->phpWord = new PhpWord();
+            $this->phpWord = new PhpWord;
 
             $sectionStyle = [
                 'marginTop' => 1134,
@@ -55,18 +57,18 @@ class CdcPhpWordGenerator
             $this->addValidation();
 
             $timestamp = time();
-            $docxFileName = 'cdc-' . $cdc->id . '-' . $timestamp . '.docx';
-            $docxPath = storage_path('app/public/cdcs/' . $docxFileName);
+            $docxFileName = 'cdc-'.$cdc->id.'-'.$timestamp.'.docx';
+            $docxPath = storage_path('app/public/cdcs/'.$docxFileName);
 
             $cdcsDir = storage_path('app/public/cdcs');
-            if (!File::exists($cdcsDir)) {
+            if (! File::exists($cdcsDir)) {
                 File::makeDirectory($cdcsDir, 0755, true);
             }
 
             $objWriter = IOFactory::createWriter($this->phpWord, 'Word2007');
             $objWriter->save($docxPath);
 
-            return 'cdcs/' . $docxFileName;
+            return 'cdcs/'.$docxFileName;
 
         } catch (\Exception $e) {
             Log::error('Erreur génération CDC avec PhpWord', [
@@ -74,7 +76,7 @@ class CdcPhpWordGenerator
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'line' => $e->getLine(),
-                'file' => $e->getFile()
+                'file' => $e->getFile(),
             ]);
 
             throw $e;
@@ -98,14 +100,14 @@ class CdcPhpWordGenerator
             'width' => 100 * 50,
             'unit' => TblWidth::PERCENT,
             'cellMargin' => 0,
-            'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED
+            'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
         ]);
 
         $footerTable->addRow();
 
         $cellLeft = $footerTable->addCell(4500, [
             'borderSize' => 0,
-            'borderColor' => 'FFFFFF'
+            'borderColor' => 'FFFFFF',
         ]);
         $cellLeft->addPreserveText(
             'Page {PAGE} sur {NUMPAGES}',
@@ -115,7 +117,7 @@ class CdcPhpWordGenerator
 
         $cellRight = $footerTable->addCell(4500, [
             'borderSize' => 0,
-            'borderColor' => 'FFFFFF'
+            'borderColor' => 'FFFFFF',
         ]);
         $cellRight->addText(
             'Version 1.1-ordo2k104-21 (18.01.2025)',
@@ -150,7 +152,7 @@ class CdcPhpWordGenerator
         );
 
         $this->section->addText(
-            'Version 1.1 - ' . now()->format('d.m.Y'),
+            'Version 1.1 - '.now()->format('d.m.Y'),
             ['name' => 'Calibri', 'size' => 10],
             ['alignment' => Jc::CENTER, 'spaceBefore' => 0, 'spaceAfter' => 240]
         );
@@ -203,10 +205,10 @@ class CdcPhpWordGenerator
         }
 
         if ($isPercentage) {
-            return round($total) . '%';
+            return round($total).'%';
         }
 
-        return round($total) . 'H';
+        return round($total).'H';
     }
 
     private function addInformationsGenerales(Cdc $cdc)
@@ -221,7 +223,7 @@ class CdcPhpWordGenerator
             'cellMarginTop' => 20,
             'cellMarginBottom' => 20,
             'width' => 100 * 50,
-            'unit' => TblWidth::PERCENT
+            'unit' => TblWidth::PERCENT,
         ];
 
         $cellBgColor = ['bgColor' => 'f0f0f0'];
@@ -363,6 +365,39 @@ class CdcPhpWordGenerator
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText($cdc->data['horaire_travail'] ?? '', $fontStyle);
 
+        // --- JOURS D'ÉCOLE ---
+        $joursEcole = $cdc->data['jours_ecole'] ?? null;
+        $joursText = '';
+        if ($joursEcole) {
+            if (is_string($joursEcole)) {
+                $joursArray = json_decode($joursEcole, true) ?: [$joursEcole];
+            } else {
+                $joursArray = is_array($joursEcole) ? $joursEcole : [$joursEcole];
+            }
+            $joursText = implode(', ', array_map('ucfirst', $joursArray));
+        }
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Jours d\'école :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($joursText ?: '', $fontStyle);
+
+        // --- PAUSES ---
+        $pauseMatin = ($cdc->data['pause_matin_debut'] ?? '').' – '.($cdc->data['pause_matin_fin'] ?? '');
+        $pauseAprem = ($cdc->data['pause_aprem_debut'] ?? '').' – '.($cdc->data['pause_aprem_fin'] ?? '');
+
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Pause matin :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($pauseMatin !== ' – ' ? $pauseMatin : '', $fontStyle);
+
+        $table->addRow();
+        $table->addCell(3000, $cellBgColor)
+            ->addText('Pause après-midi :', array_merge($fontStyle, ['bold' => true]));
+        $table->addCell(6000, ['gridSpan' => 2])
+            ->addText($pauseAprem !== ' – ' ? $pauseAprem : '', $fontStyle);
+
         // --- NOMBRE D'HEURES ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
@@ -375,22 +410,22 @@ class CdcPhpWordGenerator
         $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
             ->addText('Planning (en H ou %) :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
-            ->addText('Analyse : ' . ($cdc->data['planning_analyse'] ?? '0H'), $fontStyle);
+            ->addText('Analyse : '.($cdc->data['planning_analyse'] ?? '0H'), $fontStyle);
 
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(6000, ['gridSpan' => 2])
-            ->addText('Implémentation : ' . ($cdc->data['planning_implementation'] ?? '0H'), $fontStyle);
+            ->addText('Implémentation : '.($cdc->data['planning_implementation'] ?? '0H'), $fontStyle);
 
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(6000, ['gridSpan' => 2])
-            ->addText('Tests : ' . ($cdc->data['planning_tests'] ?? '0H'), $fontStyle);
+            ->addText('Tests : '.($cdc->data['planning_tests'] ?? '0H'), $fontStyle);
 
         $table->addRow();
         $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(6000, ['gridSpan' => 2])
-            ->addText('Documentations : ' . ($cdc->data['planning_documentation'] ?? '0H'), $fontStyle);
+            ->addText('Documentations : '.($cdc->data['planning_documentation'] ?? '0H'), $fontStyle);
 
         // ✅ Ligne de fin de section
         $this->addSectionSeparator();
@@ -432,7 +467,7 @@ class CdcPhpWordGenerator
 
     private function addMaterielLogiciel(Cdc $cdc)
     {
-        if (!empty($cdc->data['materiel_logiciel'])) {
+        if (! empty($cdc->data['materiel_logiciel'])) {
             $this->addSectionTitle('4 MATÉRIEL ET LOGICIEL À DISPOSITION');
 
             $materiel = $cdc->data['materiel_logiciel'];
@@ -456,7 +491,7 @@ class CdcPhpWordGenerator
 
     private function addPrerequis(Cdc $cdc)
     {
-        if (!empty($cdc->data['prerequis'])) {
+        if (! empty($cdc->data['prerequis'])) {
             $this->addSectionTitle('5 PRÉREQUIS');
 
             $prerequis = $cdc->data['prerequis'];
@@ -502,7 +537,7 @@ class CdcPhpWordGenerator
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        @$dom->loadHTML('<?xml encoding="UTF-8"><body>' . $html . '</body>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        @$dom->loadHTML('<?xml encoding="UTF-8"><body>'.$html.'</body>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         libxml_clear_errors();
 
         if ($dom->documentElement) {
@@ -512,7 +547,9 @@ class CdcPhpWordGenerator
 
     private function parseNode($node, $fontStyle, $depth = 0)
     {
-        if (!$node || !$node->childNodes) return;
+        if (! $node || ! $node->childNodes) {
+            return;
+        }
 
         foreach ($node->childNodes as $child) {
             switch ($child->nodeName) {
@@ -520,7 +557,7 @@ class CdcPhpWordGenerator
                 case 'h2':
                 case 'h3':
                 case 'h4':
-                    $level = (int)substr($child->nodeName, 1);
+                    $level = (int) substr($child->nodeName, 1);
                     $this->section->addText(
                         trim($child->textContent),
                         array_merge($fontStyle, ['bold' => true, 'size' => 16 - ($level * 2)]),
@@ -586,11 +623,12 @@ class CdcPhpWordGenerator
 
     private function addFormattedText($node, $textRun, $baseFontStyle)
     {
-        if (!$node->hasChildNodes()) {
+        if (! $node->hasChildNodes()) {
             $text = trim($node->textContent);
             if ($text) {
                 $textRun->addText($text, $baseFontStyle);
             }
+
             return;
         }
 
@@ -600,33 +638,28 @@ class CdcPhpWordGenerator
                 if ($text && $text !== "\n") {
                     $textRun->addText($text, $baseFontStyle);
                 }
-            }
-            elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
+            } elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
                 $textRun->addText(
                     $child->textContent,
                     array_merge($baseFontStyle, ['bold' => true])
                 );
-            }
-            elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
+            } elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
                 $textRun->addText(
                     $child->textContent,
                     array_merge($baseFontStyle, ['italic' => true])
                 );
-            }
-            elseif ($child->nodeName === 'code') {
+            } elseif ($child->nodeName === 'code') {
                 $textRun->addText(
                     $child->textContent,
                     array_merge($baseFontStyle, [
                         'name' => 'Courier New',
                         'size' => 9,
-                        'color' => 'D32F2F'
+                        'color' => 'D32F2F',
                     ])
                 );
-            }
-            elseif ($child->nodeName === 'br') {
+            } elseif ($child->nodeName === 'br') {
                 $textRun->addTextBreak();
-            }
-            else {
+            } else {
                 $this->addFormattedText($child, $textRun, $baseFontStyle);
             }
         }
@@ -663,20 +696,15 @@ class CdcPhpWordGenerator
         foreach ($node->childNodes as $child) {
             if ($child->nodeName === '#text') {
                 $text .= $child->textContent;
-            }
-            elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
+            } elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
                 $text .= $child->textContent;
-            }
-            elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
+            } elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
                 $text .= $child->textContent;
-            }
-            elseif ($child->nodeName === 'code') {
+            } elseif ($child->nodeName === 'code') {
                 $text .= $child->textContent;
-            }
-            elseif ($child->nodeName === 'br') {
+            } elseif ($child->nodeName === 'br') {
                 $text .= ' ';
-            }
-            elseif ($child->nodeName !== 'ul' && $child->nodeName !== 'ol') {
+            } elseif ($child->nodeName !== 'ul' && $child->nodeName !== 'ol') {
                 $text .= $this->extractFormattedText($child, $fontStyle);
             }
         }
@@ -686,7 +714,7 @@ class CdcPhpWordGenerator
 
     private function addLivrables(Cdc $cdc)
     {
-        if (!empty($cdc->data['livrables'])) {
+        if (! empty($cdc->data['livrables'])) {
             $this->addSectionTitle('7 LIVRABLES');
 
             $this->section->addText(
@@ -717,8 +745,8 @@ class CdcPhpWordGenerator
     {
         $standardFields = FormFieldsService::getStandardFields();
 
-        $customFields = collect($cdc->data)->filter(function($value, $key) use ($standardFields) {
-            return !in_array($key, $standardFields) && !empty($value);
+        $customFields = collect($cdc->data)->filter(function ($value, $key) use ($standardFields) {
+            return ! in_array($key, $standardFields) && ! empty($value);
         });
 
         if ($customFields->count() > 0) {
@@ -740,7 +768,7 @@ class CdcPhpWordGenerator
             $counter = 1;
             foreach ($customFields as $key => $value) {
                 $this->section->addText(
-                    $counter . '. ' . ucfirst(str_replace('_', ' ', $key)),
+                    $counter.'. '.ucfirst(str_replace('_', ' ', $key)),
                     ['name' => 'Calibri', 'size' => 10, 'bold' => true],
                     ['spaceAfter' => 60]
                 );
@@ -755,6 +783,7 @@ class CdcPhpWordGenerator
             $this->addSectionSeparator();
         }
     }
+
     private function addValidation()
     {
         $this->addSectionTitle('9 VALIDATION');
@@ -767,7 +796,7 @@ class CdcPhpWordGenerator
             'cellMarginTop' => 20,
             'cellMarginBottom' => 20,
             'width' => 100 * 50,
-            'unit' => TblWidth::PERCENT
+            'unit' => TblWidth::PERCENT,
         ];
 
         $cellBgColor = ['bgColor' => 'f0f0f0'];

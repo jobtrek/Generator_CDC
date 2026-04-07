@@ -206,10 +206,19 @@
                     </div>
 
                     <!-- Période et Planning -->
-                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Période de réalisation</dt>
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('periode_realisation') }}</dd>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <dt class="text-xs font-medium text-gray-500 mb-1">Jours d'école</dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                @php
+                                    $jours = json_decode($getValue('jours_ecole', '[]'));
+                                    echo is_array($jours) ? implode(', ', array_map('ucfirst', $jours)) : 'Non renseigné';
+                                @endphp
+                            </dd>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Horaire de travail</dt>
@@ -220,6 +229,23 @@
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('nombre_heures') }}</dd>
                         </div>
                     </div>
+
+                    @if($getValue('pause_matin_debut', '') || $getValue('pause_aprem_debut', ''))
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <dt class="text-xs font-medium text-gray-500 mb-1">Pause matin</dt>
+                                <dd class="text-sm font-medium text-gray-900">
+                                    {{ $getValue('pause_matin_debut', '--') }} – {{ $getValue('pause_matin_fin', '--') }}
+                                </dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <dt class="text-xs font-medium text-gray-500 mb-1">Pause après-midi</dt>
+                                <dd class="text-sm font-medium text-gray-900">
+                                    {{ $getValue('pause_aprem_debut', '--') }} – {{ $getValue('pause_aprem_fin', '--') }}
+                                </dd>
+                            </div>
+                        </div>
+                    @endif
 
                     @if($getValue('planning_analyse', '') || $getValue('planning_implementation', ''))
                         <div class="mt-6">
