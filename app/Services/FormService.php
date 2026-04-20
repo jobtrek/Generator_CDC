@@ -6,7 +6,6 @@ use App\Models\Form;
 use App\Models\Cdc;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
 class FormService
 {
     public function __construct(
@@ -37,7 +36,6 @@ class FormService
     public function updateFormWithCdc(Form $form, array $validated, int $userId): void
     {
         DB::transaction(function () use ($form, $validated, $userId) {
-            $user = User::findOrFail($userId);
             $form->name = $validated['titre_projet'];
             $form->save();
 
@@ -54,7 +52,7 @@ class FormService
             ]);
 
             if (! $cdc->exists) {
-                $cdc->user()->associate($user);
+                $cdc->user_id = $userId;
             }
             $form->cdc()->save($cdc);
         });
