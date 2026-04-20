@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Helpers\RoleHelper;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -52,8 +53,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Form::class);
     }
 
-    public function cdc(): HasMany
+    public function cdcs(): HasMany
     {
         return $this->hasMany(Cdc::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(RoleHelper::ROLE_SUPER_ADMIN);
     }
 }
