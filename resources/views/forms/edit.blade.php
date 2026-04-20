@@ -260,11 +260,11 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Jours d'école *</label>
                                     <div class="flex flex-wrap gap-4">
-                                        @php $savedDays = json_decode(old('jours_ecole', $getValue('jours_ecole', '[]'))); @endphp
+                                        @php $savedDays = old('jours_ecole', $getValue('jours_ecole', [])); @endphp
                                         @foreach(['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as $day)
                                             <label class="flex items-center">
                                                 <input type="checkbox" name="jours_ecole[]" value="{{ $day }}"
-                                                       {{ in_array($day, (array)$savedDays) ? 'checked' : '' }}
+                                                       {{ in_array($day, $savedDays) ? 'checked' : '' }}
                                                        class="text-indigo-600 rounded">
                                                 <span class="ml-1 text-sm capitalize">{{ $day }}</span>
                                             </label>

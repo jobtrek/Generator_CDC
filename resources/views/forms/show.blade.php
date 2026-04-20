@@ -215,7 +215,7 @@
                             <dt class="text-xs font-medium text-gray-500 mb-1">Jours d'école</dt>
                             <dd class="text-sm font-medium text-gray-900">
                                 @php
-                                    $jours = json_decode($getValue('jours_ecole', '[]'));
+                                    $jours = is_array($getValue('jours_ecole')) ? $getValue('jours_ecole') : json_decode($getValue('jours_ecole', '[]'), true) ?? [];
                                     echo is_array($jours) ? implode(', ', array_map('ucfirst', $jours)) : 'Non renseigné';
                                 @endphp
                             </dd>

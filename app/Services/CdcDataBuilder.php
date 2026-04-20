@@ -51,7 +51,6 @@ class CdcDataBuilder
             'heure_aprem_debut' => $validated['heure_aprem_debut'],
             'heure_aprem_fin' => $validated['heure_aprem_fin'],
 
-
             'titre_projet' => $validated['titre_projet'],
             'descriptif_projet' => $validated['descriptif_projet'],
             'materiel_logiciel' => $validated['materiel_logiciel'] ?? '',
@@ -63,6 +62,7 @@ class CdcDataBuilder
             'planning_implementation' => $validated['planning_implementation'] ?? '',
             'planning_tests' => $validated['planning_tests'] ?? '',
             'planning_documentation' => $validated['planning_documentation'] ?? '',
+            'jours_ecole' => $validated['jours_ecole'] ?? [],
         ];
     }
 }
