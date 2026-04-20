@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Form;
-use App\Models\FieldType;
-use App\Services\FormService;
 use App\Http\Requests\StoreCdcRequest;
 use App\Http\Requests\UpdateCdcRequest;
+use App\Models\FieldType;
+use App\Models\Form;
+use App\Services\FormService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FormController extends Controller
 {
@@ -21,7 +21,7 @@ class FormController extends Controller
 
     public function index(Request $request)
     {
-        $query = Form::with(['user', 'fields', 'cdcs'])
+        $query = Form::with(['user', 'fields', 'cdc'])
             ->where('user_id', Auth::id());
 
         if ($request->filled('search')) {
@@ -68,8 +68,8 @@ class FormController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur création formulaire/CDC', [
                 'user_id' => Auth::id(),
-                'error'   => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
@@ -81,7 +81,8 @@ class FormController extends Controller
     public function show(Form $form)
     {
         $this->authorize('view', $form);
-        $form->load(['fields.fieldType', 'user', 'cdcs']);
+        $form->load(['fields.fieldType', 'user', 'cdc']);
+
         return view('forms.show', compact('form'));
     }
 
@@ -109,8 +110,8 @@ class FormController extends Controller
             Log::error('Erreur mise à jour formulaire', [
                 'form_id' => $form->id,
                 'user_id' => Auth::id(),
-                'error'   => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
@@ -135,7 +136,7 @@ class FormController extends Controller
             Log::error('Erreur suppression formulaire', [
                 'form_id' => $form->id,
                 'user_id' => Auth::id(),
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
 
             return redirect()->back()
