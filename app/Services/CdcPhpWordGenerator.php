@@ -6,10 +6,10 @@ use App\Models\Cdc;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use League\CommonMark\CommonMarkConverter;
-use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\SimpleType\TblWidth;
+use PhpOffice\PhpWord\Style\Table;
 
 class CdcPhpWordGenerator
 {
@@ -58,17 +58,14 @@ class CdcPhpWordGenerator
 
             $timestamp = time();
             $docxFileName = 'cdc-'.$cdc->id.'-'.$timestamp.'.docx';
-            $docxPath = storage_path('app/public/cdcs/'.$docxFileName);
+            $docxPath = storage_path('app/public/cdc/'.$docxFileName);
 
-            $cdcsDir = storage_path('app/public/cdcs');
-            if (! File::exists($cdcsDir)) {
-                File::makeDirectory($cdcsDir, 0755, true);
+            $cdcDir = storage_path('app/public/cdc');
+            if (! File::exists($cdcDir)) {
+                File::makeDirectory($cdcDir, 0755, true);
             }
 
-            $objWriter = IOFactory::createWriter($this->phpWord, 'Word2007');
-            $objWriter->save($docxPath);
-
-            return 'cdcs/'.$docxFileName;
+            return 'cdc/'.$docxFileName;
 
         } catch (\Exception $e) {
             Log::error('Erreur génération CDC avec PhpWord', [
@@ -100,7 +97,7 @@ class CdcPhpWordGenerator
             'width' => 100 * 50,
             'unit' => TblWidth::PERCENT,
             'cellMargin' => 0,
-            'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+            'layout' => Table::LAYOUT_FIXED,
         ]);
 
         $footerTable->addRow();

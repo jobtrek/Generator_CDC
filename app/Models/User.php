@@ -8,9 +8,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Form;
-
-
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -55,9 +52,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Form::class);
     }
 
-    public function cdcs(): HasMany
+    public function cdc(): HasMany
     {
         return $this->hasMany(Cdc::class);
     }
-
 }
