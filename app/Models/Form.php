@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Form extends Model
 {
@@ -25,9 +26,8 @@ class Form extends Model
     {
         return $this->hasMany(Field::class)->orderBy('order_index');
     }
-
-    public function cdcs(): HasMany
+    public function cdc(): HasOne
     {
-        return $this->hasMany(Cdc::class);
+        return $this->hasOne(Cdc::class);
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CdcController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,7 +17,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     Route::middleware(['verified'])->group(function () {
-        Route::prefix('cdcs')->name('cdcs.')->group(function () {
+        Route::prefix('cdc')->name('cdc.')->group(function () {
             Route::get('/create', [CdcController::class, 'create'])->name('create');
             Route::get('/{cdc}/download', [CdcController::class, 'download'])->name('download');
         });

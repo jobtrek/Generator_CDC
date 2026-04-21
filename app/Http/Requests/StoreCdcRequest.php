@@ -62,6 +62,8 @@ class StoreCdcRequest extends FormRequest
             'fields.*.label' => 'required_with:fields|string|max:255',
             'fields.*.field_type_id' => 'required_with:fields|exists:field_types,id',
             'fields.*.value' => 'nullable|string',
+            'jours_ecole' => 'nullable|array',
+            'jours_ecole.*' => 'string',
         ];
     }
 }

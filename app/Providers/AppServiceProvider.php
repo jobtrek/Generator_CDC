@@ -16,9 +16,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // mnt larravel fais cette travail automatiquement
     }
-
     /**
      * Bootstrap any application services.
      */
