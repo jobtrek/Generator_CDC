@@ -2,22 +2,23 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
-            'cdcs.view', 'cdcs.create', 'cdcs.edit', 'cdcs.delete', 'cdcs.export',
+            'cdc.view', 'cdc.create', 'cdc.edit', 'cdc.delete', 'cdc.export',
             'users.view', 'users.create', 'users.edit', 'users.delete', 'users.manage_roles',
-            'settings.view', 'settings.edit'
+            'settings.view', 'settings.edit',
         ];
 
         foreach ($permissions as $permission) {
@@ -29,8 +30,8 @@ class RolePermissionSeeder extends Seeder
 
         $userRole = Role::firstOrCreate(['name' => 'user']);
         $userRole->syncPermissions([
-            'cdcs.view',
-            'cdcs.create',
+            'cdc.view',
+            'cdc.create',
         ]);
 
         $usersToCreate = [
@@ -38,7 +39,7 @@ class RolePermissionSeeder extends Seeder
                 'email' => 'superadmin@cdcs.com',
                 'name' => 'Super Admin',
                 'role' => 'super-admin',
-                'password' => 'password123'
+                'password' => 'password123',
             ],
         ];
 

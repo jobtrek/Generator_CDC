@@ -19,13 +19,11 @@ class Field extends Model
         'options',
         'form_id',
         'field_type_id',
-        'section',
-        'subsection'
     ];
 
     protected $casts = [
         'is_required' => 'boolean',
-        'options' => 'array'
+        'options' => 'array',
     ];
 
     public function form(): BelongsTo

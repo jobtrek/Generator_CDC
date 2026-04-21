@@ -14,16 +14,13 @@
 
             <div class="flex items-center gap-3">
                 @php
-                    $cdc = $form->cdcs()->first();
+                    $cdc = $form->cdc;
                 @endphp
-
-                {{-- Bouton Télécharger (Word) --}}
-                @if($cdc)
-                    <a href="{{ route('cdcs.download', $cdc) }}"
+            @if($cdc)
+                    <a href="{{ route('cdc.download', $cdc) }}"
                        class="group flex items-center justify-center w-10 h-10 bg-white border border-gray-200 rounded-full text-gray-500 transition-all duration-200 ease-in-out hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                        title="Télécharger Word"
                        aria-label="Télécharger le document Word">
-                        {{-- Icône Document Text (Style plus fin) --}}
                         <svg class="w-5 h-5 transition-transform group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -78,7 +75,7 @@
             @endif
 
             @php
-                $cdc = $form->cdcs()->first();
+                $cdc = $form->cdc;
                 $cdcData = $cdc ? $cdc->data : [];
 
                 $getValue = function($key, $default = 'Non renseigné') use ($cdcData) {
@@ -209,10 +206,19 @@
                     </div>
 
                     <!-- Période et Planning -->
-                    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Période de réalisation</dt>
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('periode_realisation') }}</dd>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <dt class="text-xs font-medium text-gray-500 mb-1">Jours d'école</dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                @php
+                                    $jours = is_array($getValue('jours_ecole')) ? $getValue('jours_ecole') : json_decode($getValue('jours_ecole', '[]'), true) ?? [];
+                                    echo is_array($jours) ? implode(', ', array_map('ucfirst', $jours)) : 'Non renseigné';
+                                @endphp
+                            </dd>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Horaire de travail</dt>
@@ -223,6 +229,23 @@
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('nombre_heures') }}</dd>
                         </div>
                     </div>
+
+                    @if($getValue('pause_matin_debut', '') || $getValue('pause_aprem_debut', ''))
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <dt class="text-xs font-medium text-gray-500 mb-1">Pause matin</dt>
+                                <dd class="text-sm font-medium text-gray-900">
+                                    {{ $getValue('pause_matin_debut', '--') }} – {{ $getValue('pause_matin_fin', '--') }}
+                                </dd>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <dt class="text-xs font-medium text-gray-500 mb-1">Pause après-midi</dt>
+                                <dd class="text-sm font-medium text-gray-900">
+                                    {{ $getValue('pause_aprem_debut', '--') }} – {{ $getValue('pause_aprem_fin', '--') }}
+                                </dd>
+                            </div>
+                        </div>
+                    @endif
 
                     @if($getValue('planning_analyse', '') || $getValue('planning_implementation', ''))
                         <div class="mt-6">
@@ -344,7 +367,10 @@
                         @endphp
                         @if($descriptif)
                             <div class="prose max-w-none text-gray-900">
-                                {!! Str::markdown($descriptif) !!}
+                                {!! Str::markdown($descriptif, [
+                                    'html_input'=> 'strip',
+                                    'allow_unsafe_links' => false,
+                                ]) !!}
                             </div>
                         @else
                             <p class="text-gray-500 italic">Non renseigné</p>
