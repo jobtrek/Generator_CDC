@@ -239,9 +239,8 @@
 
                         <!-- Période et horaire -->
                         <div class="border-t pt-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{
-                                totalHours: {{ old('nombre_heures', '90') }}
-                            }">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Colonne 1: Dates -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
                                         Période de réalisation *
@@ -262,110 +261,90 @@
                                     </div>
                                 </div>
 
+                                <!-- Colonne 2: Horaires -->
                                 <div x-data="projectHoursCalculator()" x-init="init()">
-                                    <div class="mb-3">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                                            Horaire de travail *
-                                        </label>
-                                        <div class="space-y-1">
-                                            <div>
-                                                <label class="text-xs text-gray-500">Matin</label>
-                                                <div class="flex gap-1 items-center">
-                                                    <input type="time" name="heure_matin_debut" required
-                                                           value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                    <span class="text-xs">–</span>
-                                                    <input type="time" name="heure_matin_fin" required
-                                                           value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Après-midi</label>
-                                                <div class="flex gap-1 items-center">
-                                                    <input type="time" name="heure_aprem_debut" required
-                                                           value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                    <span class="text-xs">–</span>
-                                                    <input type="time" name="heure_aprem_fin" required
-                                                           value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
-                                                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-<div class="border-t pt-3 mt-3">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                                            Pauses *
-                                        </label>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause matin (début)</label>
-                                                <input type="time" name="pause_matin_debut"
-                                                       value="{{ old('pause_matin_debut', $prefillData['pause_matin_debut'] ?? '10:30') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause matin (fin)</label>
-                                                <input type="time" name="pause_matin_fin"
-                                                       value="{{ old('pause_matin_fin', $prefillData['pause_matin_fin'] ?? '10:45') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause aprèm (début)</label>
-                                                <input type="time" name="pause_aprem_debut"
-                                                       value="{{ old('pause_aprem_debut', $prefillData['pause_aprem_debut'] ?? '15:00') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause aprèm (fin)</label>
-                                                <input type="time" name="pause_aprem_fin"
-                                                       value="{{ old('pause_aprem_fin', $prefillData['pause_aprem_fin'] ?? '15:15') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause matin (fin)</label>
-                                                <input type="time" name="pause_matin_fin"
-                                                       value="{{ old('pause_matin_fin', $prefillData['pause_matin_fin'] ?? '10:45') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause après-midi (début)</label>
-                                                <input type="time" name="pause_aprem_debut"
-                                                       value="{{ old('pause_aprem_debut', $prefillData['pause_aprem_debut'] ?? '15:00') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                            <div>
-                                                <label class="text-xs text-gray-500">Pause après-midi (fin)</label>
-                                                <input type="time" name="pause_aprem_fin"
-                                                       value="{{ old('pause_aprem_fin', $prefillData['pause_aprem_fin'] ?? '15:15') }}"
-                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                                        Jours d'école *
+                                        Horaire de travail *
                                     </label>
-                                    <div class="flex flex-wrap gap-4">
-                                        @php $savedDays = old('jours_ecole', []); @endphp
-                                        @foreach(['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as $day)
-                                            <label class="flex items-center">
-                                                <input type="checkbox" name="jours_ecole[]" value="{{ $day }}"
-                                                       {{ in_array($day, $savedDays) ? 'checked' : '' }}
-                                                       class="text-indigo-600 rounded">
-                                                <span class="ml-1 text-sm capitalize">{{ $day }}</span>
-                                            </label>
-                                        @endforeach
+                                    <div class="space-y-2">
+                                        <div>
+                                            <label class="text-xs text-gray-500">Matin</label>
+                                            <div class="flex gap-1 items-center">
+                                                <input type="time" name="heure_matin_debut" required
+                                                       value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                                <span class="text-xs">–</span>
+                                                <input type="time" name="heure_matin_fin" required
+                                                       value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">Après-midi</label>
+                                            <div class="flex gap-1 items-center">
+                                                <input type="time" name="heure_aprem_debut" required
+                                                       value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                                <span class="text-xs">–</span>
+                                                <input type="time" name="heure_aprem_fin" required
+                                                       value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Sélectionnez les jours de présence à l'école</p>
                                 </div>
+                            </div>
+
+                            <!-- Pauses -->
+                            <div class="border-t pt-4 mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">
+                                    Pauses *
+                                </label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    <div>
+                                        <label class="text-xs text-gray-500">Pause matin (début)</label>
+                                        <input type="time" name="pause_matin_debut"
+                                               value="{{ old('pause_matin_debut', $prefillData['pause_matin_debut'] ?? '10:30') }}"
+                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500">Pause matin (fin)</label>
+                                        <input type="time" name="pause_matin_fin"
+                                               value="{{ old('pause_matin_fin', $prefillData['pause_matin_fin'] ?? '10:45') }}"
+                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500">Pause après-midi (début)</label>
+                                        <input type="time" name="pause_aprem_debut"
+                                               value="{{ old('pause_aprem_debut', $prefillData['pause_aprem_debut'] ?? '15:00') }}"
+                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-500">Pause après-midi (fin)</label>
+                                        <input type="time" name="pause_aprem_fin"
+                                               value="{{ old('pause_aprem_fin', $prefillData['pause_aprem_fin'] ?? '15:15') }}"
+                                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Jours d'école -->
+                            <div class="border-t pt-4 mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Jours d'école *
+                                </label>
+                                <div class="flex flex-wrap gap-4">
+                                    @php $savedDays = old('jours_ecole', []); @endphp
+                                    @foreach(['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as $day)
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="jours_ecole[]" value="{{ $day }}"
+                                                   {{ in_array($day, $savedDays) ? 'checked' : '' }}
+                                                   class="text-indigo-600 rounded">
+                                            <span class="ml-1 text-sm capitalize">{{ $day }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">Sélectionnez les jours de présence à l'école</p>
                             </div>
                         </div>
 
