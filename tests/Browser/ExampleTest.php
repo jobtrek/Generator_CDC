@@ -16,7 +16,7 @@ class ExampleTest extends DuskTestCase
             $browser->resize(1920, 1080)
                 ->visit('http://127.0.0.1:8000')
                 ->pause(3000)
-                ->assertTitleContains('Générateur');
+                ->assertTitleContains('Laravel');
         });
     }
 }

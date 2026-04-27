@@ -6,6 +6,7 @@ use App\Models\Cdc;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use League\CommonMark\CommonMarkConverter;
+use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\SimpleType\TblWidth;
@@ -27,6 +28,17 @@ class CdcPhpWordGenerator
         ]);
     }
 
+    private function getStringValue($value): string
+    {
+        if (is_array($value)) {
+            return json_encode($value);
+        }
+        if (is_null($value)) {
+            return '';
+        }
+
+        return (string) $value;
+    }
     public function generate(Cdc $cdc): string
     {
         try {
@@ -64,6 +76,9 @@ class CdcPhpWordGenerator
             if (! File::exists($cdcDir)) {
                 File::makeDirectory($cdcDir, 0755, true);
             }
+
+            $objWriter = IOFactory::createWriter($this->phpWord, 'Word2007');
+            $objWriter->save($docxPath);
 
             return 'cdc/'.$docxFileName;
 
@@ -764,13 +779,16 @@ class CdcPhpWordGenerator
 
             $counter = 1;
             foreach ($customFields as $key => $value) {
+                $displayKey = ucfirst(str_replace('_', ' ', $key));
+                $displayValue = $this->getStringValue($value);
+
                 $this->section->addText(
-                    $counter.'. '.ucfirst(str_replace('_', ' ', $key)),
+                    $counter.'. '.$displayKey,
                     ['name' => 'Calibri', 'size' => 10, 'bold' => true],
                     ['spaceAfter' => 60]
                 );
                 $this->section->addText(
-                    $value,
+                    $displayValue,
                     ['name' => 'Calibri', 'size' => 10],
                     ['spaceAfter' => 120]
                 );

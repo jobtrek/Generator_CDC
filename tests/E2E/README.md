@@ -1,83 +1,73 @@
-# Tests E2E - Setup
+# Tests E2E - Générateur CDC
 
-Guide pour configurer et exécuter les tests E2E avec Laravel Dusk.
+Guide pour exécuter les tests E2E avec Laravel Dusk.
 
-## Installation de Laravel Dusk
+## Résumé
 
-```bash
-composer require --dev laravel/dusk
-php artisan dusk:install
-```
+### Tests E2E Automatisés ✓
+Fichier: `tests/Browser/CreateCdcFlowTest.php`
+
+| # | Test | Description | Statut |
+|---|------|-------------|--------|
+| 1 | `test_user_can_login_and_access_dashboard` | Connexion et dashboard | ✓ Pass |
+| 2 | `test_user_can_visit_forms_index` | Liste des formulaires | ✓ Pass |
+| 3 | `test_user_can_visit_create_form_page` | Page création | ✓ Pass |
+| 4 | `test_forms_show_displays_form` | Visualisation formulaire | ✓ Pass |
+| 5 | `test_forms_list_shows_pagination` | Pagination liste | ✓ Pass |
+
+### Tests E2E Manuels (à effectuer)
 
 ## Commandes
 
-### Exécuter les tests E2E
-
 ```bash
+# Exécuter tous les tests E2E
 php artisan dusk
-```
 
-### Exécuter un test spécifique
-
-```bash
-php artisan dusk --filter=NomDuTest
-```
-
-### Mode non-headless (pour debugging)
-
-```bash
+# Modeheaded (voir navigateur)
 php artisan dusk --headless=false
 ```
 
-## Créer un test E2E
+## Scénarios de Test E2E Manuels
 
-Créer un fichier dans `tests/Browser/`:
+### Scénario 1: Inscription/Connexion
+1. Accéder à la page d'accueil
+2. S'inscrire ou se connecter
+3. Vérifier redirection vers dashboard
 
-```php
-<?php
+### Scénario 2: Création Complète CDC
+1. Se connecter
+2. Aller sur "Nouveau formulaire"
+3. Remplir toutes les sections
+4. Soumettre le formulaire
+5. Vérifier message de succès
 
-namespace Tests\Browser;
+### Scénario 3: Génération et Téléchargement
+1. Cliquer sur "Générer CDC"
+2. Cliquer sur "Télécharger"
+3. Vérifier fichier .docx téléchargé
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Laravel\Dusk\Browser;
-use Tests\DuskTestCase;
+### Scénario 4: Modification
+1. Ouvrir un formulaire existant
+2. Cliquer "Modifier"
+3. Changer une information
+4. Enregistrer
 
-class MonTestE2E extends DuskTestCase
-{
-    use DatabaseMigrations;
+### Scénario 5: Suppression
+1. Ouvrir un formulaire
+2. Cliquer "Supprimer"
+3. Confirmer
 
-    public function test_mon_scénario(): void
-    {
-        $user = User::factory()->create(['email_verified_at' => now()]);
+### Scénario 6: Sécurité - Accès Interdit
+1. Créer formulaire avec utilisateur A
+2. Se connecter avec utilisateur B
+3. Tenter d'accéder au formulaire de A
 
-        $this->browse(function (Browser $browser) use ($user) {
-            $browser->loginAs($user)
-                ->visit('/dashboard')
-                ->assertPathIs('/dashboard');
-        });
-    }
-}
-```
+### Scénario 7: Vérification Document Word
+1. Télécharger le .docx
+2. Ouvrir dans Word
+3. Vérifier les données
 
-    │#                                                        │Scénario                                                                           │Description                                                                                                      │                           
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤                                
-     │1                                                        │Inscription/Connexion                                                              │Tester le流程 complet d'inscription + connexion                                                                  │                             
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤                                              
-     │2                                                        │Création de formulaire CDC                                                         │Remplir le formulaire complet et soumettre                                                                       │                                      
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤                         
-     │3                                                        │Téléchargement CDC                                                                 │Créer un CDC puis télécharger le document .docx                                                                  │                                              
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤                         
-     │4                                                        │Modification d'un formulaire                                                       │Modifier un formulaire existant                                                                                  │       
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤        
-     │5                                                        │Suppression d'un formulaire                                                        │Supprimer un formulaire et vérifier                                                                              │      
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤       
-     │6                                                        │Accès aux routes protégées                                                         │Vérifier redirection vers /login si non connecté                                                                 │      
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤      
-     │7                                                        │Vérification email                                                                 │Tester le流程 de vérification d'email                                                                            │     
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤      
-     │8                                                        │Dashboard                                                                          │Vérifier que le dashboard affiche les bonnes infos                                                               │       
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤    
-     │9                                                        │Profile - modification                                                             │Modifier le nom/email et vérifier                                                                                │                                              
-     ├─────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤                                              
-     │10                                                       │Gestion users (admin)                                                              │Tester la création/modification d'un utilisateur par admin  
+## Résultats
+
+- Tests automatisés: **5/5 passent**
+- Tests manuels: **7 documentés**
