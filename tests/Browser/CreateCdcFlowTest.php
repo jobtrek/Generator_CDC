@@ -79,7 +79,6 @@ class CreateCdcFlowTest extends DuskTestCase
                 ->assertPathIs('/forms/'.$form->id);
         });
     }
-
     public function test_forms_list_shows_pagination(): void
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
@@ -96,7 +95,6 @@ class CreateCdcFlowTest extends DuskTestCase
                 'user_id' => $user->id,
             ]);
         }
-
 
         $this->browse(function (Browser $browser) use ($user) {
             $browser->loginAs($user)
