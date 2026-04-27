@@ -1,9 +1,5 @@
 export function projectHoursCalculator() {
     return {
-        pauseMatinDebut: '',
-        pauseMatinFin: '',
-        pauseApremDebut: '',
-        pauseApremFin: '',
         selectedDays: [],
 
         init() {
@@ -32,7 +28,6 @@ export function projectHoursCalculator() {
             daysInputs.forEach(input => {
                 input.addEventListener('change', () => {
                     this.updateSelectedDays();
-                    this.calculateHours();
                 });
             });
 
@@ -81,32 +76,18 @@ export function projectHoursCalculator() {
             const dateDebut = document.querySelector('[name="date_debut"]')?.value;
             const dateFin = document.querySelector('[name="date_fin"]')?.value;
 
-            if (!dateDebut || !dateFin || this.selectedDays.length === 0) {
+            if (!dateDebut || !dateFin) {
                 return 0;
             }
 
-            const dayMap = {
-                '0': 0, 'sun': 0, 'dimanche': 0,
-                '1': 1, 'mon': 1, 'lundi': 1,
-                '2': 2, 'tue': 2, 'mardi': 2,
-                '3': 3, 'wed': 3, 'mercredi': 3,
-                '4': 4, 'thu': 4, 'jeudi': 4,
-                '5': 5, 'fri': 5, 'vendredi': 5,
-                '6': 6, 'sat': 6, 'samedi': 6
-            };
-
-            const validDayNumbers = this.selectedDays.map(d => dayMap[d] ?? parseInt(d)).filter(d => !isNaN(d));
-            if (validDayNumbers.length === 0) return 0;
-
             const start = new Date(dateDebut);
             const end = new Date(dateFin);
+
             let count = 0;
             const current = new Date(start);
 
             while (current <= end) {
-                if (validDayNumbers.includes(current.getDay())) {
-                    count++;
-                }
+                count++;
                 current.setDate(current.getDate() + 1);
             }
 
@@ -128,7 +109,7 @@ export function projectHoursCalculator() {
 
             const display = document.querySelector('#calculated-hours-display');
             if (display) {
-                display.textContent = `${totalHours}h (${schoolDays} jours × ${hoursPerDay.toFixed(1)}h/jour)`;
+                display.textContent = `${totalHours}h`;
             }
         },
 

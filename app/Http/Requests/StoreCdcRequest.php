@@ -42,7 +42,7 @@ class StoreCdcRequest extends FormRequest
             'heure_matin_fin' => 'required|date_format:H:i',
             'heure_aprem_debut' => 'required|date_format:H:i',
             'heure_aprem_fin' => 'required|date_format:H:i',
-            'nombre_heures' => 'required|integer|min:1|max:90',
+            'nombre_heures' => 'nullable|integer|min:1|max:90',
 
             'planning_analyse' => 'nullable|string',
             'planning_implementation' => 'nullable|string',

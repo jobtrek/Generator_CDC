@@ -43,7 +43,7 @@ class CdcDataBuilder
 
             'periode_realisation' => $periodeRealisation,
             'horaire_travail' => $horaireTravail,
-            'nombre_heures' => $validated['nombre_heures'],
+            'nombre_heures' => $validated['nombre_heures'] ?? null,
             'date_debut' => $validated['date_debut'],
             'date_fin' => $validated['date_fin'],
             'heure_matin_debut' => $validated['heure_matin_debut'],

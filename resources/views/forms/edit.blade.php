@@ -271,21 +271,11 @@
                                         @endforeach
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">Sélectionnez les jours de présence à l'école</p>
-                                </div>
+</div>
+                    </div>
+                </div>
 
-                                <div class="col-span-2">
-                                    <div class="bg-indigo-50 p-3 rounded-lg">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm font-medium text-indigo-900">Heures totales calculées:</span>
-                                            <span id="calculated-hours-display" class="text-sm font-bold text-indigo-700">—</span>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="nombre_heures" x-model="totalHours" value="{{ $getValue('nombre_heures', '90') }}">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Planning Section -->
+                <!-- Planning Section -->
                         <div class="border-t pt-4" x-data="planningCalculatorEdit({
                             total_heures: '{{ old('nombre_heures', $getValue('nombre_heures', '90')) }}',
                             planning_analyse: '{{ old('planning_analyse', $getValue('planning_analyse', '15%')) }}',

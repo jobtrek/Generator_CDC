@@ -295,7 +295,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="border-t pt-3 mt-3">
+<div class="border-t pt-3 mt-3">
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             Pauses *
                                         </label>
@@ -306,6 +306,27 @@
                                                        value="{{ old('pause_matin_debut', $prefillData['pause_matin_debut'] ?? '10:30') }}"
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                             </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500">Pause matin (fin)</label>
+                                                <input type="time" name="pause_matin_fin"
+                                                       value="{{ old('pause_matin_fin', $prefillData['pause_matin_fin'] ?? '10:45') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500">Pause aprèm (début)</label>
+                                                <input type="time" name="pause_aprem_debut"
+                                                       value="{{ old('pause_aprem_debut', $prefillData['pause_aprem_debut'] ?? '15:00') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500">Pause aprèm (fin)</label>
+                                                <input type="time" name="pause_aprem_fin"
+                                                       value="{{ old('pause_aprem_fin', $prefillData['pause_aprem_fin'] ?? '15:15') }}"
+                                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                             <div>
                                                 <label class="text-xs text-gray-500">Pause matin (fin)</label>
                                                 <input type="time" name="pause_matin_fin"
@@ -344,16 +365,6 @@
                                         @endforeach
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1">Sélectionnez les jours de présence à l'école</p>
-                                </div>
-
-                                <div class="col-span-2">
-                                    <div class="bg-indigo-50 p-3 rounded-lg">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-sm font-medium text-indigo-900">Heures totales calculées:</span>
-                                            <span id="calculated-hours-display" class="text-sm font-bold text-indigo-700">—</span>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="nombre_heures" value="{{ old('nombre_heures', 90) }}">
                                 </div>
                             </div>
                         </div>

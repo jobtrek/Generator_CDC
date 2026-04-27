@@ -226,7 +226,7 @@
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Nombre d'heures</dt>
-                            <dd class="text-sm font-medium text-gray-900">{{ $getValue('nombre_heures') }}</dd>
+                            <dd class="text-sm font-medium text-gray-900">{{ $getValue('nombre_heures', '90') }}</dd>
                         </div>
                     </div>
 
