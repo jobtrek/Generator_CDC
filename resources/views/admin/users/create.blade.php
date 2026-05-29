@@ -41,19 +41,19 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Rôle</label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <span class="block text-sm font-medium text-gray-700 mb-2">Rôle</span>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" data-role-cards>
                                 @foreach($roles as $role)
-                                    <div class="relative flex items-start py-3 px-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition {{ old('role') == $role->name ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
+                                    <label for="role_{{ $role->id }}" data-role-card class="relative flex items-start py-3 px-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition {{ old('role') == $role->name ? 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-50' : 'border-gray-200' }}">
                                         <div class="min-w-0 flex-1 text-sm">
-                                            <label for="role_{{ $role->id }}" class="font-medium text-gray-700 cursor-pointer">
+                                            <span class="font-medium text-gray-700">
                                                 {{ \App\Helpers\RoleHelper::getRoleLabel($role->name) }}
-                                            </label>
+                                            </span>
                                         </div>
                                         <div class="ml-3 flex items-center h-5">
                                             <input id="role_{{ $role->id }}" name="role" type="radio" value="{{ $role->name }}" required {{ old('role') == $role->name ? 'checked' : '' }} class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
                                         </div>
-                                    </div>
+                                    </label>
                                 @endforeach
                             </div>
                         </div>
@@ -71,4 +71,19 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('[data-role-cards] input[type="radio"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                document.querySelectorAll('[data-role-card]').forEach((card) => {
+                    const checked = card.querySelector('input[type="radio"]').checked;
+                    card.classList.toggle('border-indigo-500', checked);
+                    card.classList.toggle('ring-1', checked);
+                    card.classList.toggle('ring-indigo-500', checked);
+                    card.classList.toggle('bg-indigo-50', checked);
+                    card.classList.toggle('border-gray-200', !checked);
+                });
+            });
+        });
+    </script>
 </x-app-layout>
