@@ -16,15 +16,6 @@ class RoleHelper
         ];
     }
 
-    public static function getRoleBadgeColor(?string $role): string
-    {
-        return match ($role) {
-            self::ROLE_SUPER_ADMIN => 'red',
-            self::ROLE_USER => 'green',
-            default => 'gray'
-        };
-    }
-
     public static function getRoleLabel(?string $role): string
     {
         return match ($role) {

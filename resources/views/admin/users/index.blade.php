@@ -250,13 +250,13 @@
                 <form id="roleForm" method="POST">
                     @csrf
                     <div class="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                        @foreach(\Spatie\Permission\Models\Role::all() as $role)
+                        @foreach(\Spatie\Permission\Models\Role::whereIn('name', \App\Helpers\RoleHelper::getAvailableRoles())->get() as $role)
                             <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 cursor-pointer transition-all group">
                                 <input type="checkbox"
                                        name="roles[]"
                                        value="{{ $role->name }}"
                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-indigo-700">{{ ucfirst($role->name) }}</span>
+                                <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-indigo-700">{{ \App\Helpers\RoleHelper::getRoleLabel($role->name) }}</span>
                             </label>
                         @endforeach
                     </div>
