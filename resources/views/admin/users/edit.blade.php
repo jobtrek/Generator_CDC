@@ -83,7 +83,10 @@
                                     Supprimer cet utilisateur
                                 </button>
                             @else
-                                <div></div>
+                                <p class="text-sm text-gray-500">
+                                    Pour supprimer votre compte, rendez-vous sur la page
+                                    <a href="{{ route('profile.edit') }}" class="text-indigo-600 hover:text-indigo-800 underline">Profil</a>.
+                                </p>
                             @endif
 
                             <div class="flex items-center space-x-3">
