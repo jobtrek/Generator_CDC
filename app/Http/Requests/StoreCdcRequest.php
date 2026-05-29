@@ -18,6 +18,8 @@ class StoreCdcRequest extends FormRequest
         return [
             'candidat_nom' => 'required|string|max:255',
             'candidat_prenom' => 'required|string|max:255',
+            'candidat_email' => 'required|email',
+            'candidat_telephone' => $phoneRule,
             'lieu_travail' => 'required|string|max:255',
             'orientation' => 'nullable|string',
 

@@ -193,6 +193,8 @@ class FormCdcIntegrationTest extends TestCase
         return [
             'candidat_nom' => 'Dupont',
             'candidat_prenom' => 'Jean',
+            'candidat_email' => 'jean.dupont@exemple.com',
+            'candidat_telephone' => '+41 79 123 45 67',
             'lieu_travail' => 'Paris',
             'orientation' => 'Informatique',
 
