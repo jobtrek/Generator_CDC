@@ -120,4 +120,19 @@ class UserController extends Controller implements HasMiddleware
 
         return back()->with('success', 'Email validé manuellement.');
     }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'role' => 'required|string|exists:roles,name',
+        ]);
+
+        if (Auth::id() === $user->id && $validated['role'] !== RoleHelper::ROLE_SUPER_ADMIN) {
+            return back()->with('error', 'Vous ne pouvez pas retirer votre propre rôle de Super Admin.');
+        }
+
+        $user->syncRoles([$validated['role']]);
+
+        return back()->with('success', 'Rôle mis à jour avec succès.');
+    }
 }

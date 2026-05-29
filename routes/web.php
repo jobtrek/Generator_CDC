@@ -36,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('users', UserController::class);
             Route::post('users/{user}/verify', [UserController::class, 'verifyEmail'])
                 ->name('users.verify');
+            Route::post('users/{user}/role', [UserController::class, 'updateRole'])
+                ->name('users.role');
         });
 });
 
