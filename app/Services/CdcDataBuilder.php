@@ -23,6 +23,8 @@ class CdcDataBuilder
         return [
             'candidat_nom' => $validated['candidat_nom'],
             'candidat_prenom' => $validated['candidat_prenom'],
+            'candidat_email' => $validated['candidat_email'],
+            'candidat_telephone' => $validated['candidat_telephone'],
             'lieu_travail' => $validated['lieu_travail'],
             'orientation' => $validated['orientation'] ?? null,
 

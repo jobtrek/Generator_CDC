@@ -75,6 +75,29 @@
                                        placeholder="Jean"
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Email du candidat *
+                                </label>
+                                <input type="email" name="candidat_email" required
+                                       value="{{ old('candidat_email') }}"
+                                       placeholder="jean.dupont@example.com"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                    Téléphone du candidat *
+                                </label>
+                                <input type="tel"
+                                       name="candidat_telephone"
+                                       id="candidat_telephone"
+                                       required
+                                       value="{{ old('candidat_telephone', '+41 ') }}"
+                                       placeholder="+41 79 123 45 67"
+                                       maxlength="16"
+                                       oninput="window.formatSwissPhone(this)"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
                         </div>
 
                         <div>

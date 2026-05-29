@@ -13,7 +13,7 @@ class FormFieldsServiceTest extends TestCase
     {
         parent::setUp();
         $this->expectedStandardFields = [
-            'candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
+            'candidat_nom', 'candidat_prenom', 'candidat_email', 'candidat_telephone', 'lieu_travail', 'orientation',
             'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
             'expert1_nom', 'expert1_prenom', 'expert1_email', 'expert1_telephone',
             'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',
@@ -34,7 +34,7 @@ class FormFieldsServiceTest extends TestCase
     public function test_get_standard_fields_returns_all_standard_fields(): void
     {
         $result = FormFieldsService::getStandardFields();
-        $this->assertCount(35, $result);
+        $this->assertCount(37, $result);
     }
 
     public function test_get_standard_fields_contains_candidat_fields(): void

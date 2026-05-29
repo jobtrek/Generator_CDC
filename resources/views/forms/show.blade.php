@@ -110,6 +110,14 @@
                                     <dd class="text-sm font-medium text-gray-900">{{ $getValue('candidat_prenom') }}</dd>
                                 </div>
                                 <div>
+                                    <dt class="text-xs font-medium text-gray-500">Email</dt>
+                                    <dd class="text-sm font-medium text-gray-900">{{ $getValue('candidat_email') }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs font-medium text-gray-500">Téléphone</dt>
+                                    <dd class="text-sm font-medium text-gray-900">{{ $getValue('candidat_telephone') }}</dd>
+                                </div>
+                                <div>
                                     <dt class="text-xs font-medium text-gray-500">Lieu de travail</dt>
                                     <dd class="text-sm font-medium text-gray-900">{{ $getValue('lieu_travail') }}</dd>
                                 </div>

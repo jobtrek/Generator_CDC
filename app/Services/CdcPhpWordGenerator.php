@@ -245,7 +245,7 @@ class CdcPhpWordGenerator
 
         // --- CANDIDAT ---
         $table->addRow();
-        $table->addCell(3000, $cellBgColor)
+        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
             ->addText('Candidat :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(3000)
             ->addText('Nom :', $fontStyle);
@@ -253,11 +253,25 @@ class CdcPhpWordGenerator
             ->addText('Prénom :', $fontStyle);
 
         $table->addRow();
-        $table->addCell(3000);
+        $table->addCell(3000, ['vMerge' => 'continue']);
         $table->addCell(3000)
             ->addText($cdc->data['candidat_nom'] ?? '', $fontStyle);
         $table->addCell(3000)
             ->addText($cdc->data['candidat_prenom'] ?? '', $fontStyle);
+
+        $table->addRow();
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText('✉ :', $fontStyle);
+        $table->addCell(3000)
+            ->addText('☎ :', $fontStyle);
+
+        $table->addRow();
+        $table->addCell(3000, ['vMerge' => 'continue']);
+        $table->addCell(3000)
+            ->addText($cdc->data['candidat_email'] ?? '', $fontStyle);
+        $table->addCell(3000)
+            ->addText($cdc->data['candidat_telephone'] ?? '', $fontStyle);
 
         // --- LIEU DE TRAVAIL ---
         $table->addRow();

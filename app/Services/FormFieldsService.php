@@ -5,7 +5,7 @@ namespace App\Services;
 class FormFieldsService
 {
     private static array $standardFields = [
-        'candidat_nom', 'candidat_prenom', 'lieu_travail', 'orientation',
+        'candidat_nom', 'candidat_prenom', 'candidat_email', 'candidat_telephone', 'lieu_travail', 'orientation',
         'chef_projet_nom', 'chef_projet_prenom', 'chef_projet_email', 'chef_projet_telephone',
         'expert1_nom', 'expert1_prenom', 'expert1_email', 'expert1_telephone',
         'expert2_nom', 'expert2_prenom', 'expert2_email', 'expert2_telephone',

@@ -64,6 +64,18 @@
                                 <input type="text" name="candidat_prenom" required value="{{ $getValue('candidat_prenom') }}" placeholder="Jean"
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email du candidat *</label>
+                                <input type="email" name="candidat_email" required value="{{ $getValue('candidat_email') }}" placeholder="jean.dupont@example.com"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone du candidat *</label>
+                                <input type="tel" name="candidat_telephone" required value="{{ $getValue('candidat_telephone', '+41 ') }}"
+                                       pattern="\+41\s[0-9]{2}\s[0-9]{3}\s[0-9]{2}\s[0-9]{2}" placeholder="+41 79 123 45 67"
+                                       title="Format suisse : +41 XX XXX XX XX" maxlength="16" oninput="formatSwissPhone(this)"
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
                         </div>
 
                         <div>
