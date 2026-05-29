@@ -121,6 +121,11 @@ class UserController extends Controller implements HasMiddleware
         return back()->with('success', 'Email validé manuellement.');
     }
 
+    public function showRole(User $user)
+    {
+        return redirect()->route('admin.users.edit', $user);
+    }
+
     public function updateRole(Request $request, User $user)
     {
         $validated = $request->validate([

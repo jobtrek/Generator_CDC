@@ -281,7 +281,7 @@
     <script>
         function openRoleModal(userId, userName, currentRoles) {
             document.getElementById('userName').textContent = userName;
-            document.getElementById('roleForm').action = `/admin/users/${userId}/role`;
+            document.getElementById('roleForm').action = `/admin/users/${userId}/roles`;
             const modal = document.getElementById('roleModal');
             modal.classList.remove('hidden');
 
