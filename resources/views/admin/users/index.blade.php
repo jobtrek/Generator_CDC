@@ -252,10 +252,11 @@
                     <div class="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
                         @foreach(\Spatie\Permission\Models\Role::whereIn('name', \App\Helpers\RoleHelper::getAvailableRoles())->get() as $role)
                             <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 cursor-pointer transition-all group">
-                                <input type="checkbox"
-                                       name="roles[]"
+                                <input type="radio"
+                                       name="role"
                                        value="{{ $role->name }}"
-                                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                       required
+                                       class="border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 <span class="ml-3 text-sm font-medium text-gray-700 group-hover:text-indigo-700">{{ \App\Helpers\RoleHelper::getRoleLabel($role->name) }}</span>
                             </label>
                         @endforeach
@@ -280,7 +281,7 @@
     <script>
         function openRoleModal(userId, userName, currentRoles) {
             document.getElementById('userName').textContent = userName;
-            document.getElementById('roleForm').action = `/admin/users/${userId}/roles`;
+            document.getElementById('roleForm').action = `/admin/users/${userId}/role`;
             const modal = document.getElementById('roleModal');
             modal.classList.remove('hidden');
 
@@ -289,8 +290,8 @@
                 modal.lastElementChild.classList.remove('scale-95', 'opacity-0');
             }, 10);
 
-            document.querySelectorAll('#roleForm input[type="checkbox"]').forEach(checkbox => {
-                checkbox.checked = currentRoles.includes(checkbox.value);
+            document.querySelectorAll('#roleForm input[type="radio"]').forEach(radio => {
+                radio.checked = currentRoles.includes(radio.value);
             });
             document.documentElement.style.overflow = 'hidden';
         }
