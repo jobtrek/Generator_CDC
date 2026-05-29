@@ -36,7 +36,7 @@
         }
     </style>
 </head>
-<body class="bg-white dark:bg-slate-950 min-h-screen font-sans antialiased selection:bg-indigo-600 selection:text-white">
+<body class="bg-white dark:bg-slate-950 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-600 selection:text-white">
 
 <!-- Navigation -->
 <nav class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-gray-200 dark:border-slate-800">
@@ -157,7 +157,7 @@
 </section>
 
 <!-- Footer -->
-<footer class="border-t border-gray-200 dark:border-slate-800 px-6 py-8 bg-gray-50 dark:bg-slate-900">
+<footer class="mt-auto border-t border-gray-200 dark:border-slate-800 px-6 py-8 bg-gray-50 dark:bg-slate-900">
     <div class="max-w-6xl mx-auto flex justify-between items-center flex-col sm:flex-row gap-4">
         <p class="text-gray-600 dark:text-gray-400 text-sm">
             © 2026 CDC Generator.
