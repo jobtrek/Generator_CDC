@@ -52,6 +52,10 @@ class CdcDataBuilder
             'heure_matin_fin' => $validated['heure_matin_fin'],
             'heure_aprem_debut' => $validated['heure_aprem_debut'],
             'heure_aprem_fin' => $validated['heure_aprem_fin'],
+            'pause_matin_debut' => $validated['pause_matin_debut'] ?? '10:30',
+            'pause_matin_fin' => $validated['pause_matin_fin'] ?? '10:45',
+            'pause_aprem_debut' => $validated['pause_aprem_debut'] ?? '15:00',
+            'pause_aprem_fin' => $validated['pause_aprem_fin'] ?? '15:15',
 
             'titre_projet' => $validated['titre_projet'],
             'descriptif_projet' => $validated['descriptif_projet'],
