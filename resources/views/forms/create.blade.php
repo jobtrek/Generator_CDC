@@ -450,19 +450,19 @@
                                         <span class="font-medium" x-text="'−' + joursCoursRecuperer + ' j'"></span>
                                     </div>
                                     <div class="flex justify-between text-gray-500 text-xs pt-1.5 border-t border-indigo-100">
-                                        <span x-text="joursTpiEffectifs + ' j × ' + heuresParJour + 'h/j'"></span>
+                                        <span x-text="joursTpiEffectifs + ' j × ' + heuresParJourFormatted + '/j'"></span>
                                     </div>
                                 </div>
                                 <div class="mt-3 pt-3 border-t border-indigo-200 flex items-end justify-between">
                                     <span class="text-sm text-gray-500">Total heures TPI</span>
-                                    <span class="text-4xl font-extrabold text-indigo-700 leading-none" x-text="totalHeuresCalculees + 'h'"></span>
+                                    <span class="text-4xl font-extrabold text-indigo-700 leading-none" x-text="totalHeuresFormatted"></span>
                                 </div>
                                 <div class="mt-2 bg-indigo-100 rounded-full h-2 overflow-hidden">
                                     <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500"
-                                         :style="`width: ${Math.min(100, (totalHeuresCalculees / 90) * 100)}%`"></div>
+                                         :style="`width: ${Math.min(100, (totalMinutesCalculees / (90 * 60)) * 100)}%`"></div>
                                 </div>
                                 <p class="text-xs text-red-500 mt-1.5 font-medium"
-                                   x-show="totalHeuresCalculees >= 90">⚠ Maximum de 90h atteint</p>
+                                   x-show="totalMinutesCalculees >= 5400">⚠ Maximum de 90h atteint</p>
                             </div>
                             <input type="hidden" name="nombre_heures" :value="totalHeuresCalculees">
                         </div>
