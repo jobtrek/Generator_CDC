@@ -66,6 +66,8 @@ class StoreCdcRequest extends FormRequest
             'fields.*.value' => 'nullable|string',
             'jours_ecole' => 'nullable|array',
             'jours_ecole.*' => 'string',
+            'jours_feries' => 'nullable|string',
+            'jours_cours_recuperer' => 'nullable|integer|min:0|max:90',
         ];
     }
 }
