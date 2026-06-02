@@ -45,7 +45,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-init="projectHoursCalculator().init()" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
+            <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
                 @csrf
 
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
@@ -261,7 +261,21 @@
                         </div>
 
                         <!-- Période et horaire -->
-                        <div class="border-t pt-4">
+                        @php $jFeriesCreate = json_decode(old('jours_feries', '[]'), true) ?? []; @endphp
+                        <div class="border-t pt-4" x-data="projectHoursCalculator({
+                            dateDebut: '{{ old('date_debut', $prefillData['date_debut'] ?? '') }}',
+                            dateFin: '{{ old('date_fin', $prefillData['date_fin'] ?? '') }}',
+                            heureMatinDebut: '{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}',
+                            heureMatinFin: '{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}',
+                            heureApremDebut: '{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}',
+                            heureApremFin: '{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}',
+                            pauseMatinDebut: '{{ old('pause_matin_debut', $prefillData['pause_matin_debut'] ?? '10:30') }}',
+                            pauseMatinFin: '{{ old('pause_matin_fin', $prefillData['pause_matin_fin'] ?? '10:45') }}',
+                            pauseApremDebut: '{{ old('pause_aprem_debut', $prefillData['pause_aprem_debut'] ?? '15:00') }}',
+                            pauseApremFin: '{{ old('pause_aprem_fin', $prefillData['pause_aprem_fin'] ?? '15:15') }}',
+                            joursFeries: @json($jFeriesCreate),
+                            joursCoursRecuperer: {{ (int) old('jours_cours_recuperer', 0) }}
+                        })">
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <!-- Colonne 1: Dates -->
                                 <div>
@@ -271,21 +285,19 @@
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
                                             <label class="text-xs text-gray-500">Du</label>
-                                            <input type="date" name="date_debut" required
-                                                   value="{{ old('date_debut', $prefillData['date_debut'] ?? '') }}"
+                                            <input type="date" name="date_debut" x-model="dateDebut" required
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                         <div>
                                             <label class="text-xs text-gray-500">Au</label>
-                                            <input type="date" name="date_fin" required
-                                                   value="{{ old('date_fin', $prefillData['date_fin'] ?? '') }}"
+                                            <input type="date" name="date_fin" x-model="dateFin" required
                                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Colonne 2: Horaires -->
-                                <div x-data="projectHoursCalculator()" x-init="init()">
+                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">
                                         Horaire de travail *
                                     </label>
@@ -293,24 +305,20 @@
                                         <div>
                                             <label class="text-xs text-gray-500">Matin</label>
                                             <div class="flex gap-1 items-center">
-                                                <input type="time" name="heure_matin_debut" required
-                                                       value="{{ old('heure_matin_debut', $prefillData['heure_matin_debut'] ?? '08:30') }}"
+                                                <input type="time" name="heure_matin_debut" x-model="heureMatinDebut" required
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                                 <span class="text-xs">–</span>
-                                                <input type="time" name="heure_matin_fin" required
-                                                       value="{{ old('heure_matin_fin', $prefillData['heure_matin_fin'] ?? '12:30') }}"
+                                                <input type="time" name="heure_matin_fin" x-model="heureMatinFin" required
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                             </div>
                                         </div>
                                         <div>
                                             <label class="text-xs text-gray-500">Après-midi</label>
                                             <div class="flex gap-1 items-center">
-                                                <input type="time" name="heure_aprem_debut" required
-                                                       value="{{ old('heure_aprem_debut', $prefillData['heure_aprem_debut'] ?? '13:30') }}"
+                                                <input type="time" name="heure_aprem_debut" x-model="heureApremDebut" required
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                                 <span class="text-xs">–</span>
-                                                <input type="time" name="heure_aprem_fin" required
-                                                       value="{{ old('heure_aprem_fin', $prefillData['heure_aprem_fin'] ?? '17:30') }}"
+                                                <input type="time" name="heure_aprem_fin" x-model="heureApremFin" required
                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                             </div>
                                         </div>
@@ -320,32 +328,26 @@
 
                             <!-- Pauses -->
                             <div class="border-t pt-4 mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-3">
-                                    Pauses *
-                                </label>
+                                <label class="block text-sm font-medium text-gray-700 mb-3">Pauses *</label>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     <div>
                                         <label class="text-xs text-gray-500">Pause matin (début)</label>
-                                        <input type="time" name="pause_matin_debut"
-                                               value="{{ old('pause_matin_debut', $prefillData['pause_matin_debut'] ?? '10:30') }}"
+                                        <input type="time" name="pause_matin_debut" x-model="pauseMatinDebut"
                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-500">Pause matin (fin)</label>
-                                        <input type="time" name="pause_matin_fin"
-                                               value="{{ old('pause_matin_fin', $prefillData['pause_matin_fin'] ?? '10:45') }}"
+                                        <input type="time" name="pause_matin_fin" x-model="pauseMatinFin"
                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-500">Pause après-midi (début)</label>
-                                        <input type="time" name="pause_aprem_debut"
-                                               value="{{ old('pause_aprem_debut', $prefillData['pause_aprem_debut'] ?? '15:00') }}"
+                                        <input type="time" name="pause_aprem_debut" x-model="pauseApremDebut"
                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                     </div>
                                     <div>
                                         <label class="text-xs text-gray-500">Pause après-midi (fin)</label>
-                                        <input type="time" name="pause_aprem_fin"
-                                               value="{{ old('pause_aprem_fin', $prefillData['pause_aprem_fin'] ?? '15:15') }}"
+                                        <input type="time" name="pause_aprem_fin" x-model="pauseApremFin"
                                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
                                     </div>
                                 </div>
@@ -353,9 +355,7 @@
 
                             <!-- Jours d'école -->
                             <div class="border-t pt-4 mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Jours d'école *
-                                </label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Jours d'école *</label>
                                 <div class="flex flex-wrap gap-4">
                                     @php $savedDays = old('jours_ecole', []); @endphp
                                     @foreach(['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as $day)
@@ -369,6 +369,102 @@
                                 </div>
                                 <p class="text-xs text-gray-500 mt-2">Sélectionnez les jours de présence à l'école</p>
                             </div>
+
+                            <!-- Jours fériés & Cours à récupérer -->
+                            <div class="border-t pt-4 mt-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Jours fériés -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Jours fériés <span class="text-xs font-normal text-gray-400">(dans la période)</span>
+                                        </label>
+                                        <div class="flex gap-2 mb-3">
+                                            <input type="date" x-model="newFerieDate"
+                                                   :min="dateDebut" :max="dateFin"
+                                                   class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-red-400 focus:ring-red-400 text-sm">
+                                            <button type="button" @click="addFerie()"
+                                                    :disabled="!newFerieDate"
+                                                    class="px-3 py-1.5 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                                                + Ajouter
+                                            </button>
+                                        </div>
+                                        <div class="flex flex-wrap gap-1.5 min-h-[2rem]">
+                                            <template x-for="ferie in joursFeries" :key="ferie">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 text-red-700 rounded-full text-xs font-medium">
+                                                    <span x-text="formatDate(ferie)"></span>
+                                                    <button type="button" @click="removeFerie(ferie)"
+                                                            class="text-red-400 hover:text-red-700 font-bold leading-none ml-0.5">×</button>
+                                                </span>
+                                            </template>
+                                            <span x-show="joursFeries.length === 0" class="text-xs text-gray-400 italic self-center">Aucun jour férié</span>
+                                        </div>
+                                        <input type="hidden" name="jours_feries" :value="JSON.stringify(joursFeries)">
+                                    </div>
+
+                                    <!-- Jours de cours à récupérer -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Jours de cours à récupérer
+                                        </label>
+                                        <div class="flex items-center gap-4">
+                                            <button type="button"
+                                                    @click="joursCoursRecuperer = Math.max(0, joursCoursRecuperer - 1)"
+                                                    class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 text-xl font-bold flex items-center justify-center transition-colors">−</button>
+                                            <span class="text-3xl font-bold text-gray-800 min-w-[2.5rem] text-center tabular-nums" x-text="joursCoursRecuperer"></span>
+                                            <button type="button"
+                                                    @click="joursCoursRecuperer++"
+                                                    class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 text-xl font-bold flex items-center justify-center transition-colors">+</button>
+                                            <span class="text-sm text-gray-500">jour(s)</span>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-2">Jours passés en rattrapage scolaire pendant la période TPI</p>
+                                        <input type="hidden" name="jours_cours_recuperer" :value="joursCoursRecuperer">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Résumé du calcul des heures TPI -->
+                            <div class="mt-5 p-5 bg-gradient-to-br from-indigo-50 to-slate-50 rounded-xl border border-indigo-100"
+                                 x-show="dateDebut && dateFin"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="text-sm font-semibold text-indigo-900">Calcul des heures TPI</h4>
+                                    <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">max 90h</span>
+                                </div>
+                                <div class="space-y-1.5 text-sm">
+                                    <div class="flex justify-between text-gray-600">
+                                        <span>Jours ouvrables (lun–ven)</span>
+                                        <span class="font-medium" x-text="joursOuvrablesBruts + ' j'"></span>
+                                    </div>
+                                    <div class="flex justify-between text-amber-600" x-show="joursEcoleTotal > 0">
+                                        <span>− École (<span x-text="selectedDays.join(', ')"></span>)</span>
+                                        <span class="font-medium" x-text="'−' + joursEcoleTotal + ' j'"></span>
+                                    </div>
+                                    <div class="flex justify-between text-red-600" x-show="joursFeriesEffectifs > 0">
+                                        <span>− Jours fériés</span>
+                                        <span class="font-medium" x-text="'−' + joursFeriesEffectifs + ' j'"></span>
+                                    </div>
+                                    <div class="flex justify-between text-orange-600" x-show="joursCoursRecuperer > 0">
+                                        <span>− Cours à récupérer</span>
+                                        <span class="font-medium" x-text="'−' + joursCoursRecuperer + ' j'"></span>
+                                    </div>
+                                    <div class="flex justify-between text-gray-500 text-xs pt-1.5 border-t border-indigo-100">
+                                        <span x-text="joursTpiEffectifs + ' j × ' + heuresParJour + 'h/j'"></span>
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-3 border-t border-indigo-200 flex items-end justify-between">
+                                    <span class="text-sm text-gray-500">Total heures TPI</span>
+                                    <span class="text-4xl font-extrabold text-indigo-700 leading-none" x-text="totalHeuresCalculees + 'h'"></span>
+                                </div>
+                                <div class="mt-2 bg-indigo-100 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500"
+                                         :style="`width: ${Math.min(100, (totalHeuresCalculees / 90) * 100)}%`"></div>
+                                </div>
+                                <p class="text-xs text-red-500 mt-1.5 font-medium"
+                                   x-show="totalHeuresCalculees >= 90">⚠ Maximum de 90h atteint</p>
+                            </div>
+                            <input type="hidden" name="nombre_heures" :value="totalHeuresCalculees">
                         </div>
 
                         <!-- Planning Section -->
@@ -387,7 +483,7 @@
                                             @click="switchMode('pourcentage')"
                                             :class="mode === 'pourcentage' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'"
                                             class="px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:shadow-md">
-                                        % (100%)
+                                        %
                                     </button>
                                     <button type="button"
                                             @click="switchMode('heures')"

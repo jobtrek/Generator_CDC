@@ -1,122 +1,144 @@
-export function projectHoursCalculator() {
+export function projectHoursCalculator(initData = {}) {
+    const DAY_MAP = { lundi: 1, mardi: 2, mercredi: 3, jeudi: 4, vendredi: 5 };
+
     return {
+        dateDebut: initData.dateDebut || '',
+        dateFin: initData.dateFin || '',
+        heureMatinDebut: initData.heureMatinDebut || '08:30',
+        heureMatinFin: initData.heureMatinFin || '12:30',
+        heureApremDebut: initData.heureApremDebut || '13:30',
+        heureApremFin: initData.heureApremFin || '17:30',
+        pauseMatinDebut: initData.pauseMatinDebut || '10:30',
+        pauseMatinFin: initData.pauseMatinFin || '10:45',
+        pauseApremDebut: initData.pauseApremDebut || '15:00',
+        pauseApremFin: initData.pauseApremFin || '15:15',
         selectedDays: [],
+        joursFeries: initData.joursFeries || [],
+        joursCoursRecuperer: initData.joursCoursRecuperer || 0,
+        newFerieDate: '',
 
         init() {
-            this.setupEventListeners();
-            this.calculateHours();
-        },
+            this.updateSelectedDays();
 
-        setupEventListeners() {
-            const fields = [
-                'date_debut', 'date_fin',
-                'heure_matin_debut', 'heure_matin_fin',
-                'heure_aprem_debut', 'heure_aprem_fin',
-                'pause_matin_debut', 'pause_matin_fin',
-                'pause_aprem_debut', 'pause_aprem_fin'
-            ];
+            document.querySelectorAll('[name="jours_ecole[]"]').forEach(cb => {
+                cb.addEventListener('change', () => this.updateSelectedDays());
+            });
 
-            fields.forEach(field => {
-                const input = document.querySelector(`[name="${field}"]`);
+            this.$watch('totalHeuresCalculees', (val) => {
+                if (!this.dateDebut || !this.dateFin) return;
+                const input = document.querySelector('input[name="nombre_heures"]');
                 if (input) {
-                    input.addEventListener('change', () => this.calculateHours());
-                    input.addEventListener('input', () => this.calculateHours());
+                    input.value = val;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
 
-            const daysInputs = document.querySelectorAll('[name="jours_ecole[]"]');
-            daysInputs.forEach(input => {
-                input.addEventListener('change', () => {
-                    this.updateSelectedDays();
-                });
+            this.$nextTick(() => {
+                if (this.dateDebut && this.dateFin) {
+                    const input = document.querySelector('input[name="nombre_heures"]');
+                    if (input) {
+                        input.value = this.totalHeuresCalculees;
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
             });
-
-            const hiddenDaysInput = document.querySelector('input[name="jours_ecole_hidden"]');
-            if (hiddenDaysInput && hiddenDaysInput.value) {
-                const savedDays = JSON.parse(hiddenDaysInput.value);
-                savedDays.forEach(day => {
-                    const checkbox = document.querySelector(`[name="jours_ecole[]"][value="${day}"]`);
-                    if (checkbox) checkbox.checked = true;
-                });
-                this.updateSelectedDays();
-            }
         },
 
         updateSelectedDays() {
-            this.selectedDays = Array.from(document.querySelectorAll('[name="jours_ecole[]"]:checked'))
-                .map(cb => cb.value);
+            this.selectedDays = Array.from(
+                document.querySelectorAll('[name="jours_ecole[]"]:checked')
+            ).map(cb => cb.value);
         },
 
-        getWorkingHoursPerDay() {
-            const matinDebut = this.timeToMinutes(document.querySelector('[name="heure_matin_debut"]')?.value || '08:30');
-            const matinFin = this.timeToMinutes(document.querySelector('[name="heure_matin_fin"]')?.value || '12:30');
-            const apremDebut = this.timeToMinutes(document.querySelector('[name="heure_aprem_debut"]')?.value || '13:30');
-            const apremFin = this.timeToMinutes(document.querySelector('[name="heure_aprem_fin"]')?.value || '17:30');
-
-            const pauseMatinDebut = this.timeToMinutes(document.querySelector('[name="pause_matin_debut"]')?.value || '');
-            const pauseMatinFin = this.timeToMinutes(document.querySelector('[name="pause_matin_fin"]')?.value || '');
-            const pauseApremDebut = this.timeToMinutes(document.querySelector('[name="pause_aprem_debut"]')?.value || '');
-            const pauseApremFin = this.timeToMinutes(document.querySelector('[name="pause_aprem_fin"]')?.value || '');
-
-            let matinHours = (matinFin - matinDebut) / 60;
-            let apremHours = (apremFin - apremDebut) / 60;
-
-            if (pauseMatinFin > pauseMatinDebut) {
-                matinHours -= (pauseMatinFin - pauseMatinDebut) / 60;
-            }
-
-            if (pauseApremFin > pauseApremDebut) {
-                apremHours -= (pauseApremFin - pauseApremDebut) / 60;
-            }
-
-            return Math.max(0, matinHours + apremHours);
+        timeToMin(t) {
+            if (!t) return 0;
+            const parts = t.split(':').map(Number);
+            return (parts[0] || 0) * 60 + (parts[1] || 0);
         },
 
-        getNumberOfSchoolDays() {
-            const dateDebut = document.querySelector('[name="date_debut"]')?.value;
-            const dateFin = document.querySelector('[name="date_fin"]')?.value;
+        get heuresParJour() {
+            let matin = (this.timeToMin(this.heureMatinFin) - this.timeToMin(this.heureMatinDebut)) / 60;
+            let aprem = (this.timeToMin(this.heureApremFin) - this.timeToMin(this.heureApremDebut)) / 60;
+            const pMD = this.timeToMin(this.pauseMatinDebut);
+            const pMF = this.timeToMin(this.pauseMatinFin);
+            const pAD = this.timeToMin(this.pauseApremDebut);
+            const pAF = this.timeToMin(this.pauseApremFin);
+            if (pMF > pMD) matin -= (pMF - pMD) / 60;
+            if (pAF > pAD) aprem -= (pAF - pAD) / 60;
+            return Math.max(0, Math.round((matin + aprem) * 100) / 100);
+        },
 
-            if (!dateDebut || !dateFin) {
-                return 0;
-            }
-
-            const start = new Date(dateDebut);
-            const end = new Date(dateFin);
-
+        get joursOuvrablesBruts() {
+            if (!this.dateDebut || !this.dateFin) return 0;
+            const start = new Date(this.dateDebut);
+            const end = new Date(this.dateFin);
+            if (isNaN(start) || isNaN(end) || end < start) return 0;
             let count = 0;
-            const current = new Date(start);
-
-            while (current <= end) {
-                count++;
-                current.setDate(current.getDate() + 1);
+            const cur = new Date(start);
+            while (cur <= end) {
+                const d = cur.getDay();
+                if (d >= 1 && d <= 5) count++;
+                cur.setDate(cur.getDate() + 1);
             }
-
             return count;
         },
 
-        calculateHours() {
-            const schoolDays = this.getNumberOfSchoolDays();
-            const hoursPerDay = this.getWorkingHoursPerDay();
-            const totalHours = Math.round(schoolDays * hoursPerDay);
-
-            const totalHoursInput = document.querySelector('input[name="nombre_heures"]');
-            if (totalHoursInput) {
-                totalHoursInput.value = totalHours;
-
-                const event = new Event('change', { bubbles: true });
-                totalHoursInput.dispatchEvent(event);
+        get joursEcoleTotal() {
+            if (!this.dateDebut || !this.dateFin || !this.selectedDays.length) return 0;
+            const start = new Date(this.dateDebut);
+            const end = new Date(this.dateFin);
+            if (isNaN(start) || isNaN(end) || end < start) return 0;
+            const nums = this.selectedDays.map(d => DAY_MAP[d]).filter(Boolean);
+            let count = 0;
+            const cur = new Date(start);
+            while (cur <= end) {
+                if (nums.includes(cur.getDay())) count++;
+                cur.setDate(cur.getDate() + 1);
             }
+            return count;
+        },
 
-            const display = document.querySelector('#calculated-hours-display');
-            if (display) {
-                display.textContent = `${totalHours}h`;
+        get joursFeriesEffectifs() {
+            if (!this.dateDebut || !this.dateFin || !this.joursFeries.length) return 0;
+            const start = new Date(this.dateDebut);
+            const end = new Date(this.dateFin);
+            const schoolNums = this.selectedDays.map(d => DAY_MAP[d]).filter(Boolean);
+            return this.joursFeries.filter(ds => {
+                const d = new Date(ds);
+                if (isNaN(d)) return false;
+                const dow = d.getDay();
+                return d >= start && d <= end && dow >= 1 && dow <= 5 && !schoolNums.includes(dow);
+            }).length;
+        },
+
+        get joursTpiEffectifs() {
+            return Math.max(0,
+                this.joursOuvrablesBruts
+                - this.joursEcoleTotal
+                - this.joursFeriesEffectifs
+                - (parseInt(this.joursCoursRecuperer) || 0)
+            );
+        },
+
+        get totalHeuresCalculees() {
+            return Math.min(90, Math.round(this.joursTpiEffectifs * this.heuresParJour));
+        },
+
+        addFerie() {
+            if (this.newFerieDate && !this.joursFeries.includes(this.newFerieDate)) {
+                this.joursFeries = [...this.joursFeries, this.newFerieDate].sort();
+                this.newFerieDate = '';
             }
         },
 
-        timeToMinutes(timeStr) {
-            if (!timeStr) return 0;
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            return (hours || 0) * 60 + (minutes || 0);
-        }
+        removeFerie(date) {
+            this.joursFeries = this.joursFeries.filter(d => d !== date);
+        },
+
+        formatDate(ds) {
+            if (!ds) return '';
+            const [y, m, d] = ds.split('-');
+            return `${d}.${m}.${y}`;
+        },
     };
 }

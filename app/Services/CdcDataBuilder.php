@@ -65,6 +65,8 @@ class CdcDataBuilder
             'planning_tests' => $validated['planning_tests'] ?? '',
             'planning_documentation' => $validated['planning_documentation'] ?? '',
             'jours_ecole' => $validated['jours_ecole'] ?? [],
+            'jours_feries' => json_decode($validated['jours_feries'] ?? '[]', true) ?? [],
+            'jours_cours_recuperer' => (int) ($validated['jours_cours_recuperer'] ?? 0),
         ];
     }
 }

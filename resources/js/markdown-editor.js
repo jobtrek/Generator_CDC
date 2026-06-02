@@ -26,7 +26,6 @@ export function markdownEditor() {
                 this.content = textarea.value || '';
             }
         },
-
         get renderedMarkdown() {
             if (!this.content) return '<p class="text-gray-400 italic">Aucun contenu à prévisualiser...</p>';
 

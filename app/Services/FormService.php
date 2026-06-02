@@ -73,6 +73,8 @@ class FormService
             'planning_implementation' => $cdcData['planning_implementation'] ?? '',
             'planning_tests' => $cdcData['planning_tests'] ?? '',
             'planning_documentation' => $cdcData['planning_documentation'] ?? '',
+            'jours_feries' => $cdcData['jours_feries'] ?? [],
+            'jours_cours_recuperer' => (int) ($cdcData['jours_cours_recuperer'] ?? 0),
         ];
     }
 }
