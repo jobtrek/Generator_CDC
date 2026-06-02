@@ -56,16 +56,16 @@ export function projectHoursCalculator(initData = {}) {
             return (parts[0] || 0) * 60 + (parts[1] || 0);
         },
 
+        get minutesParJour() {
+            const matin = this.timeToMin(this.heureMatinFin) - this.timeToMin(this.heureMatinDebut);
+            const aprem = this.timeToMin(this.heureApremFin) - this.timeToMin(this.heureApremDebut);
+            const pauseMatin = Math.max(0, this.timeToMin(this.pauseMatinFin) - this.timeToMin(this.pauseMatinDebut));
+            const pauseAprem = Math.max(0, this.timeToMin(this.pauseApremFin) - this.timeToMin(this.pauseApremDebut));
+            return Math.max(0, matin + aprem - pauseMatin - pauseAprem);
+        },
+
         get heuresParJour() {
-            let matin = (this.timeToMin(this.heureMatinFin) - this.timeToMin(this.heureMatinDebut)) / 60;
-            let aprem = (this.timeToMin(this.heureApremFin) - this.timeToMin(this.heureApremDebut)) / 60;
-            const pMD = this.timeToMin(this.pauseMatinDebut);
-            const pMF = this.timeToMin(this.pauseMatinFin);
-            const pAD = this.timeToMin(this.pauseApremDebut);
-            const pAF = this.timeToMin(this.pauseApremFin);
-            if (pMF > pMD) matin -= (pMF - pMD) / 60;
-            if (pAF > pAD) aprem -= (pAF - pAD) / 60;
-            return Math.max(0, Math.round((matin + aprem) * 100) / 100);
+            return this.minutesParJour / 60;
         },
 
         get joursOuvrablesBruts() {
@@ -120,8 +120,30 @@ export function projectHoursCalculator(initData = {}) {
             );
         },
 
+        get totalMinutesCalculees() {
+            return Math.min(90 * 60, this.joursTpiEffectifs * this.minutesParJour);
+        },
+
         get totalHeuresCalculees() {
-            return Math.min(90, Math.round(this.joursTpiEffectifs * this.heuresParJour));
+            return Math.floor(this.totalMinutesCalculees / 60);
+        },
+
+        get totalMinutesRest() {
+            return this.totalMinutesCalculees % 60;
+        },
+
+        get totalHeuresFormatted() {
+            const m = this.totalMinutesRest;
+            return m > 0
+                ? `${this.totalHeuresCalculees}h${String(m).padStart(2, '0')}`
+                : `${this.totalHeuresCalculees}h`;
+        },
+
+        get heuresParJourFormatted() {
+            const min = this.minutesParJour;
+            const h = Math.floor(min / 60);
+            const m = min % 60;
+            return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
         },
 
         addFerie() {
