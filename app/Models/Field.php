@@ -19,6 +19,7 @@ class Field extends Model
         'options',
         'form_id',
         'field_type_id',
+        'section_id',
     ];
 
     protected $casts = [

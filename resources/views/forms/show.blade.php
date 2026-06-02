@@ -281,7 +281,6 @@
                 </div>
             </div>
 
-
                 <!-- Section 2: PROCÉDURE -->
                 <div class="bg-white shadow-sm rounded-lg mb-6">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
