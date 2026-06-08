@@ -53,7 +53,7 @@ class UserController extends Controller implements HasMiddleware
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make(Str::random(32)),
-            'email_verified_at' => null,
+            'email_verified_at' => now(),
         ]);
 
         $user->assignRole($validated['role']);
