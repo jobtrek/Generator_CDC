@@ -66,13 +66,6 @@
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                     </div>
 
-                    <!-- Help Text -->
-                    <div class="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                        <p class="text-sm text-blue-800 dark:text-blue-300">
-                            <span class="font-semibold">Conseil de sécurité:</span> Utilisez un mot de passe fort avec majuscules, minuscules, chiffres et caractères spéciaux.
-                        </p>
-                    </div>
-
                     <!-- Submit Button -->
                     <button type="submit"
                             class="w-full mt-8 px-4 py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold transition-all duration-200 hover:shadow-lg active:scale-95">

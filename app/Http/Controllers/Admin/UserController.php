@@ -28,7 +28,6 @@ class UserController extends Controller implements HasMiddleware
             }),
         ];
     }
-
     public function index()
     {
         $users = User::with('roles')->paginate(10);
