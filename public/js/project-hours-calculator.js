@@ -24,24 +24,17 @@ export function projectHoursCalculator(initData = {}) {
                 cb.addEventListener('change', () => this.updateSelectedDays());
             });
 
-            this.$watch('totalHeuresCalculees', (val) => {
-                if (!this.dateDebut || !this.dateFin) return;
-                const input = document.querySelector('input[name="nombre_heures"]');
-                if (input) {
-                    input.value = val;
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            });
+            this.$watch('totalHeuresCalculees', () => this._syncHoursInput());
+            this.$nextTick(() => this._syncHoursInput());
+        },
 
-            this.$nextTick(() => {
-                if (this.dateDebut && this.dateFin) {
-                    const input = document.querySelector('input[name="nombre_heures"]');
-                    if (input) {
-                        input.value = this.totalHeuresCalculees;
-                        input.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                }
-            });
+        _syncHoursInput() {
+            if (!this.dateDebut || !this.dateFin) return;
+            const input = document.querySelector('input[name="nombre_heures"]');
+            if (input) {
+                input.value = this.totalHeuresCalculees;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         },
 
         updateSelectedDays() {
@@ -52,8 +45,8 @@ export function projectHoursCalculator(initData = {}) {
 
         timeToMin(t) {
             if (!t) return 0;
-            const parts = t.split(':').map(Number);
-            return (parts[0] || 0) * 60 + (parts[1] || 0);
+            const [h, m] = t.split(':').map(Number);
+            return (h || 0) * 60 + (m || 0);
         },
 
         get minutesParJour() {

@@ -21,7 +21,7 @@ class StoreCdcRequest extends FormRequest
             'candidat_email' => 'required|email',
             'candidat_telephone' => $phoneRule,
             'lieu_travail' => 'required|string|max:255',
-            'orientation' => 'nullable|string',
+            'orientation' => 'nullable|string|max:500',
 
             'chef_projet_nom' => 'required|string|max:255',
             'chef_projet_prenom' => 'required|string|max:255',
@@ -50,27 +50,27 @@ class StoreCdcRequest extends FormRequest
             'pause_aprem_fin' => 'nullable|date_format:H:i',
             'nombre_heures' => 'nullable|integer|min:1|max:90',
 
-            'planning_analyse' => 'nullable|string',
-            'planning_implementation' => 'nullable|string',
-            'planning_tests' => 'nullable|string',
-            'planning_documentation' => 'nullable|string',
+            'planning_analyse' => 'nullable|string|max:20',
+            'planning_implementation' => 'nullable|string|max:20',
+            'planning_tests' => 'nullable|string|max:20',
+            'planning_documentation' => 'nullable|string|max:20',
 
             'procedure' => 'nullable|string|max:5000',
 
-            'titre_projet' => 'required|string',
-            'materiel_logiciel' => 'nullable|string',
-            'prerequis' => 'nullable|string',
-            'descriptif_projet' => 'required|string',
-            'livrables' => 'nullable|string',
+            'titre_projet' => 'required|string|max:255',
+            'materiel_logiciel' => 'nullable|string|max:5000',
+            'prerequis' => 'nullable|string|max:5000',
+            'descriptif_projet' => 'required|string|max:10000',
+            'livrables' => 'nullable|string|max:5000',
 
             'fields' => 'nullable|array',
             'fields.*.name' => 'required_with:fields|string|max:255',
             'fields.*.label' => 'required_with:fields|string|max:255',
             'fields.*.field_type_id' => 'required_with:fields|exists:field_types,id',
-            'fields.*.value' => 'nullable|string',
+            'fields.*.value' => 'nullable|string|max:5000',
             'jours_ecole' => 'nullable|array',
-            'jours_ecole.*' => 'string',
-            'jours_feries' => 'nullable|string',
+            'jours_ecole.*' => 'string|in:lundi,mardi,mercredi,jeudi,vendredi',
+            'jours_feries' => 'nullable|string|max:2000',
             'jours_cours_recuperer' => 'nullable|integer|min:0|max:90',
         ];
     }
