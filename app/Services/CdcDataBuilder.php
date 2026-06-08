@@ -6,6 +6,14 @@ class CdcDataBuilder
 {
     public function __construct(private DateTimeFormatter $dateTimeFormatter) {}
 
+    private function decodeJoursFeries(string $json): array
+    {
+        $decoded = json_decode($json, true);
+        if (!is_array($decoded)) return [];
+        return array_values(array_filter($decoded, fn($d) =>
+            is_string($d) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $d) && strtotime($d) !== false
+        ));
+    }
     public function build(array $validated): array
     {
         $periodeRealisation = $this->dateTimeFormatter->buildPeriodeRealisation(
@@ -69,7 +77,7 @@ class CdcDataBuilder
             'planning_tests' => $validated['planning_tests'] ?? '',
             'planning_documentation' => $validated['planning_documentation'] ?? '',
             'jours_ecole' => $validated['jours_ecole'] ?? [],
-            'jours_feries' => json_decode($validated['jours_feries'] ?? '[]', true) ?? [],
+            'jours_feries' => $this->decodeJoursFeries($validated['jours_feries'] ?? '[]'),
             'jours_cours_recuperer' => (int) ($validated['jours_cours_recuperer'] ?? 0),
         ];
     }

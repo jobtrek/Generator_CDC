@@ -63,25 +63,19 @@ export function planningCalculatorEdit(oldData = {}) {
         },
 
         normalizeSum(targetTotal) {
-            let currentSum = (parseInt(this.analyse) || 0) +
-                (parseInt(this.implementation) || 0) +
-                (parseInt(this.tests) || 0) +
-                (parseInt(this.documentation) || 0);
+            const diff = targetTotal - this.total;
+            if (diff === 0) return;
+            const keys = ['analyse', 'implementation', 'tests', 'documentation'];
+            const largest = keys.reduce((a, b) => this[a] >= this[b] ? a : b);
+            this[largest] = (this[largest] || 0) + diff;
+        },
 
-            let diff = targetTotal - currentSum;
-
-            if (diff !== 0) {
-                const fields = [
-                    { key: 'analyse', val: parseInt(this.analyse) || 0 },
-                    { key: 'implementation', val: parseInt(this.implementation) || 0 },
-                    { key: 'tests', val: parseInt(this.tests) || 0 },
-                    { key: 'documentation', val: parseInt(this.documentation) || 0 }
-                ];
-
-                fields.sort((a, b) => b.val - a.val);
-                const largestField = fields[0].key;
-                this[largestField] = (parseInt(this[largestField]) || 0) + diff;
-            }
+        _scaleFields(oldMax, newMax) {
+            const wasComplete = this.total === oldMax;
+            ['analyse', 'implementation', 'tests', 'documentation'].forEach(k => {
+                this[k] = Math.round((this[k] / oldMax) * newMax);
+            });
+            if (wasComplete) this.normalizeSum(newMax);
         },
 
         switchMode(newMode) {
@@ -90,21 +84,7 @@ export function planningCalculatorEdit(oldData = {}) {
             const oldMax = this.mode === 'heures' ? this.totalHeures : 100;
             const newMax = newMode === 'heures' ? this.totalHeures : 100;
 
-            if (oldMax === 0) {
-                this.mode = newMode;
-                return;
-            }
-
-            const wasComplete = (this.total === oldMax);
-
-            this.analyse = Math.round((this.analyse / oldMax) * newMax);
-            this.implementation = Math.round((this.implementation / oldMax) * newMax);
-            this.tests = Math.round((this.tests / oldMax) * newMax);
-            this.documentation = Math.round((this.documentation / oldMax) * newMax);
-
-            if (wasComplete) {
-                this.normalizeSum(newMax);
-            }
+            if (oldMax > 0) this._scaleFields(oldMax, newMax);
 
             this.mode = newMode;
         },
@@ -150,13 +130,7 @@ export function planningCalculatorEdit(oldData = {}) {
                     const oldTotal = this.totalHeures;
 
                     if (this.mode === 'heures' && oldTotal > 0) {
-                        const wasComplete = (this.total === oldTotal);
-                        this.analyse = Math.round((this.analyse / oldTotal) * newTotal);
-                        this.implementation = Math.round((this.implementation / oldTotal) * newTotal);
-                        this.tests = Math.round((this.tests / oldTotal) * newTotal);
-                        this.documentation = Math.round((this.documentation / oldTotal) * newTotal);
-
-                        if (wasComplete) this.normalizeSum(newTotal);
+                        this._scaleFields(oldTotal, newTotal);
                     }
                     this.totalHeures = newTotal;
                 });
