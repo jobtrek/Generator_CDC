@@ -89,12 +89,6 @@
                     Retour à la connexion
                 </a>
             </div>
-
-            <!-- Footer Text -->
-            <p class="text-center text-xs text-gray-600 dark:text-gray-400 mt-8">
-                Besoin d'aide?
-                <a href="#" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Contactez notre support</a>
-            </p>
         </div>
     </div>
 </x-guest-layout>
