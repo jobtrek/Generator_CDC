@@ -416,7 +416,6 @@
                                                     class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 text-xl font-bold flex items-center justify-center transition-colors">+</button>
                                             <span class="text-sm text-gray-500">jour(s)</span>
                                         </div>
-                                        <p class="text-xs text-gray-400 mt-2">Jours passés en rattrapage scolaire pendant la période TPI</p>
                                         <input type="hidden" name="jours_cours_recuperer" :value="joursCoursRecuperer">
                                     </div>
                                 </div>
