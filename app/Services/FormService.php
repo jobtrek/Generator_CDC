@@ -13,10 +13,9 @@ class FormService
         private FieldsManager $fieldsManager,
     ) {}
 
-    public function createFormWithCdc(array $validated, int $userId): Form
+    public function createFormWithCdc(array $validated, User $user): Form
     {
-        return DB::transaction(function () use ($validated, $userId) {
-            $user = User::findOrFail($userId);
+        return DB::transaction(function () use ($validated, $user) {
             $form = new Form([
                 'name' => $validated['titre_projet'],
             ]);
@@ -33,9 +32,9 @@ class FormService
             return $form;
         });
     }
-    public function updateFormWithCdc(Form $form, array $validated, int $userId): void
+    public function updateFormWithCdc(Form $form, array $validated, User $user): void
     {
-        DB::transaction(function () use ($form, $validated, $userId) {
+        DB::transaction(function () use ($form, $validated, $user) {
             $form->name = $validated['titre_projet'];
             $form->save();
 
@@ -52,7 +51,7 @@ class FormService
             ]);
 
             if (! $cdc->exists) {
-                $cdc->user_id = $userId;
+                $cdc->user_id = $user->id;
             }
             $form->cdc()->save($cdc);
         });
