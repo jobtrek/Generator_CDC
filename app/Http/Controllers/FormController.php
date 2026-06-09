@@ -57,7 +57,7 @@ class FormController extends Controller
         try {
             $form = $this->formService->createFormWithCdc(
                 $request->validated(),
-                Auth::id()
+                Auth::user()
             );
 
             session()->forget('duplicate_form');
@@ -101,7 +101,7 @@ class FormController extends Controller
         $this->authorize('update', $form);
 
         try {
-            $this->formService->updateFormWithCdc($form, $request->validated(), Auth::id());
+            $this->formService->updateFormWithCdc($form, $request->validated(), Auth::user());
 
             return redirect()->route('forms.show', $form)
                 ->with('success', 'Formulaire et CDC mis à jour avec succès !');

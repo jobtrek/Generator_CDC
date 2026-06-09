@@ -1,19 +1,17 @@
 import { marked } from 'marked';
+import { markedHighlight } from 'marked-highlight';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
 
-marked.setOptions({
-    highlight: function(code, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-            try {
-                return hljs.highlight(code, { language: lang }).value;
-            } catch (err) {}
-        }
-        return code;
-    },
-    breaks: true,
-    gfm: true
-});
+marked.use(markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang) {
+        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+        return hljs.highlight(code, { language }).value;
+    }
+}));
+
+marked.use({ breaks: true, gfm: true });
 
 export function markdownEditor() {
     return {
