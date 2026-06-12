@@ -416,7 +416,6 @@
                                                     class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 text-xl font-bold flex items-center justify-center transition-colors">+</button>
                                             <span class="text-sm text-gray-500">jour(s)</span>
                                         </div>
-                                        <p class="text-xs text-gray-400 mt-2">Jours passés en rattrapage scolaire pendant la période TPI</p>
                                         <input type="hidden" name="jours_cours_recuperer" :value="joursCoursRecuperer">
                                     </div>
                                 </div>
@@ -430,7 +429,7 @@
                                  x-transition:enter-end="opacity-100 translate-y-0">
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-sm font-semibold text-indigo-900">Calcul des heures TPI</h4>
-                                    <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">max 90h</span>
+                                    <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">70 – 90h</span>
                                 </div>
                                 <div class="space-y-1.5 text-sm">
                                     <div class="flex justify-between text-gray-600">
@@ -445,9 +444,9 @@
                                         <span>− Jours fériés</span>
                                         <span class="font-medium" x-text="'−' + joursFeriesEffectifs + ' j'"></span>
                                     </div>
-                                    <div class="flex justify-between text-orange-600" x-show="joursCoursRecuperer > 0">
-                                        <span>− Cours à récupérer</span>
-                                        <span class="font-medium" x-text="'−' + joursCoursRecuperer + ' j'"></span>
+                                    <div class="flex justify-between text-green-600" x-show="joursCoursRecuperer > 0">
+                                        <span>+ Cours à récupérer</span>
+                                        <span class="font-medium" x-text="'+' + joursCoursRecuperer + ' j'"></span>
                                     </div>
                                     <div class="flex justify-between text-gray-500 text-xs pt-1.5 border-t border-indigo-100">
                                         <span x-text="joursTpiEffectifs + ' j × ' + heuresParJourFormatted + '/j'"></span>
@@ -455,13 +454,20 @@
                                 </div>
                                 <div class="mt-3 pt-3 border-t border-indigo-200 flex items-end justify-between">
                                     <span class="text-sm text-gray-500">Total heures TPI</span>
-                                    <span class="text-4xl font-extrabold text-indigo-700 leading-none" x-text="totalHeuresFormatted"></span>
+                                    <span class="text-4xl font-extrabold leading-none"
+                                          :class="totalHeuresCalculees < 70 ? 'text-red-600' : totalHeuresCalculees >= 90 ? 'text-orange-500' : 'text-green-600'"
+                                          x-text="totalHeuresFormatted"></span>
                                 </div>
                                 <div class="mt-2 bg-indigo-100 rounded-full h-2 overflow-hidden">
-                                    <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500"
+                                    <div class="h-2 rounded-full transition-all duration-500"
+                                         :class="totalHeuresCalculees < 70 ? 'bg-red-500' : totalHeuresCalculees >= 90 ? 'bg-orange-400' : 'bg-green-500'"
                                          :style="`width: ${Math.min(100, (totalMinutesCalculees / (90 * 60)) * 100)}%`"></div>
                                 </div>
-                                <p class="text-xs text-red-500 mt-1.5 font-medium"
+                                <p class="text-xs text-red-600 mt-1.5 font-medium"
+                                   x-show="totalHeuresCalculees > 0 && totalHeuresCalculees < 70">
+                                    ⚠ Le total doit être entre 70h et 90h (actuellement <span x-text="totalHeuresFormatted"></span>)
+                                </p>
+                                <p class="text-xs text-orange-500 mt-1.5 font-medium"
                                    x-show="totalMinutesCalculees >= 5400">⚠ Maximum de 90h atteint</p>
                             </div>
                             <input type="hidden" name="nombre_heures" :value="totalHeuresCalculees">

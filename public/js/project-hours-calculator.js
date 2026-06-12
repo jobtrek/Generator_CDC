@@ -109,7 +109,7 @@ export function projectHoursCalculator(initData = {}) {
                 this.joursOuvrablesBruts
                 - this.joursEcoleTotal
                 - this.joursFeriesEffectifs
-                - (parseInt(this.joursCoursRecuperer) || 0)
+                + (parseInt(this.joursCoursRecuperer) || 0)
             );
         },
 
