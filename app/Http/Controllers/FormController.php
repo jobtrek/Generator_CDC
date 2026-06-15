@@ -8,6 +8,7 @@ use App\Models\FieldType;
 use App\Models\Form;
 use App\Services\FormService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -52,14 +53,38 @@ class FormController extends Controller
         return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData'));
     }
 
+    public function autosave(Request $request): JsonResponse
+    {
+        $data = $request->except(['_token', '_method']);
+        $formId = isset($data['draft_form_id']) ? (int) $data['draft_form_id'] : null;
+        unset($data['draft_form_id']);
+
+        try {
+            $form = $this->formService->autosaveFormWithCdc($data, Auth::user(), $formId);
+
+            return response()->json([
+                'form_id' => $form->id,
+                'saved_at' => now()->format('H:i'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Erreur lors de la sauvegarde'], 500);
+        }
+    }
     public function store(StoreCdcRequest $request)
     {
         try {
-            $form = $this->formService->createFormWithCdc(
-                $request->validated(),
-                Auth::user()
-            );
+            $draftFormId = $request->input('draft_form_id');
 
+            if ($draftFormId) {
+                $form = Form::where('id', $draftFormId)->where('user_id', Auth::id())->firstOrFail();
+                $this->authorize('update', $form);
+                $this->formService->updateFormWithCdc($form, $request->validated(), Auth::user());
+            } else {
+                $form = $this->formService->createFormWithCdc(
+                    $request->validated(),
+                    Auth::user()
+                );
+            }
             session()->forget('duplicate_form');
 
             return redirect()->route('forms.show', $form)

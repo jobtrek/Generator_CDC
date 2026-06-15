@@ -13,6 +13,7 @@ class Cdc extends Model
         'title',
         'data',
         'form_id',
+        'status',
     ];
 
     protected $casts = [
