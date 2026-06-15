@@ -21,6 +21,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', [CdcController::class, 'create'])->name('create');
             Route::get('/{cdc}/download', [CdcController::class, 'download'])->name('download');
         });
+        Route::post('/forms/autosave', [FormController::class, 'autosave'])->name('forms.autosave');
         Route::resource('forms', FormController::class);
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('edit');

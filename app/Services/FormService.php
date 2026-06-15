@@ -48,12 +48,41 @@ class FormService
             $cdc->fill([
                 'title' => $validated['titre_projet'],
                 'data' => $cdcData,
+                'status' => 'terminé',
             ]);
 
             if (! $cdc->exists) {
                 $cdc->user_id = $user->id;
             }
             $form->cdc()->save($cdc);
+        });
+    }
+
+    public function autosaveFormWithCdc(array $data, User $user, ?int $formId = null): Form
+    {
+        return DB::transaction(function () use ($data, $user, $formId) {
+            $title = $data['titre_projet'] ?? 'Brouillon sans titre';
+
+            if ($formId) {
+                $form = Form::where('id', $formId)->where('user_id', $user->id)->firstOrFail();
+                $form->name = $title;
+                $form->save();
+                $cdc = $form->cdc ?? new Cdc;
+            } else {
+                $form = new Form(['name' => $title]);
+                $user->forms()->save($form);
+                $cdc = new Cdc;
+                $cdc->user()->associate($user);
+            }
+
+            $cdc->fill([
+                'title' => $title,
+                'data' => $data,
+                'status' => 'brouillon',
+            ]);
+            $form->cdc()->save($cdc);
+
+            return $form;
         });
     }
     public function getPrefillDataForEdit(Form $form): array

@@ -45,7 +45,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('forms.store') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
+            <form id="cdc-form" method="POST" action="{{ route('forms.store') }}" data-autosave-url="{{ route('forms.autosave') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
                 @csrf
 
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
@@ -766,23 +766,32 @@
                     </div>
                 </div>
 
-                <!-- Boutons d'action -->
-                <div class="flex justify-end gap-4">
-                    <a href="{{ route('forms.index') }}"
-                       class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-                        Annuler
-                    </a>
-                    <button type="submit"
-                            :disabled="submitting"
-                            :class="submitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'"
-                            class="px-6 py-3 bg-green-600 text-white rounded-md transition font-medium shadow-lg">
-                        <span x-show="!submitting">Créer le cahier des charges</span>
-                        <span x-show="submitting" x-cloak>Création en cours...</span>
-                    </button>
+                <!-- Brouillon indicateur -->
+                <div class="flex justify-between items-center">
+                    <div id="autosave-indicator"
+                         class="hidden items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-300">
+                        <span id="autosave-icon"></span>
+                        <span id="autosave-text"></span>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="{{ route('forms.index') }}"
+                           class="px-6 py-3 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
+                            Annuler
+                        </a>
+                        <button type="submit"
+                                :disabled="submitting"
+                                :class="submitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'"
+                                class="px-6 py-3 bg-green-600 text-white rounded-md transition font-medium shadow-lg">
+                            <span x-show="!submitting">Créer le cahier des charges</span>
+                            <span x-show="submitting" x-cloak>Création en cours...</span>
+                        </button>
+                    </div>
                 </div>
+
+                <input type="hidden" name="draft_form_id" id="draft_form_id" value="">
             </form>
         </div>
     </div>
-
     <script src="{{ asset('js/phone-formatter.js') }}"></script>
+    <script src="{{ asset('js/cdc-autosave.js') }}"></script>
 </x-app-layout>
