@@ -45,11 +45,16 @@
                 </div>
             @endif
 
-            <form id="cdc-form" method="POST" action="{{ route('forms.store') }}" data-autosave-url="{{ route('forms.autosave') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
+            <!-- Barre de progression -->
+            <div class="sticky top-0 z-40 mb-6 h-1 bg-gray-200 overflow-hidden">
+                <div id="progress-fill" class="h-full transition-all duration-700 ease-out" style="width: 0%; background: linear-gradient(90deg, #6366f1, #10b981)"></div>
+            </div>
+
+                        <form id="cdc-form" method="POST" action="{{ route('forms.store') }}" data-autosave-url="{{ route('forms.autosave') }}" x-data="{ ...cdcFormBuilder(), submitting: false }" x-on:submit="if(submitting) { $event.preventDefault(); return; } submitting = true;" class="space-y-6">
                 @csrf
 
                 <!-- Section 1: INFORMATIONS GÉNÉRALES -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-1" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">
                             1. INFORMATIONS GÉNÉRALES
@@ -646,7 +651,7 @@
                 </div>
 
                 <!-- Section 2: PROCÉDURE (Markdown) -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-2" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">2. PROCÉDURE</h3>
                     </div>
@@ -675,7 +680,7 @@
                 </div>
 
                 <!-- Section 3: TITRE -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-3" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">3. TITRE</h3>
                     </div>
@@ -691,7 +696,7 @@
                 </div>
 
                 <!-- Section 4: MATÉRIEL ET LOGICIEL (Markdown) -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-4" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">4. MATÉRIEL ET LOGICIEL À DISPOSITION</h3>
                     </div>
@@ -710,7 +715,7 @@
                 </div>
 
                 <!-- Section 5: PRÉREQUIS (Markdown) -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-5" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">5. PRÉREQUIS</h3>
                     </div>
@@ -728,7 +733,7 @@
                 </div>
 
                 <!-- Section 6: DESCRIPTIF DU PROJET (Markdown) -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-6" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">6. DESCRIPTIF DU PROJET</h3>
                     </div>
@@ -746,7 +751,7 @@
                 </div>
 
                 <!-- Section 7: LIVRABLES (Markdown) -->
-                <div class="bg-white shadow-sm rounded-lg">
+                <div id="section-7" class="bg-white shadow-sm rounded-lg">
                     <div class="p-6 border-b border-gray-200 bg-indigo-50">
                         <h3 class="text-lg font-bold text-indigo-900">7. LIVRABLES</h3>
                     </div>
@@ -788,10 +793,11 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="draft_form_id" id="draft_form_id" value="">
+                <input type="hidden" name="draft_form_id" id="draft_form_id" value="{{ $draftFormId ?? '' }}">
             </form>
         </div>
     </div>
     <script src="{{ asset('js/phone-formatter.js') }}"></script>
     <script src="{{ asset('js/cdc-autosave.js') }}"></script>
+    <script src="{{ asset('js/cdc-progress.js') }}"></script>
 </x-app-layout>
