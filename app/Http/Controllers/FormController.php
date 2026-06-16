@@ -45,25 +45,28 @@ class FormController extends Controller
 
     public function create()
     {
-        $fieldTypes = FieldType::all();
-        $duplicateData = session('duplicate_form', []);
+        $fieldTypes      = FieldType::all();
+        $duplicateData   = session('duplicate_form', []);
         $prefilledFields = $duplicateData['fields'] ?? [];
-        $prefillData = [];
+        $prefillData     = [];
 
-        return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData'));
+        $draftFormId = empty($duplicateData)
+            ? Form::draft(Auth::id())->latest()->value('id')
+            : null;
+
+        return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData', 'draftFormId'));
     }
 
     public function autosave(Request $request): JsonResponse
     {
-        $data = $request->except(['_token', '_method']);
-        $formId = isset($data['draft_form_id']) ? (int) $data['draft_form_id'] : null;
-        unset($data['draft_form_id']);
+        $formId = (int) $request->input('draft_form_id') ?: null;
+        $data   = $request->except(['_token', '_method', 'draft_form_id']);
 
         try {
             $form = $this->formService->autosaveFormWithCdc($data, Auth::user(), $formId);
 
             return response()->json([
-                'form_id' => $form->id,
+                'form_id'  => $form->id,
                 'saved_at' => now()->format('H:i'),
             ]);
         } catch (\Exception $e) {

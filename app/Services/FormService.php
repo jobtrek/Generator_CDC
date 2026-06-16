@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Form;
 use App\Models\Cdc;
+use App\Models\Form;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+
 class FormService
 {
     public function __construct(
@@ -16,15 +17,15 @@ class FormService
     public function createFormWithCdc(array $validated, User $user): Form
     {
         return DB::transaction(function () use ($validated, $user) {
-            $form = new Form([
-                'name' => $validated['titre_projet'],
-            ]);
+            $form = new Form(['name' => $validated['titre_projet']]);
             $user->forms()->save($form);
+
             $cdcData = $this->cdcDataBuilder->build($validated);
             $cdcData = $this->fieldsManager->createCustomFields($form, $validated['fields'] ?? [], $cdcData);
+
             $cdc = new Cdc([
                 'title' => $validated['titre_projet'],
-                'data' => $cdcData,
+                'data'  => $cdcData,
             ]);
             $cdc->user()->associate($user);
             $form->cdc()->save($cdc);
@@ -32,6 +33,7 @@ class FormService
             return $form;
         });
     }
+
     public function updateFormWithCdc(Form $form, array $validated, User $user): void
     {
         DB::transaction(function () use ($form, $validated, $user) {
@@ -41,19 +43,22 @@ class FormService
             $cdcData = $this->cdcDataBuilder->build($validated);
             $cdcData = $this->fieldsManager->updateCustomFields($form, $validated['fields'] ?? [], $cdcData);
             $cdcData = $this->fieldsManager->createCustomFields($form, $validated['new_fields'] ?? [], $cdcData);
+
             if (! empty($validated['deleted_fields'])) {
                 $this->fieldsManager->deleteFields($form, $validated['deleted_fields']);
             }
-            $cdc = $form->cdc ?? new Cdc;
-            $cdc->fill([
-                'title' => $validated['titre_projet'],
-                'data' => $cdcData,
-                'status' => 'terminé',
-            ]);
 
-            if (! $cdc->exists) {
-                $cdc->user_id = $user->id;
+            $cdc = $form->cdc;
+            if (! $cdc) {
+                $cdc = new Cdc;
+                $cdc->user()->associate($user);
             }
+
+            $cdc->fill([
+                'title'  => $validated['titre_projet'],
+                'data'   => $cdcData,
+                'status' => Cdc::STATUS_TERMINE,
+            ]);
             $form->cdc()->save($cdc);
         });
     }
@@ -61,52 +66,58 @@ class FormService
     public function autosaveFormWithCdc(array $data, User $user, ?int $formId = null): Form
     {
         return DB::transaction(function () use ($data, $user, $formId) {
-            $title = $data['titre_projet'] ?? 'Brouillon sans titre';
+            $nom   = trim(($data['candidat_nom'] ?? '') . ' ' . ($data['candidat_prenom'] ?? ''));
+            $title = $nom ?: 'Brouillon sans titre';
 
             if ($formId) {
                 $form = Form::where('id', $formId)->where('user_id', $user->id)->firstOrFail();
                 $form->name = $title;
                 $form->save();
-                $cdc = $form->cdc ?? new Cdc;
+                $cdc = $form->cdc;
             } else {
                 $form = new Form(['name' => $title]);
                 $user->forms()->save($form);
+                $cdc = null;
+            }
+
+            if (! $cdc) {
                 $cdc = new Cdc;
                 $cdc->user()->associate($user);
             }
 
             $cdc->fill([
-                'title' => $title,
-                'data' => $data,
-                'status' => 'brouillon',
+                'title'  => $title,
+                'data'   => $data,
+                'status' => Cdc::STATUS_BROUILLON,
             ]);
             $form->cdc()->save($cdc);
 
             return $form;
         });
     }
+
     public function getPrefillDataForEdit(Form $form): array
     {
-        $cdc = $form->cdc;
-        $cdcData = $cdc?->data ?? [];
+        $cdcData = $form->cdc?->data ?? [];
+
         return [
-            'date_debut' => $cdcData['date_debut'] ?? null,
-            'date_fin' => $cdcData['date_fin'] ?? null,
-            'heure_matin_debut' => $cdcData['heure_matin_debut'] ?? null,
-            'heure_matin_fin' => $cdcData['heure_matin_fin'] ?? null,
-            'heure_aprem_debut' => $cdcData['heure_aprem_debut'] ?? null,
-            'heure_aprem_fin' => $cdcData['heure_aprem_fin'] ?? null,
-            'pause_matin_debut' => $cdcData['pause_matin_debut'] ?? '10:30',
-            'pause_matin_fin' => $cdcData['pause_matin_fin'] ?? '10:45',
-            'pause_aprem_debut' => $cdcData['pause_aprem_debut'] ?? '15:00',
-            'pause_aprem_fin' => $cdcData['pause_aprem_fin'] ?? '15:15',
-            'nombre_heures' => $cdcData['nombre_heures'] ?? null,
-            'planning_analyse' => $cdcData['planning_analyse'] ?? '',
+            'date_debut'              => $cdcData['date_debut'] ?? null,
+            'date_fin'                => $cdcData['date_fin'] ?? null,
+            'heure_matin_debut'       => $cdcData['heure_matin_debut'] ?? null,
+            'heure_matin_fin'         => $cdcData['heure_matin_fin'] ?? null,
+            'heure_aprem_debut'       => $cdcData['heure_aprem_debut'] ?? null,
+            'heure_aprem_fin'         => $cdcData['heure_aprem_fin'] ?? null,
+            'pause_matin_debut'       => $cdcData['pause_matin_debut'] ?? '10:30',
+            'pause_matin_fin'         => $cdcData['pause_matin_fin'] ?? '10:45',
+            'pause_aprem_debut'       => $cdcData['pause_aprem_debut'] ?? '15:00',
+            'pause_aprem_fin'         => $cdcData['pause_aprem_fin'] ?? '15:15',
+            'nombre_heures'           => $cdcData['nombre_heures'] ?? null,
+            'planning_analyse'        => $cdcData['planning_analyse'] ?? '',
             'planning_implementation' => $cdcData['planning_implementation'] ?? '',
-            'planning_tests' => $cdcData['planning_tests'] ?? '',
-            'planning_documentation' => $cdcData['planning_documentation'] ?? '',
-            'jours_feries' => $cdcData['jours_feries'] ?? [],
-            'jours_cours_recuperer' => (int) ($cdcData['jours_cours_recuperer'] ?? 0),
+            'planning_tests'          => $cdcData['planning_tests'] ?? '',
+            'planning_documentation'  => $cdcData['planning_documentation'] ?? '',
+            'jours_feries'            => $cdcData['jours_feries'] ?? [],
+            'jours_cours_recuperer'   => (int) ($cdcData['jours_cours_recuperer'] ?? 0),
         ];
     }
 }
