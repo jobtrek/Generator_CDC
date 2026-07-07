@@ -20,7 +20,6 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('cdc')->name('cdc.')->group(function () {
             Route::get('/create', [CdcController::class, 'create'])->name('create');
             Route::get('/{cdc}/download', [CdcController::class, 'download'])->name('download');
-            Route::get('/{cdc}/download-file', [CdcController::class, 'downloadFile'])->name('download-file');
         });
         Route::post('/forms/autosave', [FormController::class, 'autosave'])->name('forms.autosave');
         Route::resource('forms', FormController::class);

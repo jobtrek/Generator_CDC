@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\GenerateCdcDocxJob;
 use App\Models\Cdc;
 use App\Models\Form;
 use App\Services\CdcPhpWordGenerator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -75,31 +73,6 @@ class CdcController extends Controller
         if (! File::exists($fullPath)) {
             return back()->with('error', 'Le document n\'a pas pu être généré. Veuillez réessayer.');
         }
-
-        return response()->download(
-            $fullPath,
-            'cdc-'.Str::slug($cdc->title).'.docx',
-            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-        )->deleteFileAfterSend(true);
-    }
-
-    public function downloadFile(Cdc $cdc)
-    {
-        $this->authorize('view', $cdc);
-
-        $fullPath = $cdc->docx_path
-            ? storage_path('app/public/'.$cdc->docx_path)
-            : null;
-
-        if (! $fullPath || ! File::exists($fullPath)) {
-            return back()->with('error', 'Le fichier n\'est pas encore prêt ou a expiré. Veuillez relancer la génération.');
-        }
-
-        // Marquer la notification correspondante comme lue
-        Auth::user()
-            ->unreadNotifications()
-            ->where('data->cdc_id', $cdc->id)
-            ->update(['read_at' => now()]);
 
         return response()->download(
             $fullPath,
