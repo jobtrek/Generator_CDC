@@ -215,11 +215,11 @@
 
                     <!-- Période et Planning -->
                     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div class="p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Période de réalisation</dt>
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('periode_realisation') }}</dd>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div class="p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Jours d'école</dt>
                             <dd class="text-sm font-medium text-gray-900">
                                 @php
@@ -228,11 +228,11 @@
                                 @endphp
                             </dd>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div class="p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Horaire de travail</dt>
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('horaire_travail') }}</dd>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div class="p-4 rounded-lg border border-gray-200">
                             <dt class="text-xs font-medium text-gray-500 mb-1">Nombre d'heures</dt>
                             <dd class="text-sm font-medium text-gray-900">{{ $getValue('nombre_heures', '90') }}</dd>
                         </div>
@@ -240,13 +240,13 @@
 
                     @if($getValue('pause_matin_debut', '') || $getValue('pause_aprem_debut', ''))
                         <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="p-4 rounded-lg border border-gray-200">
                                 <dt class="text-xs font-medium text-gray-500 mb-1">Pause matin</dt>
                                 <dd class="text-sm font-medium text-gray-900">
                                     {{ $getValue('pause_matin_debut', '--') }} – {{ $getValue('pause_matin_fin', '--') }}
                                 </dd>
                             </div>
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="p-4 rounded-lg border border-gray-200">
                                 <dt class="text-xs font-medium text-gray-500 mb-1">Pause après-midi</dt>
                                 <dd class="text-sm font-medium text-gray-900">
                                     {{ $getValue('pause_aprem_debut', '--') }} – {{ $getValue('pause_aprem_fin', '--') }}
@@ -259,19 +259,19 @@
                         <div class="mt-6">
                             <h4 class="font-semibold text-gray-800 mb-3">Planning</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div class="p-3 rounded-lg border border-gray-200">
                                     <dt class="text-xs font-medium text-gray-500">Analyse</dt>
                                     <dd class="text-sm font-medium text-gray-900">{{ $getValue('planning_analyse', 'Non défini') }}</dd>
                                 </div>
-                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div class="p-3 rounded-lg border border-gray-200">
                                     <dt class="text-xs font-medium text-gray-500">Implémentation</dt>
                                     <dd class="text-sm font-medium text-gray-900">{{ $getValue('planning_implementation', 'Non défini') }}</dd>
                                 </div>
-                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div class="p-3 rounded-lg border border-gray-200">
                                     <dt class="text-xs font-medium text-gray-500">Tests</dt>
                                     <dd class="text-sm font-medium text-gray-900">{{ $getValue('planning_tests', 'Non défini') }}</dd>
                                 </div>
-                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                <div class="p-3 rounded-lg border border-gray-200">
                                     <dt class="text-xs font-medium text-gray-500">Documentations</dt>
                                     <dd class="text-sm font-medium text-gray-900">{{ $getValue('planning_documentation', 'Non défini') }}</dd>
                                 </div>

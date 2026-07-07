@@ -363,7 +363,7 @@ class CdcPhpWordGenerator
             'unit' => TblWidth::PERCENT,
         ];
 
-        $cellBgColor = ['bgColor' => 'f0f0f0'];
+        $cellBgColor = [];
         $fontStyle = ['name' => 'Calibri', 'size' => 10];
 
         $table = $this->section->addTable($tableStyle);
