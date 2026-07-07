@@ -18,6 +18,7 @@ class Cdc extends Model
         'data',
         'form_id',
         'status',
+        'docx_path',
     ];
 
     protected $casts = [

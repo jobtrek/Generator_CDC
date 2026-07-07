@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateCdcDocxJob;
 use App\Models\Cdc;
 use App\Models\Form;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -57,30 +58,39 @@ class CdcController extends Controller
     {
         $this->authorize('view', $cdc);
 
-        try {
-            $generator = new \App\Services\CdcPhpWordGenerator;
-            $filePath = $generator->generate($cdc);
-
-            $fullPath = storage_path('app/public/'.$filePath);
-
-            if (! File::exists($fullPath)) {
-                return back()->with('error', 'Le fichier n\'a pas pu être généré.');
-            }
-            return response()->download(
-                $fullPath,
-                'cdc-'.Str::slug($cdc->title).'.docx',
-                ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-            )->deleteFileAfterSend(true);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur génération/téléchargement CDC', [
-                'cdc_id' => $cdc->id,
-                'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-            ]);
-
-            return back()->with('error', 'Une erreur est survenue lors du téléchargement.');
+        // Supprimer l'ancien fichier s'il existe, pour en générer un frais
+        if ($cdc->docx_path) {
+            File::delete(storage_path('app/public/'.$cdc->docx_path));
+            $cdc->update(['docx_path' => null]);
         }
+
+        GenerateCdcDocxJob::dispatch($cdc, Auth::user());
+
+        return back()->with('info', 'Votre document est en cours de génération. Vous recevrez une notification dès qu\'il sera prêt.');
+    }
+
+    public function downloadFile(Cdc $cdc)
+    {
+        $this->authorize('view', $cdc);
+
+        $fullPath = $cdc->docx_path
+            ? storage_path('app/public/'.$cdc->docx_path)
+            : null;
+
+        if (! $fullPath || ! File::exists($fullPath)) {
+            return back()->with('error', 'Le fichier n\'est pas encore prêt ou a expiré. Veuillez relancer la génération.');
+        }
+
+        // Marquer la notification correspondante comme lue
+        Auth::user()
+            ->unreadNotifications()
+            ->where('data->cdc_id', $cdc->id)
+            ->update(['read_at' => now()]);
+
+        return response()->download(
+            $fullPath,
+            'cdc-'.Str::slug($cdc->title).'.docx',
+            ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        )->deleteFileAfterSend(true);
     }
 }

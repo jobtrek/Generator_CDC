@@ -44,6 +44,12 @@ class CdcPhpWordGenerator
         try {
             $this->phpWord = new PhpWord;
 
+            $this->phpWord->setDefaultParagraphStyle([
+                'spaceBefore' => 0,
+                'spaceAfter' => 0,
+                'lineHeight' => 1.0,
+            ]);
+
             $sectionStyle = [
                 'marginTop' => 1134,
                 'marginBottom' => 1134,
@@ -65,7 +71,6 @@ class CdcPhpWordGenerator
             $this->addPrerequis($cdc);
             $this->addDescriptifProjet($cdc);
             $this->addLivrables($cdc);
-            $this->addPointsTechniques($cdc);
             $this->addValidation();
 
             $timestamp = time();
@@ -174,8 +179,14 @@ class CdcPhpWordGenerator
     {
         $this->section->addText(
             $title,
-            ['name' => 'Calibri', 'size' => 15, 'color' => '17365D'],
-            ['alignment' => Jc::START, 'spaceBefore' => 120, 'spaceAfter' => 120]
+            ['name' => 'Calibri', 'size' => 15, 'color' => '2E74B5'],
+            [
+                'alignment' => Jc::START,
+                'spaceBefore' => 200,
+                'spaceAfter' => 120,
+                'borderTopSize' => 6,
+                'borderTopColor' => 'A6A6A6',
+            ]
         );
     }
 
@@ -223,6 +234,120 @@ class CdcPhpWordGenerator
         return round($total).'H';
     }
 
+    private function buildHoraireDetails(Cdc $cdc): array
+    {
+        $lines = [];
+
+        $joursEcole = $this->normalizeJours($cdc->data['jours_ecole'] ?? []);
+        $labelTravail = $this->formatJoursTravail($joursEcole);
+        if ($labelTravail !== '') {
+            $lines[] = $labelTravail.' :';
+        }
+
+        $matinDebut = $cdc->data['heure_matin_debut'] ?? '';
+        $matinFin = $cdc->data['heure_matin_fin'] ?? '';
+        $apremDebut = $cdc->data['heure_aprem_debut'] ?? '';
+        $apremFin = $cdc->data['heure_aprem_fin'] ?? '';
+
+        if ($matinDebut && $matinFin) {
+            $lines[] = $matinDebut.' – '.$matinFin
+                .$this->dureePauseLabel($cdc->data['pause_matin_debut'] ?? '', $cdc->data['pause_matin_fin'] ?? '');
+        }
+        if ($apremDebut && $apremFin) {
+            $lines[] = $apremDebut.' – '.$apremFin
+                .$this->dureePauseLabel($cdc->data['pause_aprem_debut'] ?? '', $cdc->data['pause_aprem_fin'] ?? '');
+        }
+
+        if (! empty($joursEcole)) {
+            $lines[] = $this->abbrevJours($joursEcole).' : cours';
+        }
+        return $lines ?: [$cdc->data['horaire_travail'] ?? ''];
+    }
+
+    private function normalizeJours($jours): array
+    {
+        if (is_string($jours)) {
+            $jours = json_decode($jours, true) ?: ($jours !== '' ? [$jours] : []);
+        }
+        if (! is_array($jours)) {
+            $jours = [];
+        }
+
+        return array_values(array_filter(array_map(fn ($j) => strtolower(trim((string) $j)), $jours)));
+    }
+
+    private function abbrevJours(array $jours): string
+    {
+        $map = [
+            'lundi' => 'Lu', 'mardi' => 'Ma', 'mercredi' => 'Me',
+            'jeudi' => 'Je', 'vendredi' => 'Ve', 'samedi' => 'Sa', 'dimanche' => 'Di',
+        ];
+
+        return implode(', ', array_map(fn ($j) => $map[$j] ?? ucfirst($j), $jours));
+    }
+
+    private function formatJoursTravail(array $joursEcole): string
+    {
+        $semaine = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
+        $travail = array_values(array_diff($semaine, $joursEcole));
+
+        if (empty($travail)) {
+            return '';
+        }
+
+        $indices = array_map(fn ($j) => array_search($j, $semaine), $travail);
+        $contigu = (max($indices) - min($indices) + 1) === count($indices);
+
+        if (count($travail) === 1) {
+            return $this->abbrevJours($travail);
+        }
+
+        if ($contigu) {
+            return $this->abbrevJours([$travail[0]]).'-'.$this->abbrevJours([end($travail)]);
+        }
+
+        return $this->abbrevJours($travail);
+    }
+
+    private function dureePauseLabel(string $debut, string $fin): string
+    {
+        if ($debut === '' || $fin === '') {
+            return '';
+        }
+
+        $minutes = (int) round((strtotime($fin) - strtotime($debut)) / 60);
+
+        return $minutes > 0 ? ' ('.$minutes.'min pause)' : '';
+    }
+
+    private function addPersonneRows($table, string $label, string $nom, string $prenom, string $email, string $telephone, array $fontStyle, array $cellBgColor): void
+    {
+        $boldFont = array_merge($fontStyle, ['bold' => true]);
+        $table->addRow();
+        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
+            ->addText($label, $boldFont);
+
+        $nomRun = $table->addCell(3000)->addTextRun();
+        $nomRun->addText('Nom : ', $fontStyle);
+        $nomRun->addText($nom, $boldFont);
+
+        $prenomRun = $table->addCell(3000)->addTextRun();
+        $prenomRun->addText('Prénom : ', $fontStyle);
+        $prenomRun->addText($prenom, $fontStyle);
+
+        // Ligne 2 : email + téléphone
+        $table->addRow();
+        $table->addCell(3000, ['vMerge' => 'continue']);
+
+        $emailRun = $table->addCell(3000)->addTextRun();
+        $emailRun->addText('✉ ', $fontStyle);
+        $emailRun->addText($email, $fontStyle);
+
+        $telRun = $table->addCell(3000)->addTextRun();
+        $telRun->addText('☎ ', $fontStyle);
+        $telRun->addText($telephone, $fontStyle);
+    }
+
     private function addInformationsGenerales(Cdc $cdc)
     {
         $this->addSectionTitle('1 INFORMATIONS GÉNÉRALES');
@@ -232,8 +357,8 @@ class CdcPhpWordGenerator
             'borderColor' => '000000',
             'cellMarginLeft' => 60,
             'cellMarginRight' => 20,
-            'cellMarginTop' => 20,
-            'cellMarginBottom' => 20,
+            'cellMarginTop' => 70,
+            'cellMarginBottom' => 70,
             'width' => 100 * 50,
             'unit' => TblWidth::PERCENT,
         ];
@@ -244,34 +369,16 @@ class CdcPhpWordGenerator
         $table = $this->section->addTable($tableStyle);
 
         // --- CANDIDAT ---
-        $table->addRow();
-        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Candidat :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(3000)
-            ->addText('Nom :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('Prénom :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['candidat_nom'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['candidat_prenom'] ?? '', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText('✉ :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('☎ :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['candidat_email'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['candidat_telephone'] ?? '', $fontStyle);
+        $this->addPersonneRows(
+            $table,
+            'Candidat',
+            $cdc->data['candidat_nom'] ?? '',
+            $cdc->data['candidat_prenom'] ?? '',
+            $cdc->data['candidat_email'] ?? '',
+            $cdc->data['candidat_telephone'] ?? '',
+            $fontStyle,
+            $cellBgColor
+        );
 
         // --- LIEU DE TRAVAIL ---
         $table->addRow();
@@ -288,141 +395,56 @@ class CdcPhpWordGenerator
             ->addText($cdc->data['orientation'] ?? '', $fontStyle);
 
         // --- CHEF DE PROJET ---
-        $table->addRow();
-        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Chef de projet :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(3000)
-            ->addText('Nom :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('Prénom :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['chef_projet_nom'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['chef_projet_prenom'] ?? '', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText('✉ :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('☎ :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['chef_projet_email'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['chef_projet_telephone'] ?? '', $fontStyle);
+        $this->addPersonneRows(
+            $table,
+            'Chef de projet',
+            $cdc->data['chef_projet_nom'] ?? '',
+            $cdc->data['chef_projet_prenom'] ?? '',
+            $cdc->data['chef_projet_email'] ?? '',
+            $cdc->data['chef_projet_telephone'] ?? '',
+            $fontStyle,
+            $cellBgColor
+        );
 
         // --- EXPERT 1 ---
-        $table->addRow();
-        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Expert 1 :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(3000)
-            ->addText('Nom :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('Prénom :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert1_nom'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert1_prenom'] ?? '', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText('✉ :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('☎ :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert1_email'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert1_telephone'] ?? '', $fontStyle);
+        $this->addPersonneRows(
+            $table,
+            'Expert 1',
+            $cdc->data['expert1_nom'] ?? '',
+            $cdc->data['expert1_prenom'] ?? '',
+            $cdc->data['expert1_email'] ?? '',
+            $cdc->data['expert1_telephone'] ?? '',
+            $fontStyle,
+            $cellBgColor
+        );
 
         // --- EXPERT 2 ---
-        $table->addRow();
-        $table->addCell(3000, array_merge(['vMerge' => 'restart'], $cellBgColor))
-            ->addText('Expert 2 :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(3000)
-            ->addText('Nom :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('Prénom :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert2_nom'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert2_prenom'] ?? '', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText('✉ :', $fontStyle);
-        $table->addCell(3000)
-            ->addText('☎ :', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, ['vMerge' => 'continue']);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert2_email'] ?? '', $fontStyle);
-        $table->addCell(3000)
-            ->addText($cdc->data['expert2_telephone'] ?? '', $fontStyle);
+        $this->addPersonneRows(
+            $table,
+            'Expert 2',
+            $cdc->data['expert2_nom'] ?? '',
+            $cdc->data['expert2_prenom'] ?? '',
+            $cdc->data['expert2_email'] ?? '',
+            $cdc->data['expert2_telephone'] ?? '',
+            $fontStyle,
+            $cellBgColor
+        );
 
         // --- PÉRIODE DE RÉALISATION ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
             ->addText('Période de réalisation :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(6000, ['gridSpan' => 2])
-            ->addText($cdc->data['periode_realisation'] ?? '', $fontStyle);
+            ->addText($this->formatPeriodeRealisation($cdc), $fontStyle);
 
-        // --- HORAIRE DE TRAVAIL ---
+        // --- HORAIRE DE TRAVAIL (jours d'école + pauses regroupés) ---
         $table->addRow();
         $table->addCell(3000, $cellBgColor)
             ->addText('Horaire de travail :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(6000, ['gridSpan' => 2])
-            ->addText($cdc->data['horaire_travail'] ?? '', $fontStyle);
-
-        // --- JOURS D'ÉCOLE ---
-        $joursEcole = $cdc->data['jours_ecole'] ?? null;
-        $joursText = '';
-        if ($joursEcole) {
-            if (is_string($joursEcole)) {
-                $joursArray = json_decode($joursEcole, true) ?: [$joursEcole];
-            } else {
-                $joursArray = is_array($joursEcole) ? $joursEcole : [$joursEcole];
-            }
-            $joursText = implode(', ', array_map('ucfirst', $joursArray));
+        $horaireCell = $table->addCell(6000, ['gridSpan' => 2]);
+        foreach ($this->buildHoraireDetails($cdc) as $ligne) {
+            $horaireCell->addText($ligne, $fontStyle);
         }
-        $table->addRow();
-        $table->addCell(3000, $cellBgColor)
-            ->addText('Jours d\'école :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(6000, ['gridSpan' => 2])
-            ->addText($joursText ?: '', $fontStyle);
-
-        // --- PAUSES ---
-        $pauseMatin = ($cdc->data['pause_matin_debut'] ?? '').' – '.($cdc->data['pause_matin_fin'] ?? '');
-        $pauseAprem = ($cdc->data['pause_aprem_debut'] ?? '').' – '.($cdc->data['pause_aprem_fin'] ?? '');
-
-        $table->addRow();
-        $table->addCell(3000, $cellBgColor)
-            ->addText('Pause matin :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(6000, ['gridSpan' => 2])
-            ->addText($pauseMatin !== ' – ' ? $pauseMatin : '', $fontStyle);
-
-        $table->addRow();
-        $table->addCell(3000, $cellBgColor)
-            ->addText('Pause après-midi :', array_merge($fontStyle, ['bold' => true]));
-        $table->addCell(6000, ['gridSpan' => 2])
-            ->addText($pauseAprem !== ' – ' ? $pauseAprem : '', $fontStyle);
 
         // --- NOMBRE D'HEURES ---
         $table->addRow();
@@ -453,13 +475,23 @@ class CdcPhpWordGenerator
         $table->addCell(6000, ['gridSpan' => 2])
             ->addText('Documentations : '.($cdc->data['planning_documentation'] ?? '0H'), $fontStyle);
 
-        // ✅ Ligne de fin de section
         $this->addSectionSeparator();
+    }
+
+    private function formatPeriodeRealisation(Cdc $cdc): string
+    {
+        $dateDebut = $cdc->data['date_debut'] ?? null;
+        $dateFin = $cdc->data['date_fin'] ?? null;
+
+        if ($dateDebut && $dateFin) {
+            return (new DateTimeFormatter)->buildPeriodeRealisation($dateDebut, $dateFin);
+        }
+
+        return $cdc->data['periode_realisation'] ?? '';
     }
 
     private function addProcedure(Cdc $cdc)
     {
-        $this->section->addPageBreak();
         $this->addSectionTitle('2 PROCÉDURE');
 
         $procedure = $cdc->data['procedure'] ?? '';
@@ -767,63 +799,18 @@ class CdcPhpWordGenerator
         }
     }
 
-    private function addPointsTechniques(Cdc $cdc)
-    {
-        $standardFields = FormFieldsService::getStandardFields();
-
-        $customFields = collect($cdc->data)->filter(function ($value, $key) use ($standardFields) {
-            return ! in_array($key, $standardFields) && ! empty($value);
-        });
-
-        if ($customFields->count() > 0) {
-            $this->section->addPageBreak();
-            $this->addSectionTitle('8 POINTS TECHNIQUES ÉVALUÉS SPÉCIFIQUES AU PROJET');
-
-            $this->section->addText(
-                'La grille d\'évaluation définit les critères généraux selon lesquels le travail du candidat sera évalué (documentation, journal de travail, respect des normes, qualité, …).',
-                ['name' => 'Calibri', 'size' => 10],
-                ['spaceAfter' => 120]
-            );
-
-            $this->section->addText(
-                'En plus de cela, le travail sera évalué sur les points spécifiques suivants :',
-                ['name' => 'Calibri', 'size' => 10],
-                ['spaceAfter' => 120]
-            );
-
-            $counter = 1;
-            foreach ($customFields as $key => $value) {
-                $displayKey = ucfirst(str_replace('_', ' ', $key));
-                $displayValue = $this->getStringValue($value);
-
-                $this->section->addText(
-                    $counter.'. '.$displayKey,
-                    ['name' => 'Calibri', 'size' => 10, 'bold' => true],
-                    ['spaceAfter' => 60]
-                );
-                $this->section->addText(
-                    $displayValue,
-                    ['name' => 'Calibri', 'size' => 10],
-                    ['spaceAfter' => 120]
-                );
-                $counter++;
-            }
-
-            $this->addSectionSeparator();
-        }
-    }
-
     private function addValidation()
     {
-        $this->addSectionTitle('9 VALIDATION');
+        $this->section->addPageBreak();
+        $this->addSectionTitle('8 VALIDATION');
 
         $tableStyle = [
             'borderSize' => 1,
             'borderColor' => '000000',
             'cellMarginLeft' => 60,
             'cellMarginRight' => 20,
-            'cellMarginTop' => 20,
-            'cellMarginBottom' => 20,
+            'cellMarginTop' => 100,
+            'cellMarginBottom' => 100,
             'width' => 100 * 50,
             'unit' => TblWidth::PERCENT,
         ];
@@ -833,23 +820,23 @@ class CdcPhpWordGenerator
 
         $table = $this->section->addTable($tableStyle);
 
-        $table->addRow();
+        $table->addRow(500, ['cantSplit' => true, 'tblHeader' => true]);
         $table->addCell(3500, $cellBgColor)->addText('Lu et approuvé le :', array_merge($fontStyle, ['bold' => true]));
         $table->addCell(5500, $cellBgColor)->addText('Signature :', array_merge($fontStyle, ['bold' => true]));
 
-        $table->addRow(600);
+        $table->addRow(1000, ['cantSplit' => true]);
         $table->addCell(3500)->addText('Candidat :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
 
-        $table->addRow(600);
+        $table->addRow(1000, ['cantSplit' => true]);
         $table->addCell(3500)->addText('Expert n°1 :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
 
-        $table->addRow(600);
+        $table->addRow(1000, ['cantSplit' => true]);
         $table->addCell(3500)->addText('Expert n°2 :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
 
-        $table->addRow(600);
+        $table->addRow(1000, ['cantSplit' => true]);
         $table->addCell(3500)->addText('Chef de projet :', $fontStyle);
         $table->addCell(5500)->addText('', $fontStyle);
     }
