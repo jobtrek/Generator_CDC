@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -22,12 +23,13 @@ class FormController extends Controller
 
     public function index(Request $request)
     {
-        $query = Form::with(['user', 'fields', 'cdc'])
+        // La vue index n'affiche que le CDC associé (statut + données) :
+        // inutile de charger 'user' et tous les 'fields' de chaque formulaire.
+        $query = Form::with('cdc')
             ->where('user_id', Auth::id());
 
         if ($request->filled('search')) {
-            $search = Str::lower($request->search);
-            $query->whereRaw('LOWER(name) LIKE ?', ['%'.$search.'%']);
+            $this->applyNameSearch($query, $request->search);
         }
 
         if ($request->filled('date_from')) {
@@ -41,6 +43,37 @@ class FormController extends Controller
         $forms = $query->latest()->paginate(8)->withQueryString();
 
         return view('forms.index', compact('forms'));
+    }
+
+    /**
+     * Recherche par nom de formulaire.
+     * PostgreSQL : utilise l'index GIN fulltext (to_tsvector('english', name)) via to_tsquery
+     * avec l'opérateur préfixe « :* » pour garder le matching partiel (« dev » → « développement »).
+     * Autres drivers (SQLite en test) : repli sur un LIKE insensible à la casse.
+     */
+    private function applyNameSearch($query, string $search): void
+    {
+        $search = trim($search);
+
+        if ($search === '') {
+            return;
+        }
+
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            $terms = array_filter(array_map(
+                fn ($t) => preg_replace('/[^\p{L}\p{N}]/u', '', $t),
+                preg_split('/\s+/', $search)
+            ));
+
+            if (! empty($terms)) {
+                $tsquery = implode(' & ', array_map(fn ($t) => $t.':*', $terms));
+                $query->whereRaw("to_tsvector('english', name) @@ to_tsquery('english', ?)", [$tsquery]);
+
+                return;
+            }
+        }
+
+        $query->whereRaw('LOWER(name) LIKE ?', ['%'.Str::lower($search).'%']);
     }
 
     public function create()

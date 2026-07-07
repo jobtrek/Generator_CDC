@@ -38,12 +38,16 @@ class FieldsManager
             return $cdcData;
         }
 
+        // Précharge tous les champs concernés en une seule requête (évite le N+1 du find() en boucle)
+        $ids = array_filter(array_column($fieldsData, 'id'));
+        $existingFields = $form->fields()->whereIn('id', $ids)->get()->keyBy('id');
+
         foreach ($fieldsData as $fieldData) {
             if (! isset($fieldData['id']) || ! $this->isCustomField($fieldData['name'])) {
                 continue;
             }
 
-            $field = $form->fields()->find($fieldData['id']);
+            $field = $existingFields->get($fieldData['id']);
 
             if ($field) {
                 $field->update([
