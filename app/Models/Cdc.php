@@ -62,5 +62,10 @@ class Cdc extends  Model
         foreach ($files as $file) {
             File::delete($file);
         }
+
+        $file = $cdcDir.'/cdc-'.$this->id.'.docx';
+        if (File::exists($file)) {
+            File::delete($file);
+        }
     }
 }

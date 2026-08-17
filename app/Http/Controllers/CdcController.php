@@ -57,18 +57,23 @@ class CdcController extends Controller
     {
         $this->authorize('view', $cdc);
 
-        try {
-            $relativePath = $generator->generate($cdc);
-        } catch (\Throwable $e) {
-            Log::error('Échec génération DOCX au téléchargement', [
-                'cdc_id' => $cdc->id,
-                'error' => $e->getMessage(),
-            ]);
+        $fullPath = storage_path('app/public/cdc/cdc-'.$cdc->id.'.docx');
 
-            return back()->with('error', 'La génération du document a échoué. Veuillez réessayer.');
+        $fileIsCached = File::exists($fullPath)
+            && filemtime($fullPath) >= $cdc->updated_at->timestamp;
+
+        if (! $fileIsCached) {
+            try {
+                $generator->generate($cdc);
+            } catch (\Throwable $e) {
+                Log::error('Échec génération DOCX au téléchargement', [
+                    'cdc_id' => $cdc->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return back()->with('error', 'La génération du document a échoué. Veuillez réessayer.');
+            }
         }
-
-        $fullPath = storage_path('app/public/'.$relativePath);
 
         if (! File::exists($fullPath)) {
             return back()->with('error', 'Le document n\'a pas pu être généré. Veuillez réessayer.');
@@ -78,6 +83,6 @@ class CdcController extends Controller
             $fullPath,
             'cdc-'.Str::slug($cdc->title).'.docx',
             ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-        )->deleteFileAfterSend(true);
+        );
     }
 }

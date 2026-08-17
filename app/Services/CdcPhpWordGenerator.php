@@ -57,14 +57,13 @@ class CdcPhpWordGenerator
             $this->addLivrables($cdc);
             $this->addValidation();
 
-            $timestamp = time();
-            $docxFileName = 'cdc-'.$cdc->id.'-'.$timestamp.'.docx';
-            $docxPath = storage_path('app/public/cdc/'.$docxFileName);
-
             $cdcDir = storage_path('app/public/cdc');
-            if (! File::exists($cdcDir)) {
+            if (! File::isDirectory($cdcDir)) {
                 File::makeDirectory($cdcDir, 0755, true);
             }
+
+            $docxFileName = 'cdc-'.$cdc->id.'.docx';
+            $docxPath = $cdcDir.'/'.$docxFileName;
 
             $objWriter = IOFactory::createWriter($this->phpWord, 'Word2007');
             $objWriter->save($docxPath);

@@ -52,5 +52,10 @@ class Form extends Model
         foreach ($files as $file) {
             File::delete($file);
         }
+
+        $file = $cdcDir.'/cdc-'.$this->cdc->id.'.docx';
+        if (File::exists($file)) {
+            File::delete($file);
+        }
     }
 }
