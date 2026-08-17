@@ -13,3 +13,5 @@ function formatSwissPhone(input) {
     if (digits.length > 7) formatted += ' ' + digits.substring(7, 9);
     input.value = formatted;
 }
+
+window.formatSwissPhone = formatSwissPhone;

@@ -62,6 +62,4 @@
             </form>
         </div>
     </div>
-
-    <script src="{{ asset('js/phone-formatter.js') }}"></script>
 </x-app-layout>

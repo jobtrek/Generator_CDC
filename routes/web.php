@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CdcController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\ProfileController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,7 +14,12 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $user = Auth::user();
+        $formsCount = $user->forms()->count();
+        $recentForms = $user->forms()->latest()->take(4)->get();
+        $usersCount = $user->hasRole('super-admin') ? User::count() : null;
+
+        return view('dashboard', compact('formsCount', 'recentForms', 'usersCount'));
     })->name('dashboard');
 
     Route::middleware(['verified'])->group(function () {
@@ -21,7 +27,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', [CdcController::class, 'create'])->name('create');
             Route::get('/{cdc}/download', [CdcController::class, 'download'])->name('download');
         });
-        Route::post('/forms/autosave', [FormController::class, 'autosave'])->name('forms.autosave');
         Route::resource('forms', FormController::class);
         Route::prefix('profile')->name('profile.')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('edit');

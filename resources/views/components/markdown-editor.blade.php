@@ -8,13 +8,6 @@
     'rows' => 10
 ])
 
-@once
-    @push('head-scripts')
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-    @endpush
-@endonce
-
 <div class="space-y-2">
     @if($label)
         <label class="block text-sm font-medium text-gray-700 mb-1">

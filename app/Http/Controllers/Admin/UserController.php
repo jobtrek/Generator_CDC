@@ -11,23 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
-
-class UserController extends Controller implements HasMiddleware
+class UserController extends Controller
 {
-    public static function middleware(): array
-    {
-        return [
-            new Middleware(function ($request, $next) {
-                $user = Auth::user();
-                if (!$user || !$user->hasRole(RoleHelper::ROLE_SUPER_ADMIN)) {
-                    abort(403, 'Accès réservé aux super-administrateurs.');
-                }
-                return $next($request);
-            }),
-        ];
-    }
     public function index()
     {
         $users = User::with('roles')->paginate(10);
