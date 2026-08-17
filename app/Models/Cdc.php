@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\File;
 
 class Cdc extends Model
 {
@@ -24,6 +25,15 @@ class Cdc extends Model
         'data' => 'array',
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::deleting(function (Cdc $cdc) {
+            $cdc->deleteGeneratedFiles();
+        });
+    }
+
     public function form(): BelongsTo
     {
         return $this->belongsTo(Form::class);
@@ -37,5 +47,20 @@ class Cdc extends Model
     public function isManual(): bool
     {
         return is_null($this->form_id);
+    }
+
+    private function deleteGeneratedFiles(): void
+    {
+        $cdcDir = storage_path('app/public/cdc');
+
+        if (! File::isDirectory($cdcDir)) {
+            return;
+        }
+
+        $files = File::glob($cdcDir.'/cdc-'.$this->id.'-*.docx');
+
+        foreach ($files as $file) {
+            File::delete($file);
+        }
     }
 }

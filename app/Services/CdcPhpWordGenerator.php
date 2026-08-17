@@ -14,7 +14,6 @@ use PhpOffice\PhpWord\Style\Table;
 class CdcPhpWordGenerator
 {
     private $phpWord;
-
     private $section;
 
     private MarkdownToWordConverter $markdownConverter;

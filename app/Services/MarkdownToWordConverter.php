@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use League\CommonMark\CommonMarkConverter;
-use PhpOffice\PhpWord\Style\Section;
+use PhpOffice\PhpWord\Element\Section;
 
 class MarkdownToWordConverter
 {
