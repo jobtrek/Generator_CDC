@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\File;
 
-class Cdc extends Model
+class Cdc extends  Model
 {
     use HasFactory;
 
-    const STATUS_BROUILLON = 'brouillon';
-    const STATUS_TERMINE   = 'terminé';
+    const STATUS_DRAFT     = 'draft';
+    const STATUS_COMPLETED = 'completed';
 
     protected $fillable = [
         'title',
