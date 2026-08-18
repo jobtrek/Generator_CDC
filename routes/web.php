@@ -16,7 +16,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
         $formsCount = $user->forms()->count();
-        $recentForms = $user->forms()->latest()->take(4)->get();
+        $recentForms = $user->forms()->with('cdc')->latest()->take(4)->get();
         $usersCount = $user->hasRole('super-admin') ? User::count() : null;
 
         return view('dashboard', compact('formsCount', 'recentForms', 'usersCount'));
