@@ -73,7 +73,7 @@
                     </div>
 
                     @foreach($forms as $form)
-                        @php $cdc = $form->cdc; $isDraft = $cdc && $cdc->status === 'brouillon'; @endphp
+                        @php $cdc = $form->cdc; $isDraft = $cdc && $cdc->status === 'draft'; @endphp
                         <div class="group grid grid-cols-12 gap-4 items-center px-6 py-4 border-b border-gray-100 last:border-0 transition-colors duration-150
                                     {{ $isDraft ? 'bg-amber-50/40 hover:bg-amber-50/70 border-l-2 border-l-amber-400' : 'hover:bg-gray-50/80' }}">
 

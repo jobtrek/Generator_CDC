@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Cdc;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use League\CommonMark\CommonMarkConverter;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
@@ -15,30 +14,15 @@ use PhpOffice\PhpWord\Style\Table;
 class CdcPhpWordGenerator
 {
     private $phpWord;
-
     private $section;
 
-    private $markdownConverter;
+    private MarkdownToWordConverter $markdownConverter;
 
-    public function __construct()
+    public function __construct(?MarkdownToWordConverter $markdownConverter = null)
     {
-        $this->markdownConverter = new CommonMarkConverter([
-            'html_input' => 'strip',
-            'allow_unsafe_links' => false,
-        ]);
+        $this->markdownConverter = $markdownConverter ?? new MarkdownToWordConverter();
     }
 
-    private function getStringValue($value): string
-    {
-        if (is_array($value)) {
-            return json_encode($value);
-        }
-        if (is_null($value)) {
-            return '';
-        }
-
-        return (string) $value;
-    }
     public function generate(Cdc $cdc): string
     {
         try {
@@ -73,14 +57,13 @@ class CdcPhpWordGenerator
             $this->addLivrables($cdc);
             $this->addValidation();
 
-            $timestamp = time();
-            $docxFileName = 'cdc-'.$cdc->id.'-'.$timestamp.'.docx';
-            $docxPath = storage_path('app/public/cdc/'.$docxFileName);
-
             $cdcDir = storage_path('app/public/cdc');
-            if (! File::exists($cdcDir)) {
+            if (! File::isDirectory($cdcDir)) {
                 File::makeDirectory($cdcDir, 0755, true);
             }
+
+            $docxFileName = 'cdc-'.$cdc->id.'.docx';
+            $docxPath = $cdcDir.'/'.$docxFileName;
 
             $objWriter = IOFactory::createWriter($this->phpWord, 'Word2007');
             $objWriter->save($docxPath);
@@ -104,7 +87,7 @@ class CdcPhpWordGenerator
     {
         $header = $this->section->addHeader();
         $header->addText(
-            'Centre de formation - DEV - Brief projet',
+            config('cdc.header.centre_formation'),
             ['name' => 'Calibri', 'size' => 9],
             ['alignment' => Jc::END]
         );
@@ -137,12 +120,12 @@ class CdcPhpWordGenerator
             'borderColor' => 'FFFFFF',
         ]);
         $cellRight->addText(
-            'Version 1.1-ordo2k104-21 (18.01.2025)',
+            config('cdc.footer.version'),
             ['name' => 'Calibri', 'size' => 9],
             ['alignment' => Jc::END, 'spaceAfter' => 0]
         );
         $cellRight->addText(
-            '© I-CQ VD 2017/25',
+            config('cdc.footer.copyright'),
             ['name' => 'Calibri', 'size' => 9],
             ['alignment' => Jc::END, 'spaceAfter' => 0]
         );
@@ -151,25 +134,25 @@ class CdcPhpWordGenerator
     private function addDocumentHeader()
     {
         $this->section->addText(
-            'Procédure de qualification : 88600/1/2/3 - 88614 Informaticien/ne CFC',
+            config('cdc.document.qualification'),
             ['name' => 'Calibri', 'size' => 10],
             ['alignment' => Jc::CENTER, 'spaceBefore' => 0, 'spaceAfter' => 0]
         );
 
         $this->section->addText(
-            '(Ordo 2014/21)',
+            config('cdc.document.ordo'),
             ['name' => 'Calibri', 'size' => 10],
             ['alignment' => Jc::CENTER, 'spaceBefore' => 0, 'spaceAfter' => 120]
         );
 
         $this->section->addText(
-            'Cahier des charges',
+            config('cdc.document.titre'),
             ['name' => 'Calibri', 'size' => 18, 'bold' => true],
             ['alignment' => Jc::CENTER, 'spaceBefore' => 0, 'spaceAfter' => 120]
         );
 
         $this->section->addText(
-            'Version 1.1 - '.now()->format('d.m.Y'),
+            config('cdc.document.version_prefix').now()->format('d.m.Y'),
             ['name' => 'Calibri', 'size' => 10],
             ['alignment' => Jc::CENTER, 'spaceBefore' => 0, 'spaceAfter' => 240]
         );
@@ -363,7 +346,7 @@ class CdcPhpWordGenerator
             'unit' => TblWidth::PERCENT,
         ];
 
-        $cellBgColor = ['bgColor' => 'f0f0f0'];
+        $cellBgColor = [];
         $fontStyle = ['name' => 'Calibri', 'size' => 10];
 
         $table = $this->section->addTable($tableStyle);
@@ -575,199 +558,9 @@ class CdcPhpWordGenerator
         $this->addSectionTitle('6 DESCRIPTIF DU PROJET');
 
         $descriptif = $cdc->data['descriptif_projet'] ?? 'Non renseigné';
-
-        try {
-            $html = $this->markdownConverter->convert($descriptif);
-            $this->parseMarkdownToWord($html->getContent());
-        } catch (\Exception $e) {
-            Log::warning('Erreur conversion Markdown', ['error' => $e->getMessage()]);
-            $this->section->addText($descriptif, ['name' => 'Calibri', 'size' => 10]);
-        }
+        $this->markdownConverter->convert($this->section, $descriptif);
 
         $this->addSectionSeparator();
-    }
-
-    private function parseMarkdownToWord(string $html)
-    {
-        $fontStyle = ['name' => 'Calibri', 'size' => 10];
-
-        $html = strip_tags($html, '<p><strong><em><ul><ol><li><h1><h2><h3><h4><br><code><pre><blockquote>');
-
-        $dom = new \DOMDocument('1.0', 'UTF-8');
-        libxml_use_internal_errors(true);
-        @$dom->loadHTML('<?xml encoding="UTF-8"><body>'.$html.'</body>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        libxml_clear_errors();
-
-        if ($dom->documentElement) {
-            $this->parseNode($dom->documentElement, $fontStyle);
-        }
-    }
-
-    private function parseNode($node, $fontStyle, $depth = 0)
-    {
-        if (! $node || ! $node->childNodes) {
-            return;
-        }
-
-        foreach ($node->childNodes as $child) {
-            switch ($child->nodeName) {
-                case 'h1':
-                case 'h2':
-                case 'h3':
-                case 'h4':
-                    $level = (int) substr($child->nodeName, 1);
-                    $this->section->addText(
-                        trim($child->textContent),
-                        array_merge($fontStyle, ['bold' => true, 'size' => 16 - ($level * 2)]),
-                        ['spaceAfter' => 120, 'spaceBefore' => 240]
-                    );
-                    break;
-
-                case 'p':
-                    if (trim($child->textContent)) {
-                        $this->addParagraphWithFormatting($child, $fontStyle);
-                    }
-                    break;
-
-                case 'ul':
-                case 'ol':
-                    $this->parseList($child, $fontStyle, $depth);
-                    break;
-
-                case 'blockquote':
-                    $textRun = $this->section->addTextRun(['spaceAfter' => 120, 'spaceBefore' => 120]);
-                    $textRun->addText(
-                        trim($child->textContent),
-                        array_merge($fontStyle, ['italic' => true, 'color' => '666666'])
-                    );
-                    break;
-
-                case 'pre':
-                    $this->section->addText(
-                        trim($child->textContent),
-                        array_merge($fontStyle, ['name' => 'Courier New', 'size' => 9, 'color' => '333333']),
-                        ['spaceAfter' => 120, 'spaceBefore' => 120]
-                    );
-                    break;
-
-                case 'code':
-                    break;
-
-                case 'body':
-                    $this->parseNode($child, $fontStyle, $depth);
-                    break;
-
-                case '#text':
-                    $text = trim($child->textContent);
-                    if ($text && strlen($text) > 0) {
-                        $this->section->addText($text, $fontStyle, ['spaceAfter' => 120]);
-                    }
-                    break;
-
-                default:
-                    if ($child->hasChildNodes()) {
-                        $this->parseNode($child, $fontStyle, $depth);
-                    }
-                    break;
-            }
-        }
-    }
-
-    private function addParagraphWithFormatting($node, $baseFontStyle)
-    {
-        $textRun = $this->section->addTextRun(['spaceAfter' => 120]);
-        $this->addFormattedText($node, $textRun, $baseFontStyle);
-    }
-
-    private function addFormattedText($node, $textRun, $baseFontStyle)
-    {
-        if (! $node->hasChildNodes()) {
-            $text = trim($node->textContent);
-            if ($text) {
-                $textRun->addText($text, $baseFontStyle);
-            }
-
-            return;
-        }
-
-        foreach ($node->childNodes as $child) {
-            if ($child->nodeName === '#text') {
-                $text = $child->textContent;
-                if ($text && $text !== "\n") {
-                    $textRun->addText($text, $baseFontStyle);
-                }
-            } elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
-                $textRun->addText(
-                    $child->textContent,
-                    array_merge($baseFontStyle, ['bold' => true])
-                );
-            } elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
-                $textRun->addText(
-                    $child->textContent,
-                    array_merge($baseFontStyle, ['italic' => true])
-                );
-            } elseif ($child->nodeName === 'code') {
-                $textRun->addText(
-                    $child->textContent,
-                    array_merge($baseFontStyle, [
-                        'name' => 'Courier New',
-                        'size' => 9,
-                        'color' => 'D32F2F',
-                    ])
-                );
-            } elseif ($child->nodeName === 'br') {
-                $textRun->addTextBreak();
-            } else {
-                $this->addFormattedText($child, $textRun, $baseFontStyle);
-            }
-        }
-    }
-
-    private function parseList($listNode, $fontStyle, $depth = 0)
-    {
-        foreach ($listNode->childNodes as $li) {
-            if ($li->nodeName === 'li') {
-                $textContent = $this->extractFormattedText($li, $fontStyle);
-
-                if ($textContent) {
-                    $this->section->addListItem(
-                        $textContent,
-                        $depth,
-                        $fontStyle,
-                        ['spaceAfter' => 60]
-                    );
-                }
-
-                foreach ($li->childNodes as $subNode) {
-                    if ($subNode->nodeName === 'ul' || $subNode->nodeName === 'ol') {
-                        $this->parseList($subNode, $fontStyle, $depth + 1);
-                    }
-                }
-            }
-        }
-    }
-
-    private function extractFormattedText($node, $fontStyle)
-    {
-        $text = '';
-
-        foreach ($node->childNodes as $child) {
-            if ($child->nodeName === '#text') {
-                $text .= $child->textContent;
-            } elseif ($child->nodeName === 'strong' || $child->nodeName === 'b') {
-                $text .= $child->textContent;
-            } elseif ($child->nodeName === 'em' || $child->nodeName === 'i') {
-                $text .= $child->textContent;
-            } elseif ($child->nodeName === 'code') {
-                $text .= $child->textContent;
-            } elseif ($child->nodeName === 'br') {
-                $text .= ' ';
-            } elseif ($child->nodeName !== 'ul' && $child->nodeName !== 'ol') {
-                $text .= $this->extractFormattedText($child, $fontStyle);
-            }
-        }
-
-        return trim($text);
     }
 
     private function addLivrables(Cdc $cdc)

@@ -47,7 +47,7 @@
                         <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Total</span>
                     </div>
                     <div>
-                        <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->count() }}</div>
+                        <div class="text-3xl font-bold text-gray-900">{{ $formsCount }}</div>
                         <div class="text-sm text-gray-500 mt-1">Dossiers créés</div>
                     </div>
                 </a>
@@ -62,7 +62,7 @@
                             <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Admin</span>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-gray-900">{{ \App\Models\User::count() }}</div>
+                            <div class="text-3xl font-bold text-gray-900">{{ $usersCount }}</div>
                             <div class="text-sm text-gray-500 mt-1">Utilisateurs inscrits</div>
                         </div>
                     </a>
@@ -75,7 +75,7 @@
                             <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">Vos Projets</span>
                         </div>
                         <div>
-                            <div class="text-3xl font-bold text-gray-900">{{ Auth::user()->forms()->count() }}</div>
+                            <div class="text-3xl font-bold text-gray-900">{{ $formsCount }}</div>
                             <div class="text-sm text-gray-500 mt-1">Projets créés</div>
                         </div>
                     </a>
@@ -102,10 +102,6 @@
                     <h3 class="text-lg font-bold text-gray-900">Dossiers récemment mis à jour</h3>
                     <a href="{{ route('forms.index') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tout</a>
                 </div>
-
-                @php
-                    $recentForms = Auth::user()->forms()->latest()->take(4)->get();
-                @endphp
 
                 @if($recentForms->count() > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

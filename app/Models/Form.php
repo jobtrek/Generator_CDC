@@ -2,18 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\File;
 
 class Form extends Model
 {
     use HasFactory;
 
     protected $fillable = ['name'];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::deleting(function (Form $form) {
+            $form->deleteCdcFiles();
+        });
+    }
 
     public function user(): BelongsTo
     {
@@ -30,9 +39,23 @@ class Form extends Model
         return $this->hasOne(Cdc::class);
     }
 
-    public function scopeDraft(Builder $query, int $userId): Builder
+    private function deleteCdcFiles(): void
     {
-        return $query->where('user_id', $userId)
-            ->whereHas('cdc', fn (Builder $q) => $q->where('status', Cdc::STATUS_BROUILLON));
+        $cdcDir = storage_path('app/public/cdc');
+
+        if (! File::isDirectory($cdcDir) || ! $this->cdc) {
+            return;
+        }
+
+        $files = File::glob($cdcDir.'/cdc-'.$this->cdc->id.'-*.docx');
+
+        foreach ($files as $file) {
+            File::delete($file);
+        }
+
+        $file = $cdcDir.'/cdc-'.$this->cdc->id.'.docx';
+        if (File::exists($file)) {
+            File::delete($file);
+        }
     }
 }

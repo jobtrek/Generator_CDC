@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\GenerateCdcDocxJob;
 use App\Models\Cdc;
 use App\Models\Form;
+use App\Services\CdcPhpWordGenerator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -54,43 +53,36 @@ class CdcController extends Controller
                 ->with('info', 'Remplissez les données pour générer un nouveau CDC basé sur "'.$form->name.'"');
         }
     }
-    public function download(Cdc $cdc)
+    public function download(Cdc $cdc, CdcPhpWordGenerator $generator)
     {
         $this->authorize('view', $cdc);
 
-        // Supprimer l'ancien fichier s'il existe, pour en générer un frais
-        if ($cdc->docx_path) {
-            File::delete(storage_path('app/public/'.$cdc->docx_path));
-            $cdc->update(['docx_path' => null]);
+        $fullPath = storage_path('app/public/cdc/cdc-'.$cdc->id.'.docx');
+
+        $fileIsCached = File::exists($fullPath)
+            && filemtime($fullPath) >= $cdc->updated_at->timestamp;
+
+        if (! $fileIsCached) {
+            try {
+                $generator->generate($cdc);
+            } catch (\Throwable $e) {
+                Log::error('Échec génération DOCX au téléchargement', [
+                    'cdc_id' => $cdc->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                return back()->with('error', 'La génération du document a échoué. Veuillez réessayer.');
+            }
         }
 
-        GenerateCdcDocxJob::dispatch($cdc, Auth::user());
-
-        return back()->with('info', 'Votre document est en cours de génération. Vous recevrez une notification dès qu\'il sera prêt.');
-    }
-
-    public function downloadFile(Cdc $cdc)
-    {
-        $this->authorize('view', $cdc);
-
-        $fullPath = $cdc->docx_path
-            ? storage_path('app/public/'.$cdc->docx_path)
-            : null;
-
-        if (! $fullPath || ! File::exists($fullPath)) {
-            return back()->with('error', 'Le fichier n\'est pas encore prêt ou a expiré. Veuillez relancer la génération.');
+        if (! File::exists($fullPath)) {
+            return back()->with('error', 'Le document n\'a pas pu être généré. Veuillez réessayer.');
         }
-
-        // Marquer la notification correspondante comme lue
-        Auth::user()
-            ->unreadNotifications()
-            ->where('data->cdc_id', $cdc->id)
-            ->update(['read_at' => now()]);
 
         return response()->download(
             $fullPath,
             'cdc-'.Str::slug($cdc->title).'.docx',
             ['Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-        )->deleteFileAfterSend(true);
+        );
     }
 }

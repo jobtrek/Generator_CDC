@@ -5,25 +5,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\File;
 
-class Cdc extends Model
+class Cdc extends  Model
 {
     use HasFactory;
 
-    const STATUS_BROUILLON = 'brouillon';
-    const STATUS_TERMINE   = 'terminé';
+    const STATUS_DRAFT     = 'draft';
+    const STATUS_COMPLETED = 'completed';
 
     protected $fillable = [
         'title',
         'data',
         'form_id',
         'status',
-        'docx_path',
     ];
 
     protected $casts = [
         'data' => 'array',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::deleting(function (Cdc $cdc) {
+            $cdc->deleteGeneratedFiles();
+        });
+    }
 
     public function form(): BelongsTo
     {
@@ -38,5 +47,25 @@ class Cdc extends Model
     public function isManual(): bool
     {
         return is_null($this->form_id);
+    }
+
+    private function deleteGeneratedFiles(): void
+    {
+        $cdcDir = storage_path('app/public/cdc');
+
+        if (! File::isDirectory($cdcDir)) {
+            return;
+        }
+
+        $files = File::glob($cdcDir.'/cdc-'.$this->id.'-*.docx');
+
+        foreach ($files as $file) {
+            File::delete($file);
+        }
+
+        $file = $cdcDir.'/cdc-'.$this->id.'.docx';
+        if (File::exists($file)) {
+            File::delete($file);
+        }
     }
 }

@@ -8,9 +8,9 @@ use App\Models\FieldType;
 use App\Models\Form;
 use App\Services\FormService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -22,12 +22,13 @@ class FormController extends Controller
 
     public function index(Request $request)
     {
-        $query = Form::with(['user', 'fields', 'cdc'])
+        // La vue index n'affiche que le CDC associé (statut + données) :
+        // inutile de charger 'user' et tous les 'fields' de chaque formulaire.
+        $query = Form::with('cdc')
             ->where('user_id', Auth::id());
 
         if ($request->filled('search')) {
-            $search = Str::lower($request->search);
-            $query->whereRaw('LOWER(name) LIKE ?', ['%'.$search.'%']);
+            $this->applyNameSearch($query, $request->search);
         }
 
         if ($request->filled('date_from')) {
@@ -43,6 +44,37 @@ class FormController extends Controller
         return view('forms.index', compact('forms'));
     }
 
+    /**
+     * Recherche par nom de formulaire.
+     * PostgreSQL : utilise l'index GIN fulltext (to_tsvector('english', name)) via to_tsquery
+     * avec l'opérateur préfixe « :* » pour garder le matching partiel (« dev » → « développement »).
+     * Autres drivers (SQLite en test) : repli sur un LIKE insensible à la casse.
+     */
+    private function applyNameSearch($query, string $search): void
+    {
+        $search = trim($search);
+
+        if ($search === '') {
+            return;
+        }
+
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            $terms = array_filter(array_map(
+                fn ($t) => preg_replace('/[^\p{L}\p{N}]/u', '', $t),
+                preg_split('/\s+/', $search)
+            ));
+
+            if (! empty($terms)) {
+                $tsquery = implode(' & ', array_map(fn ($t) => $t.':*', $terms));
+                $query->whereRaw("to_tsvector('english', name) @@ to_tsquery('english', ?)", [$tsquery]);
+
+                return;
+            }
+        }
+
+        $query->whereRaw('LOWER(name) LIKE ?', ['%'.Str::lower($search).'%']);
+    }
+
     public function create()
     {
         $fieldTypes      = FieldType::all();
@@ -50,44 +82,16 @@ class FormController extends Controller
         $prefilledFields = $duplicateData['fields'] ?? [];
         $prefillData     = [];
 
-        $draftFormId = empty($duplicateData)
-            ? Form::draft(Auth::id())->latest()->value('id')
-            : null;
-
-        return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData', 'draftFormId'));
+        return view('forms.create', compact('fieldTypes', 'duplicateData', 'prefilledFields', 'prefillData'));
     }
 
-    public function autosave(Request $request): JsonResponse
-    {
-        $formId = (int) $request->input('draft_form_id') ?: null;
-        $data   = $request->except(['_token', '_method', 'draft_form_id']);
-
-        try {
-            $form = $this->formService->autosaveFormWithCdc($data, Auth::user(), $formId);
-
-            return response()->json([
-                'form_id'  => $form->id,
-                'saved_at' => now()->format('H:i'),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Erreur lors de la sauvegarde'], 500);
-        }
-    }
     public function store(StoreCdcRequest $request)
     {
         try {
-            $draftFormId = $request->input('draft_form_id');
-
-            if ($draftFormId) {
-                $form = Form::where('id', $draftFormId)->where('user_id', Auth::id())->firstOrFail();
-                $this->authorize('update', $form);
-                $this->formService->updateFormWithCdc($form, $request->validated(), Auth::user());
-            } else {
-                $form = $this->formService->createFormWithCdc(
-                    $request->validated(),
-                    Auth::user()
-                );
-            }
+            $form = $this->formService->createFormWithCdc(
+                $request->validated(),
+                Auth::user()
+            );
             session()->forget('duplicate_form');
 
             return redirect()->route('forms.show', $form)
@@ -153,7 +157,6 @@ class FormController extends Controller
         $this->authorize('delete', $form);
 
         $formName = $form->name;
-
         try {
             $form->delete();
 

@@ -1,4 +1,4 @@
-(function () {
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('cdc-form');
     if (!form) return;
 
@@ -51,4 +51,4 @@
     form.addEventListener('input', updateProgress);
     form.addEventListener('change', updateProgress);
     updateProgress();
-})();
+});
