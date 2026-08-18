@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Traits\CleansCdcFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Facades\File;
 
 class Form extends Model
 {
-    use HasFactory;
+    use HasFactory, CleansCdcFiles;
 
     protected $fillable = ['name'];
 
@@ -20,7 +20,9 @@ class Form extends Model
         parent::boot();
 
         static::deleting(function (Form $form) {
-            $form->deleteCdcFiles();
+            if ($form->cdc) {
+                self::deleteCdcFilesFor($form->cdc->id);
+            }
         });
     }
 
@@ -37,25 +39,5 @@ class Form extends Model
     public function cdc(): HasOne
     {
         return $this->hasOne(Cdc::class);
-    }
-
-    private function deleteCdcFiles(): void
-    {
-        $cdcDir = storage_path('app/public/cdc');
-
-        if (! File::isDirectory($cdcDir) || ! $this->cdc) {
-            return;
-        }
-
-        $files = File::glob($cdcDir.'/cdc-'.$this->cdc->id.'-*.docx');
-
-        foreach ($files as $file) {
-            File::delete($file);
-        }
-
-        $file = $cdcDir.'/cdc-'.$this->cdc->id.'.docx';
-        if (File::exists($file)) {
-            File::delete($file);
-        }
     }
 }
