@@ -25,7 +25,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['verified'])->group(function () {
         Route::prefix('cdc')->name('cdc.')->group(function () {
             Route::get('/create', [CdcController::class, 'create'])->name('create');
-            Route::get('/{cdc}/download', [CdcController::class, 'download'])->name('download');
+            Route::get('/{cdc}/download', [CdcController::class, 'download'])
+                ->middleware('throttle:30,1')
+                ->name('download');
         });
         Route::resource('forms', FormController::class);
         Route::prefix('profile')->name('profile.')->group(function () {
