@@ -203,7 +203,7 @@
                     if (typeof DOMPurify !== 'undefined') {
                         return DOMPurify.sanitize(html);
                     }
-                    return html;
+                    return '<p class="text-red-500">Prévisualisation indisponible.</p>';
                 } catch (error) {
                     console.error('Erreur Markdown:', error);
                     return '<p class="text-red-500">Erreur de rendu Markdown</p>';
