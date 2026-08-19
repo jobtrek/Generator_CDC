@@ -279,9 +279,10 @@
     </div>
 
     <script>
+        const roleBaseUrl = '{{ route("admin.users.roles", ":id") }}';
         function openRoleModal(userId, userName, currentRoles) {
             document.getElementById('userName').textContent = userName;
-            document.getElementById('roleForm').action = `/admin/users/${userId}/roles`;
+            document.getElementById('roleForm').action = roleBaseUrl.replace(':id', userId);
             const modal = document.getElementById('roleModal');
             modal.classList.remove('hidden');
 
