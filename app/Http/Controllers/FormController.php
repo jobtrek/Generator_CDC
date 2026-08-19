@@ -157,8 +157,15 @@ class FormController extends Controller
         $this->authorize('delete', $form);
 
         $formName = $form->name;
+        $formId = $form->id;
         try {
             $form->delete();
+
+            Log::info('Suppression formulaire', [
+                'form_id' => $formId,
+                'user_id' => Auth::id(),
+                'name' => $formName,
+            ]);
 
             return redirect()->route('forms.index')
                 ->with('success', "Le formulaire \"{$formName}\" a été supprimé avec succès !");

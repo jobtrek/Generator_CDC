@@ -79,6 +79,12 @@ class CdcController extends Controller
             return back()->with('error', 'Le document n\'a pas pu être généré. Veuillez réessayer.');
         }
 
+        Log::info('Téléchargement CDC', [
+            'cdc_id' => $cdc->id,
+            'user_id' => auth()->id(),
+            'cached' => $fileIsCached,
+        ]);
+
         return response()->download(
             $fullPath,
             'cdc-'.Str::slug($cdc->title).'.docx',

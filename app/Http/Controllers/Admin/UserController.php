@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 class UserController extends Controller
 {
     public function index()
@@ -42,6 +43,13 @@ class UserController extends Controller
 
         $user->assignRole($validated['role']);
         $user->notify(new UserInvitationNotification());
+
+        Log::info('Création utilisateur', [
+            'admin_id' => Auth::id(),
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'role' => $validated['role'],
+        ]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur invité ! Un email lui a été envoyé.');
@@ -78,6 +86,13 @@ class UserController extends Controller
         $user->update($data);
         $user->syncRoles([$validated['role']]);
 
+        Log::info('Modification utilisateur', [
+            'admin_id' => Auth::id(),
+            'user_id' => $user->id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur mis à jour avec succès.');
     }
@@ -89,6 +104,12 @@ class UserController extends Controller
         }
 
         $user->delete();
+
+        Log::info('Suppression utilisateur', [
+            'admin_id' => Auth::id(),
+            'user_id' => $user->id,
+            'email' => $user->email,
+        ]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur supprimé avec succès.');
@@ -121,6 +142,12 @@ class UserController extends Controller
         }
 
         $user->syncRoles([$validated['role']]);
+
+        Log::info('Modification rôle utilisateur', [
+            'admin_id' => Auth::id(),
+            'user_id' => $user->id,
+            'role' => $validated['role'],
+        ]);
 
         return back()->with('success', 'Rôle mis à jour avec succès.');
     }
