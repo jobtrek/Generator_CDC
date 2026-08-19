@@ -77,7 +77,7 @@ class MarkdownToWordConverter
                     break;
 
                 case 'ul':
-                case 'ol':
+                case 'ol'  :
                     $this->parseList($child, $depth);
                     break;
 

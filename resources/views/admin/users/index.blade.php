@@ -126,7 +126,7 @@
                                                     </a>
                                                 @endcan
 
-                                                @can('user.roles')
+                                                @can('users.manage_roles')
                                                     <button onclick="openRoleModal({{ $user->id }}, '{{ addslashes($user->name) }}', {{ json_encode($user->getRoleNames()) }})"
                                                             class="group flex items-center justify-center w-8 h-8 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 hover:border-purple-200 hover:bg-purple-50 hover:text-purple-600 hover:shadow-sm"
                                                             title="Gérer les rôles">
@@ -156,7 +156,6 @@
                             </table>
                         </div>
                     </div>
-
                     {{-- Card Grid Mobile --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:hidden">
                         @foreach($users as $user)
@@ -182,7 +181,7 @@
                                         </div>
 
                                         <div class="mt-3 pt-3 border-t border-gray-200 flex justify-end gap-2">
-                                            @can('user.edit')
+                                            @can('users.edit')
                                                 <a href="{{ route('admin.users.edit', $user->id) }}"
                                                    class="group flex items-center justify-center w-8 h-8 bg-white border border-gray-200 rounded-full text-gray-400 transition-all duration-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
@@ -195,7 +194,7 @@
                                                 </button>
                                             @endcan
 
-                                            @can('user.delete')
+                                            @can('users.delete')
                                                 @if(auth()->id() !== $user->id)
                                                     <form class="inline" method="POST"
                                                           action="{{ route('admin.users.destroy', $user->id) }}"
@@ -279,9 +278,10 @@
     </div>
 
     <script>
+        const roleBaseUrl = '{{ route("admin.users.roles", ":id") }}';
         function openRoleModal(userId, userName, currentRoles) {
             document.getElementById('userName').textContent = userName;
-            document.getElementById('roleForm').action = `/admin/users/${userId}/roles`;
+            document.getElementById('roleForm').action = roleBaseUrl.replace(':id', userId);
             const modal = document.getElementById('roleModal');
             modal.classList.remove('hidden');
 

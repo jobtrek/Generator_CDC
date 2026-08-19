@@ -8,7 +8,7 @@ class StoreCdcRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('cdc.create');
     }
 
     public function rules(): array

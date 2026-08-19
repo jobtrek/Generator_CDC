@@ -2,10 +2,17 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Form;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCdcRequest extends StoreCdcRequest
 {
+    public function authorize(): bool
+    {
+        $form = Form::find($this->route('form'));
+
+        return $form && $this->user()->can('update', $form);
+    }
     public function rules(): array
     {
         $baseRules = parent::rules();

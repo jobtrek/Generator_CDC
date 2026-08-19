@@ -58,8 +58,6 @@ class FormService
                 'title'  => $validated['titre_projet'],
                 'data'   => $cdcData,
                 'status' => Cdc::STATUS_COMPLETED,
-                '' => Cdc::STATUS_DRAFT,
-
             ]);
             $form->cdc()->save($cdc);
 

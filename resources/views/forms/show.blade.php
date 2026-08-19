@@ -374,10 +374,10 @@
                         @endphp
                         @if($descriptif)
                             <div class="prose max-w-none text-gray-900">
-                                {!! Str::markdown($descriptif, [
-                                    'html_input'=> 'strip',
+                                {!! strip_tags(Str::markdown($descriptif, [
+                                    'html_input' => 'strip',
                                     'allow_unsafe_links' => false,
-                                ]) !!}
+                                ]), '<p><br><strong><em><ul><ol><li><h1><h2><h3><h4><h5><h6><code><pre><blockquote><hr><a><table><thead><tbody><tr><th><td>') !!}
                             </div>
                         @else
                             <p class="text-gray-500 italic">Non renseigné</p>
